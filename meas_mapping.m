@@ -149,7 +149,7 @@ multi.RMATRIX=[
 ];
 %}
 
-%{
+%%{
 meas.MeasCond='TwinDarkSpecial3'; multi.R22=0;
 %meas.MeasCond='TwinFloodSpecial3'; multi.R22=0;
 multi.RMATRIX=[
