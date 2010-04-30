@@ -125,7 +125,7 @@ multi.RMATRIX=[
    100    10    10     1      2      2 
 ];
 
-%{
+%%{
 meas.MeasCond='TwinDark'; multi.R22=0;
 %meas.MeasCond='TwinFlood'; multi.R22=0;
 multi.RMATRIX=[
@@ -177,7 +177,7 @@ multi.RMATRIX=[
 ];
 %}
 
-%%{
+%{
 meas.MeasCond='MultiDarkVarR1'; multi.R22=0;
 %meas.MeasCond='TwinFloodSpecial3'; multi.R22=0;
 multi.RMATRIX=[
@@ -355,7 +355,7 @@ flag.G3_nuke=false;
 
 % Jabber notification
 if (flag.first_run);
-    tool_notification(1,'pion.ubuntu','masda','jabber.imager.umro','--chatroom argus@conference.imager.umro','Measurement started');
+    tool_notification(1,1,'pion.ubuntu',meas,multi,1);
     
     %{
     system(['echo "MATLAB: script ' meas.MFile ' (' meas.MeasCond ') started" | ' ...
@@ -370,7 +370,7 @@ end
 
 display('Measurement complete');
 
-tool_notification(1,'pion.ubuntu','masda','jabber.imager.umro','--chatroom argus@conference.imager.umro','Measurement finished');
+%tool_notification(1,'pion.ubuntu','masda','jabber.imager.umro','--chatroom argus@conference.imager.umro','Measurement finished');
 
 %{
 system(['echo "MATLAB: ' meas.MFile '(' meas.MeasCond ') script done" | ' ...

@@ -6,6 +6,7 @@
 
 
 
+%%{
 setup.LOCATION='Argus Building, Optics Lab';
 setup.G3_system='9of9-vanilla';
 %setup.G3_interface='a2-V20-20060404'; % serial number - hardware version - bitfile version
@@ -16,7 +17,19 @@ setup.G3_adcCards='a1-a2-00-00-00-00-00-00';
 setup.POWER_G3='ArrayAndADCPower#1';
 setup.POWER_ADC='ArrayAndADCPower#1';
 setup.POWER_PSI='BKPRECISION1761#1';
+%}
 
+
+%{
+setup.LOCATION='Argus Building, RF Lab';
+setup.G3_system='5of9-vanilla';
+setup.G3_interface='a4-V20-20100408'; % serial number - hardware version - bitfile version
+setup.G3_adcCards='a3-a4-a5-a6-00-00-00-00';
+
+setup.POWER_G3='ArrayAndADCPower#2';
+setup.POWER_ADC='ArrayAndADCPower#2';
+setup.POWER_PSI='BKPRECISION1761#2';
+%}
 
 %{
 setup.ARRAYTYPE='PSI-1';
@@ -513,7 +526,7 @@ env.V(end+1)=  env.V(id.RevBias)  ; id.DLrstGate =numel(env.V);                 
 env.V(end+1)=  0    ; id.DLrstGnd   =numel(env.V);                           % hard-wired to Analog Ground on PSI-2
 env.V(end+1)=  env.V(id.AVoff)    ; id.SRCommon   =numel(env.V);                           
 
-env.I.V24m=0.092;  % Current in amperes on the BK PRECISION -24V power supply
+env.I.V24m=0.093;  % Current in amperes on the BK PRECISION -24V power supply
 env.I.V24p=0.099;  % Current in amperes on the BK PRECISION +24V power supply
 
 meas.MFileDesc=[ mfilename() '.m' ];
