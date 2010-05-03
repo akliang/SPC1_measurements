@@ -149,7 +149,7 @@ multi.RMATRIX=[
 ];
 %}
 
-%%{
+%{
 meas.MeasCond='TwinDarkSpecial3'; multi.R22=0;
 %meas.MeasCond='TwinFloodSpecial3'; multi.R22=0;
 multi.RMATRIX=[
@@ -243,6 +243,7 @@ end;
 
 flag.G3_nuke=true;
 flag.first_run=true;
+flag.finished=false;
 for mid=1:multi.nrofacq; multi.mid=mid;
 
    multi.R1 =multi.RMATRIX(multi.mid,1);
@@ -354,27 +355,14 @@ flag.G3_nuke=false;
 
 
 % Jabber notification
-if (flag.first_run);
-    tool_notification(1,1,'pion.ubuntu',meas,multi,1);
-    
-    %{
-    system(['echo "MATLAB: script ' meas.MFile ' (' meas.MeasCond ') started" | ' ...
-        'sendxmpp -u pion.ubuntu -p masda -j jabber.imager.umro pion.ubuntu@jabber.imager.umro']);
-    system(['echo "MATLAB: script ' meas.MFile ' (' meas.MeasCond ') started" | ' ...
-        'sendxmpp -u pion.ubuntu -p masda -j jabber.imager.umro --chatroom argus@conference.imager.umro']);
-    %}
-end
+%tool_notification(flag.first_run,'pion.ubuntu',meas,multi,2);
 flag.first_run=false;
 
 end
 
+
 display('Measurement complete');
 
-%tool_notification(1,'pion.ubuntu','masda','jabber.imager.umro','--chatroom argus@conference.imager.umro','Measurement finished');
-
-%{
-system(['echo "MATLAB: ' meas.MFile '(' meas.MeasCond ') script done" | ' ...
-    'sendxmpp -u pion.ubuntu -p masda -j jabber.imager.umro pion.ubuntu@jabber.imager.umro']);
-system(['echo "MATLAB: ' meas.MFile '(' meas.MeasCond ') script done" | ' ...
-    'sendxmpp -u pion.ubuntu -p masda -j jabber.imager.umro --chatroom argus@conference.imager.umro']);
-%}
+% Jabber notification that script is done
+%multi.mid=0;  % flag to signal end of for-loop
+%tool_notification(1,'pion.ubuntu',meas,multi,0);

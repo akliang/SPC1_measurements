@@ -296,27 +296,11 @@ end
 flag.G3_nuke=false;
 
 % Jabber notification
-if (flag.first_run);
-    tool_notification(1,'pion.ubuntu','masda','jabber.imager.umro','--chatroom argus@conference.imager.umro','Measurement started');
-    
-    %{
-    system(['echo "MATLAB: script ' meas.MFile ' (' meas.MeasCond ') started" | ' ...
-        'sendxmpp -u pion.ubuntu -p masda -j jabber.imager.umro pion.ubuntu@jabber.imager.umro']);
-    system(['echo "MATLAB: script ' meas.MFile ' (' meas.MeasCond ') started" | ' ...
-        'sendxmpp -u pion.ubuntu -p masda -j jabber.imager.umro --chatroom argus@conference.imager.umro']);
-    %}
-end
+% work in progress
 flag.first_run=false;
 
 end
 
 display('Measurement complete');
 
-tool_notification(1,'pion.ubuntu','masda','jabber.imager.umro','--chatroom argus@conference.imager.umro','Measurement finished');
-
-%{
-system(['echo "MATLAB: ' meas.MFile '(' meas.MeasCond ') script done" | ' ...
-    'sendxmpp -u pion.ubuntu -p masda -j jabber.imager.umro pion.ubuntu@jabber.imager.umro albert.liang@jabber.imager.umro']);
-system(['echo "MATLAB: ' meas.MFile '(' meas.MeasCond ') script done" | ' ...
-    'sendxmpp -u pion.ubuntu -p masda -j jabber.imager.umro --chatroom argus@conference.imager.umro']);
-%}
+% jabber work in progress
