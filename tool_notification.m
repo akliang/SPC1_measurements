@@ -1,4 +1,4 @@
-function [error] = tool_notification(on,user,meas,multi,long)
+function [error] = tool_notification(on,meas,finished,long)
 % XMPP network notification tool to help monitor script progress
 % "on" is a flag to send a message
 %    - set to flag.first_run to notify only once a start of run
@@ -47,11 +47,17 @@ if (on == 1)
 
 
     % determine if it is "start" or "finish"
-    if (multi.mid==0)
+    if (finished)
         msg = [msg ' finished'];
     else
         msg = [msg ' started'];
     end
     
-    system(['echo -e "' msg '" | sendxmpp -u ' user ' -p masda -j jabber.imager.umro --chatroom argus@conference.jabber.imager.umro']);
+    
+    % get the computer's name (needed for xmpp)
+    [ret username] = system('hostname');
+    username = strtrim(lower(username));
+    username = sprintf('%s.ubuntu',username);
+    
+    system(['echo -e "' msg '" | sendxmpp -u ' username ' -p masda -j jabber.imager.umro --chatroom argus@conference.jabber.imager.umro']);
 end
