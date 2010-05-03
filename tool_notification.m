@@ -58,6 +58,7 @@ if (on == 1)
     [ret username] = system('hostname');
     username = strtrim(lower(username));
     username = sprintf('%s.ubuntu',username);
+    msg = [username '/' msg];
     
     system(['echo -e "' msg '" | sendxmpp -u ' username ' -p masda -j jabber.imager.umro --chatroom argus@conference.jabber.imager.umro']);
 end
