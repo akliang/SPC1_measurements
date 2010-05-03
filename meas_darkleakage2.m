@@ -93,8 +93,44 @@ if ts(1,2,3)==3; % PSI-3 settings and calculations
 end
 
 
-
 %
+% Multi-Measurement Setup (experimental)
+%
+
+% play with all kinds of binning conditions
+multi.MMATRIX=[
+    %R13 %R14
+       1    1
+       1    2
+       1    3
+       1    4
+       1    6
+       1    8
+
+       2    2
+       2    3
+       2    4
+       2    6
+       2    8
+
+       4    4
+       4    6
+       4    8
+
+       1    1
+       1    2
+       1    3
+       1    4
+       1    6
+       1    8
+   ];
+
+multi.mnrofacq=size(multi.MMATRIX,1);
+for mmid=1:multi.mnrofacq; multi.mmid=mmid;
+multi.R13=multi.MMATRIX(multi.mmid,1);
+multi.R14=multi.MMATRIX(multi.mmid,2);
+
+% 
 % Multi-Sequence-Setup
 %
 
@@ -120,10 +156,10 @@ multi.RMATRIX=[
    %   1      10   10   1       2      2
    %   100    10    10   1       2      2 
     %}
-       1     100  20
-%       2     100  20   % not necessary for PSI-2
-%       5     100  20   % not necessary for PSI-2
-%      10     50   10   % not necessary for PSI-2
+       1     500  20
+       2     100  20   % not necessary for PSI-2
+       5     100  20   % not necessary for PSI-2
+      10     50   10   % not necessary for PSI-2
       20     50   10
       50     50   10
       100    20   10
@@ -159,6 +195,8 @@ meas.MeasDetails=[ sprintf('%s', meas.MeasCond) ...
     ...sprintf( '_VQinj%s', volt2str(env.V(id.VQinj)) ) ...
     sprintf( '_%02dR22', multi.R22                 ) ...
     ...sprintf( '_RST%s',    setup.PF_globalReset     ) ...
+    sprintf('_%02dR13', multi.R13)  ...
+    sprintf('_%02dR14', multi.R14)  ...
     sprintf( '%s',    setup.special     ) ...
     ...sprintf( '_GC%s',    setup.PF_gateCards        ) ...
     ...sprintf( '_DC%s',    setup.PF_dataCards        ) ...
@@ -182,15 +220,16 @@ end;
 
 flag.G3_nuke=true;
 flag.first_run=true;
+flag.finished=false;
 for mid=1:multi.nrofacq; multi.mid=mid;
 
    multi.R1 =multi.RMATRIX(multi.mid,1);
    %multi.R11=multi.RMATRIX(multi.mid,4);
    multi.R11=0;
    %multi.R13=multi.RMATRIX(multi.mid,5);
-   multi.R13=2;
+   %multi.R13=1;%2
    %multi.R14=multi.RMATRIX(multi.mid,6);
-   multi.R14=3;
+   %multi.R14=1;%3
    multi.R26=multi.RMATRIX(multi.mid,2);
    multi.R27=multi.RMATRIX(multi.mid,3);
 
@@ -215,8 +254,8 @@ meas.BaseName=[ meas.DirName ...
  ...sprintf('_%02dR5' , multi.R5)   ...
  ...sprintf('_%02dR6' , multi.R6)   ...
  ...sprintf('_%05dR11', multi.R11)  ...
-    sprintf('_%05dR13', multi.R13)  ...
-    sprintf('_%05dR14', multi.R14)  ...
+ ...sprintf('_%05dR13', multi.R13)  ...
+ ...sprintf('_%05dR14', multi.R14)  ...
  ...sprintf('_%02dR22', multi.R22)  ...
     sprintf('_%02dR26', multi.R26)  ...
     sprintf('_%02dR27', multi.R27)  ...
@@ -296,7 +335,7 @@ end
 flag.G3_nuke=false;
 
 % Jabber notification
-% work in progress
+tool_notification(flag.first_run,meas,flag.finished,0);
 flag.first_run=false;
 
 end
@@ -304,3 +343,8 @@ end
 display('Measurement complete');
 
 % jabber work in progress
+flag.finished=true;
+tool_notification(1,meas,flag.finished,0);
+
+
+end
