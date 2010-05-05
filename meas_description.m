@@ -6,7 +6,7 @@
 
 
 
-%{
+%%{
 setup.LOCATION='Argus Building, Optics Lab';
 setup.G3_system='9of9-vanilla';
 setup.G3_interface='a2-V20-20100408'; % serial number - hardware version - bitfile version
@@ -510,7 +510,7 @@ setup.PF_CrossCable='normal';
 setup.special='';
 %}
 
-%{
+%%{
 setup.ARRAYTYPE='PSI-1';
 setup.WAFERCODE='29A31-12';
 setup.PLATFORM='PF-G1-10-11';
