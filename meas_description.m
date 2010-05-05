@@ -3,7 +3,8 @@
 % Array and Platform Description
 %   (the physical setup of the experiment, things that are FIXED for the whole experiment)
 %
-
+% $HeadURL$
+% $Id$
 
 
 %%{
