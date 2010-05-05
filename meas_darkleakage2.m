@@ -100,14 +100,17 @@ end
 % play with all kinds of binning conditions
 multi.MMATRIX=[
     %R13 %R14
-       1    1
-       1    2
+    %   1    1
+
+        1    2
+       %{
        1    3
        1    4
        1    6
        1    8
-
+  %}
        2    2
+  %{     
        2    3
        2    4
        2    6
@@ -123,6 +126,7 @@ multi.MMATRIX=[
        1    4
        1    6
        1    8
+%}
    ];
 
 multi.mnrofacq=size(multi.MMATRIX,1);
@@ -173,8 +177,8 @@ multi.RMATRIX=[
       11900  0    2
       15700  0    2
       19550  0    2    
-      40000  0    2 %added 2010-04-27, mk
-      60000  0    2 %added 2010-04-27, mk
+%      40000  0    2 %added 2010-04-27, mk
+%      60000  0    2 %added 2010-04-27, mk
  ];
 
 
