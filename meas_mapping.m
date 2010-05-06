@@ -2,8 +2,6 @@
 clear all
 close all
 fclose('all');
-flag.dryrun=true;
-flag.dryrun=false;
 
 %{ 
    Matlab Controlled G3 Measurements
@@ -15,6 +13,13 @@ flag.dryrun=false;
     - try to use all variables as part of a struct to clarify their scope
 %}
 
+% flag.dryrun true will neither create folders nor talk to jjam
+flag.dryrun=true;
+flag.dryrun=false;
+
+% flag.jabber is to turn on/off chat notification
+flag.jabber=false;
+flag.jabber=true;
 
 % Setup descriptions in external file now
 % (too many arrays, and too many different measurement scripts made this necessary)
@@ -103,7 +108,7 @@ meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 %meas.MeasCond='FirstFlood'; multi.R22=ts(4,0,0);
 %meas.MeasCond='FirstDark'; multi.R22=ts(4,0,0);
 %meas.MeasCond='QinjDark'; multi.R22=ts(4,0,0);
-%meas.MeasCond='MapFlood'; multi.R22=14; %R22=14; % use 14 for no-PIN arrays? of flood conditions?
+meas.MeasCond='MapFlood'; multi.R22=14; %R22=14; % use 14 for no-PIN arrays? of flood conditions?
 %meas.MeasCond='MapDark'; multi.R22=14; %R22=14; % use 14 for no-PIN arrays?
 %meas.Comment=[ meas.MeasCond ' Line mapping Measurement' ];
 
@@ -125,7 +130,7 @@ multi.RMATRIX=[
    100    10    10     1      2      2 
 ];
 
-%%{
+%{
 meas.MeasCond='TwinDark'; multi.R22=0;
 %meas.MeasCond='TwinFlood'; multi.R22=0;
 multi.RMATRIX=[
@@ -211,16 +216,16 @@ if strcmp(meas.MeasCond(1:4),'Qinj' ); multi.nrofacq=1; end
 
 meas.MeasDetails=[ sprintf('%s', meas.MeasCond) ...
     sprintf( '_Vbias%s', volt2str(env.V(id.Vbias)) ) ... not needed for PSI-2/3
-    sprintf( '_Vrst%s', volt2str(env.V(id.Vreset)) ) ... for AP pixels 
+    ...sprintf( '_Vrst%s', volt2str(env.V(id.Vreset)) ) ... for AP pixels 
     ...sprintf( '_Von%s', volt2str(env.V(id.Von)) ) ... not needed for PSI-2/3
-    sprintf( '_Voff%s', volt2str(env.V(id.AVoff)) ) ... not needed for PSI-2/3
-    ...sprintf( '_Vgnd%s', volt2str(env.V(id.Vgnd)) ) ...
-    ...sprintf( '_Tbias%s', volt2str(env.V(id.Tbias)) ) ...
+    ...sprintf( '_Voff%s', volt2str(env.V(id.AVoff)) ) ... not needed for PSI-2/3
+    sprintf( '_Vgnd%s', volt2str(env.V(id.Vgnd)) ) ...
+    sprintf( '_Tbias%s', volt2str(env.V(id.Tbias)) ) ... PSI-3 specific
     ...sprintf( '_Vcc%s', volt2str(env.V(id.Vcc)) ) ...  for AP pixels 
     ...sprintf( '_Voff%s',  volt2str(env.V(id.AVoff)) ) ...    
     sprintf( '_VQinj%s', volt2str(env.V(id.VQinj)) ) ...
-    sprintf( '_%02dR22', multi.R22                 ) ...
-    ...sprintf( '_RST%s',    setup.PF_globalReset     ) ...
+    ...sprintf( '_%02dR22', multi.R22                 ) ...
+    sprintf( '_RST%s',    setup.PF_globalReset     ) ... PSI-3 specific
     sprintf( '%s',    setup.special     ) ...
     ...sprintf( '_GC%s',    setup.PF_gateCards        ) ...
     ...sprintf( '_DC%s',    setup.PF_dataCards        ) ...
@@ -355,7 +360,7 @@ flag.G3_nuke=false;
 
 
 % Jabber notification
-%tool_notification(flag.first_run,'pion.ubuntu',meas,multi,2);
+tool_notification(flag.jabber*flag.first_run,meas,multi,flag.finished,0);
 flag.first_run=false;
 
 end
@@ -364,5 +369,5 @@ end
 display('Measurement complete');
 
 % Jabber notification that script is done
-%multi.mid=0;  % flag to signal end of for-loop
-%tool_notification(1,'pion.ubuntu',meas,multi,0);
+flag.finished=true;
+tool_notification(flag.jabber,meas,multi,flag.finished,0);

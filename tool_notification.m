@@ -1,4 +1,4 @@
-function [error] = tool_notification(on,env,meas,multi,finished,long)
+function [error] = tool_notification(on,meas,multi,finished,long)
 % XMPP network notification tool to help monitor script progress
 % "on" is a flag to send a message
 %    - set to flag.first_run to notify only once a start of run
@@ -12,12 +12,9 @@ function [error] = tool_notification(on,env,meas,multi,finished,long)
 %  ex. long = 2 = '010' = display R variables
 %  ex. long = 5 = '101' = display estimated time and voltage variables
 
-% time_step for time estimation
-if (env.G3ExtClock==1000000) % no external clock
-    time_step = 0.00062;
-else                         % assuming 100khz clk
-    time_step = 0.0062;
-end    
+
+% temporary: not sure if good to implement time estimation
+time_step = 0.00062;
 
 if (on == 1)
     % decode the "long" string to determine what user wants
@@ -57,14 +54,24 @@ if (on == 1)
         msg = [msg ' finished'];
     else
         msg = [msg ' started'];
+        
+        % not sure if it's a good idea to implement time_estimation
+        %{
         % calculate the estimated time to completion
-        [rows cols] = size(multi.RMATRIX);
         time_sum = 0;
-        for i=1:rows
+        for i=1:multi.nrofacq
             time_sum = time_sum + multi.RMATRIX(i,1)*(multi.RMATRIX(i,2)+multi.RMATRIX(i,3));
         end
-        time_sum = num2str(round(time_step * time_sum / 60));
-        msg = [msg ' (' time_sum ' mins)']
+        time_sum = time_step * time_sum;
+        if (time_sum < 60) % less than 1 min
+            time_label = 'secs';
+        else
+            time_sum = round(time_sum/60);
+            time_label = 'mins';
+        end
+        time_sum = num2str(time_sum);
+        msg = [msg ' (' time_sum ' ' time_label ')']
+        %}
     end
     
     
@@ -74,5 +81,5 @@ if (on == 1)
     username = sprintf('%s.ubuntu',username);
     msg = [username '/' msg];
     
-    %system(['echo -e "' msg '" | sendxmpp -u ' username ' -p masda -j jabber.imager.umro --chatroom argus@conference.jabber.imager.umro']);
+    system(['echo -e "' msg '" | sendxmpp -u ' username ' -p masda -j jabber.imager.umro --chatroom argus@conference.jabber.imager.umro']);
 end

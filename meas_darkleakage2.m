@@ -2,8 +2,6 @@
 clear all
 close all
 fclose('all');
-flag.dryrun=true;
-flag.dryrun=false;
 
 %{ 
    Matlab Controlled G3 Measurements
@@ -14,6 +12,15 @@ flag.dryrun=false;
     - concise, compact, not convoluted
     - try to use all variables as part of a struct to clarify their scope
 %}
+
+% flag.dryrun true will neither create folders nor talk to jjam
+flag.dryrun=true;
+flag.dryrun=false;
+
+% flag.jabber is to turn on/off chat notification
+flag.jabber=false;
+flag.jabber=true;
+
 
 
 % Setup descriptions in external file now
@@ -339,16 +346,16 @@ end
 flag.G3_nuke=false;
 
 % Jabber notification
-tool_notification(flag.first_run,meas,flag.finished,0);
+tool_notification(flag.jabber&&flag.first_run,meas,multi,flag.finished,0);
 flag.first_run=false;
 
-end
+end % end for-loop for R (R1, R26, R27) matrix
 
 display('Measurement complete');
 
 % jabber work in progress
 flag.finished=true;
-tool_notification(1,meas,flag.finished,0);
+tool_notification(flag.jabber,meas,multi,flag.finished,0);
 
-end
+end  % end for-loop for R (R13, R14) matrix
 
