@@ -114,6 +114,7 @@ meas.MeasCond='QinjDark'; multi.R22=ts(4,0,0);
 
 % technically, not only R's can be changed in multi-sequence mode - 
 % is RMATRIX an inappropriate name?
+%{
 multi.RMATRIX=[
    %R1    R26   R27   R11    R13    R14
     1     100   10     0      1      1       
@@ -130,8 +131,9 @@ multi.RMATRIX=[
    100    10    10     1      2      2 
 ];
 
+%}
 
-%{
+%%{
 meas.MeasCond='MapDark4'; multi.R22=14;
 multi.RMATRIX=[
    %R1    R26   R27   R11    R13    R14
@@ -246,12 +248,12 @@ meas.MeasDetails=[ sprintf('%s', meas.MeasCond) ...
     sprintf( '_VQinj%s', volt2str(env.V(id.VQinj)) ) ...
     sprintf( '_%02dR22', multi.R22                 ) ...
     sprintf( '_RST%s',    setup.PF_globalReset     ) ... PSI-3 specific
-    sprintf( '%s',    setup.special     ) ...
     ...sprintf( '_GC%s',    setup.PF_gateCards        ) ...
     ...sprintf( '_DC%s',    setup.PF_dataCards        ) ...
     sprintf( '_DCdips%s',    setup.PF_dataCardDIPs        ) ...
     ...sprintf( '_GL%03d',  geo.GL                    ) ...
-   ];
+    sprintf( '%s',    setup.special     ) ...
+    ];
 
 
 meas.MeasID=datestr(now(),30);
