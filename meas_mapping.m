@@ -107,8 +107,8 @@ meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 
 %meas.MeasCond='FirstFlood'; multi.R22=ts(4,0,0);
 %meas.MeasCond='FirstDark'; multi.R22=ts(4,0,0);
-%meas.MeasCond='QinjDark'; multi.R22=ts(4,0,0);
-meas.MeasCond='MapFlood'; multi.R22=14; %R22=14; % use 14 for no-PIN arrays? of flood conditions?
+meas.MeasCond='QinjDark'; multi.R22=ts(4,0,0);
+%meas.MeasCond='MapFlood'; multi.R22=14; %R22=14; % use 14 for no-PIN arrays? of flood conditions?
 %meas.MeasCond='MapDark'; multi.R22=14; %R22=14; % use 14 for no-PIN arrays?
 %meas.Comment=[ meas.MeasCond ' Line mapping Measurement' ];
 
@@ -119,7 +119,7 @@ multi.RMATRIX=[
     1     100   10     0      1      1       
    100    10    10     0      1      1 
     1     10    10     0      2      1
-   100    10    10     0      2      1    
+   100    10    10     0      2      1 
     1     10    10     1      2      1
    100    10    10     1      2      1
     1     10    10     0      1      2   
@@ -129,6 +129,26 @@ multi.RMATRIX=[
     1     10    10     1      2      2
    100    10    10     1      2      2 
 ];
+
+
+%{
+meas.MeasCond='MapDark4'; multi.R22=14;
+multi.RMATRIX=[
+   %R1    R26   R27   R11    R13    R14
+    1     100   10     0      1      1       
+   100    10    10     0      1      1 
+    1     10    10     0      2      1
+   100    10    10     0      2      1 
+%    1     10    10     1      2      1
+%   100    10    10     1      2      1
+    1     10    10     0      1      2   
+   100    10    10     0      1      2
+    1     10    10     0      2      2
+   100    10    10     0      2      2
+%    1     10    10     1      2      2
+%   100    10    10     1      2      2 
+];
+%}
 
 %{
 meas.MeasCond='TwinDark'; multi.R22=0;
@@ -224,11 +244,12 @@ meas.MeasDetails=[ sprintf('%s', meas.MeasCond) ...
     ...sprintf( '_Vcc%s', volt2str(env.V(id.Vcc)) ) ...  for AP pixels 
     ...sprintf( '_Voff%s',  volt2str(env.V(id.AVoff)) ) ...    
     sprintf( '_VQinj%s', volt2str(env.V(id.VQinj)) ) ...
-    ...sprintf( '_%02dR22', multi.R22                 ) ...
+    sprintf( '_%02dR22', multi.R22                 ) ...
     sprintf( '_RST%s',    setup.PF_globalReset     ) ... PSI-3 specific
     sprintf( '%s',    setup.special     ) ...
     ...sprintf( '_GC%s',    setup.PF_gateCards        ) ...
     ...sprintf( '_DC%s',    setup.PF_dataCards        ) ...
+    sprintf( '_DCdips%s',    setup.PF_dataCardDIPs        ) ...
     ...sprintf( '_GL%03d',  geo.GL                    ) ...
    ];
 
@@ -248,7 +269,6 @@ end;
 
 flag.G3_nuke=true;
 flag.first_run=true;
-flag.finished=false;
 for mid=1:multi.nrofacq; multi.mid=mid;
 
    multi.R1 =multi.RMATRIX(multi.mid,1);
@@ -360,7 +380,7 @@ flag.G3_nuke=false;
 
 
 % Jabber notification
-tool_notification(flag.jabber*flag.first_run,meas,multi,flag.finished,0);
+tool_notification(flag.jabber&&flag.first_run,env,meas,multi,'started',[0 0]);
 flag.first_run=false;
 
 end
@@ -369,5 +389,4 @@ end
 display('Measurement complete');
 
 % Jabber notification that script is done
-flag.finished=true;
-tool_notification(flag.jabber,meas,multi,flag.finished,0);
+tool_notification(flag.jabber,env,meas,multi,'finished',[0 0]);

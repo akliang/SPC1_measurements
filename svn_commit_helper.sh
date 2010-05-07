@@ -1,13 +1,12 @@
 #!/bin/bash
 
 # this script replaces %%{ with %{ in meas_description.m,
-# effectively activating all block comments.
-# it also creates a backup file before doing so
+# and writes its output to meas_description_svn.m
+# (which is the actual file under version control)
 
-mv meas_description.m meas_description_backup.m
-cat meas_description_backup.m | sed -r -e 's/^%%\{$/%\{/' >meas_description.m
+echo "Creating block-commented version of meas_description.m as meas_description_svn.m..."
+cat meas_description.m | sed -r -e 's/^%%\{$/%\{/' >meas_description_svn.m
 
 echo "Suggested commands to execute now:
-svn commit meas_description.m -m 'place comment here'
-mv meas_description_backup.m meas_description.m
+svn commit meas_description_svn.m -m 'place comment here'
 "
