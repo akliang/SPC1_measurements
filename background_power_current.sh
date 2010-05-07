@@ -2,7 +2,7 @@
 
 MDEV="/dev/ttyUSB0"
 DDIR='../measurements/environment/'
-DFILEPREFIX='meas_'
+DFILEPREFIX="meas_$(hostname)_"
 
 stty -F $MDEV 9600
 
@@ -53,8 +53,8 @@ echo "Starting recording currents and voltages to $DDIR$DFILE..."
 
 {
 
-until read -t 4.0 K; do
-read -t 0.5 RESULTFLASH <&5
+until read -t 4 K; do
+read -t 1 RESULTFLASH <&5
 echo -e -n "MEAS:VOLT:ALL?\n" >&5
 echo -e -n "MEAS:CURR:ALL?\n" >&5
 read -t 2 RESULTVOLT <&5

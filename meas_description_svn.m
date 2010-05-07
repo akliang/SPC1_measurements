@@ -5,32 +5,50 @@
 %
 % $HeadURL$
 % $Id$
+%
+% Notes:
+% 1) other scripts call meas_description.m (no _svn), so rename this file before usage!
+% 2) call svn_commit_helper.sh to create a meas_description_svn.m from this file
+%    with all 'disabled' block comments 'activated' (i.e. everything commented)
+% 3) do not use block comments for anything but marking sections (see point 2)
+%
 
+
+
+%
+% Location-Specific Settings and Information
+%
 
 %{
 setup.LOCATION='Argus Building, Optics Lab';
+setup.HOSTNAME='Pion'; % hostname of computer running this script
 setup.G3_system='9of9-vanilla';
 setup.G3_interface='a2-V20-20100408'; % serial number - hardware version - bitfile version
 %setup.G3_interface='a1-V20-20100316'; % serial number - hardware version - bitfile version
-setup.G3_adcCards='a1-a2-00-00-00-00-00-00';
+setup.G3_adcCards='a1-a2-00-00-00-00-00-00'; % On G3 ADC Board, they are labeled ADC8-...-1
 
 setup.POWER_G3='ArrayAndADCPower#1';
 setup.POWER_ADC='ArrayAndADCPower#1';
-setup.POWER_PSI='BK_9130_005004156568001055_V1.69';
+setup.POWER_PSI=[ setup.HOSTNAME '_BK_9130_005004156568001055_V1.69' ];
 %}
 
 
 %{
 setup.LOCATION='Argus Building, RF Lab';
+setup.HOSTNAME='Driftwood'; % hostname of computer running this script
 setup.G3_system='5of9-vanilla';
 setup.G3_interface='a4-V20-20100408'; % serial number - hardware version - bitfile version
-setup.G3_adcCards='a3-a4-a5-a6-00-00-00-00';
+setup.G3_adcCards='a3-a4-a5-a6-00-00-00-00'; % On G3 ADC Board, they are labeled ADC8-...-1
 
 setup.POWER_G3='ArrayAndADCPower#2';
 setup.POWER_ADC='ArrayAndADCPower#2';
-setup.POWER_PSI='BKPRECISION1761#2';
+setup.POWER_PSI=[ setup.HOSTNAME '_BK_9130_005004156568001055_V1.69' ];
 %}
 
+
+%
+% Array- and Platform Specific Settings and Information:
+%
 
 setup.arrdefcnt=0; % initialize counter which keeps track of how many arrays got defined
 
