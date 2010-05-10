@@ -106,17 +106,18 @@ end
 
 % play with all kinds of binning conditions
 multi.MMATRIX=[
-    %R13 %R14
-    %   1    1
-
-        1    2
-       %{
+    %R13 %R14 %R6  %R4  %R3
+       1    1 1600 1200 1
+       1    1  800  600 6
+       1    1 3200 2800 1
+  %     1    2 1600 1200 1
+  %{
        1    3
        1    4
        1    6
        1    8
   %}
-       2    2
+  %     2    2
   %{     
        2    3
        2    4
@@ -140,6 +141,10 @@ multi.mnrofacq=size(multi.MMATRIX,1);
 for mmid=1:multi.mnrofacq; multi.mmid=mmid;
 multi.R13=multi.MMATRIX(multi.mmid,1);
 multi.R14=multi.MMATRIX(multi.mmid,2);
+
+multi.R6=multi.MMATRIX(multi.mmid,3);
+multi.R4=multi.MMATRIX(multi.mmid,4);
+multi.R3=multi.MMATRIX(multi.mmid,5);
 
 % 
 % Multi-Sequence-Setup
@@ -197,7 +202,7 @@ if strcmp(meas.MeasCond(1:4),'Qinj' ); multi.nrofacq=1; end
 meas.MeasDetails=[ sprintf('%s', meas.MeasCond) ...
     sprintf( '_Vbias%s', volt2str(env.V(id.Vbias)) ) ...
     sprintf( '_Von%s', volt2str(env.V(id.Von)) ) ...
-    sprintf( '_Vrst%s', volt2str(env.V(id.Vreset)) ) ...  not needed for PSI-1
+    ...sprintf( '_Vrst%s', volt2str(env.V(id.Vreset)) ) ...  not needed for PSI-1
     sprintf( '_Voff%s', volt2str(env.V(id.AVoff)) ) ...    
     ...sprintf( '_Vgnd%s', volt2str(env.V(id.Vgnd)) ) ...
     ...sprintf( '_Tbias%s', volt2str(env.V(id.Tbias)) ) ...
@@ -206,14 +211,17 @@ meas.MeasDetails=[ sprintf('%s', meas.MeasCond) ...
     ...sprintf( '_VQinj%s', volt2str(env.V(id.VQinj)) ) ...
     sprintf( '_%02dR22', multi.R22                 ) ...
     ...sprintf( '_RST%s',    setup.PF_globalReset     ) ...
-    sprintf('_%02dR13', multi.R13)  ...
-    sprintf('_%02dR14', multi.R14)  ...
-    sprintf( '%s',    setup.special     ) ...
+    sprintf('_%04dR6', multi.R6)  ...
+    sprintf('_%04dR4', multi.R4)  ...
+    sprintf('_%03dR3', multi.R3)  ...
+    ...sprintf('_%02dR13', multi.R13)  ...
+    ...sprintf('_%02dR14', multi.R14)  ...
     ...sprintf( '_GC%s',    setup.PF_gateCards        ) ...
     ...sprintf( '_DC%s',    setup.PF_dataCards        ) ...
     ...sprintf( '_GL%03d',  geo.GL                    ) ...
     ...sprintf( '_repeat'                 ) ...
-   ];
+    sprintf( '%s',    setup.special     ) ...
+  ];
 
 
 meas.MeasID=datestr(now(),30);
@@ -285,10 +293,10 @@ meas.R=[
  %value PSI-1 PSI-2 PSI-3   %name  bits  (default)units        Description
         multi.R1            %R1    16    (512)us   (F9==0)  Tau_1:   Primary Delay between Readouts. R1*512Mhz/tau1_clk ; tau1_clk=(F9==0)?1Mhz:extclock
         0                   %R2    16      (8)us  (F10==0)  Tau_2: Secondary Delay between Readouts, e.g. for LED-Flashing, starts after Tau_1, R2*8/tau2_clk ; tau2_clk=(F10==0)?1Mhz:extclock
-        1                   %R3    16      (8)us  (F11==0)  Tau_3: Delay between Gate Line Groups. R3*8Mhz/tau3_clk ; tau3_clk=(F11==0)?1Mhz:extclock
-    ts( 1200,  300, 1000)   %R4    14      50 ns            Tau_4: preamp integration time (SAFT): R4*50ns ; starts 1.75us after Tau_21 [?? Tint=3.9+0.05(R21+R4-R5) in us]
-    ts(  400,   50,   50)   %R5    12      50 ns            Tau_5: Gate Hold-off, i.e. delay before Gate-On, 0.05us*R5, for non-multiplexed arrays larger than 2.15us+0.05us*R21+1.75us
-    ts( 1600, 2000, 2150)   %R6    16      50 ns            Tau_6: Gate-On-Time, 0.05us*R6, starts after Tau_5
+        multi.R3                   %R3    16      (8)us  (F11==0)  Tau_3: Delay between Gate Line Groups. R3*8Mhz/tau3_clk ; tau3_clk=(F11==0)?1Mhz:extclock
+        multi.R4    %ts( 1200,  300, 1000)   %R4    14      50 ns            Tau_4: preamp integration time (SAFT): R4*50ns ; starts 1.75us after Tau_21 [?? Tint=3.9+0.05(R21+R4-R5) in us]
+                     ts(  400,   50,   50)   %R5    12      50 ns            Tau_5: Gate Hold-off, i.e. delay before Gate-On, 0.05us*R5, for non-multiplexed arrays larger than 2.15us+0.05us*R21+1.75us
+        multi.R6    %ts( 1600, 2000, 2150)   %R6    16      50 ns            Tau_6: Gate-On-Time, 0.05us*R6, starts after Tau_5
         0                   %R7          N/I
         0                   %R8    12       1 us  (F12==1)  Tau_8: LED HOLD-off delay, i.e. delay between start of Tau_2 and the first flash
         0                   %R9    12       1 us  (F12==1)  Tau_9: LED Delay between flashes (applies only if R25>1?)
@@ -346,16 +354,16 @@ end
 flag.G3_nuke=false;
 
 % Jabber notification
-tool_notification(flag.jabber&&flag.first_run,meas,multi,flag.finished,0);
+tool_notification(flag.jabber&&flag.first_run,env,meas,multi,'started',[0 0]);
 flag.first_run=false;
 
 end % end for-loop for R (R1, R26, R27) matrix
 
 display('Measurement complete');
 
+end  % end for-loop for R (R13, R14) matrix
+
 % jabber work in progress
 flag.finished=true;
-tool_notification(flag.jabber,meas,multi,flag.finished,0);
-
-end  % end for-loop for R (R13, R14) matrix
+tool_notification(flag.jabber,env,meas,multi,'finished',[0 0]);
 
