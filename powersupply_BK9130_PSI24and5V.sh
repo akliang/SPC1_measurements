@@ -4,9 +4,7 @@ MDEV="/dev/ttyUSB0"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
 
-stty -F $MDEV 9600
-
-
+stty -F $MDEV 9600 -parenb -parodd cs8 hupcl -cstopb cread clocal -crtscts -ixon -echo
 
 
 exec 5<>$MDEV

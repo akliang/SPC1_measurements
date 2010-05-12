@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MDEV="/dev/ttyUSB2"
+MDEV="/dev/ttyUSB1"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
 
@@ -14,7 +14,8 @@ function sendscpi() {
 	echo -e -n "$2\n" >&5
 	RESULT=""
         while read -t $1 RES <&5; do
-                [ "$3" == "" ] && echo "RESPONSE<<: $RES"
+		RES="${RES%%$'\r'*}"
+                [ "$3" == "" ] && echo "RESPONSE<<: <$RES>"
 		RESULT="$RESULT$RES"
 	done
 }
@@ -38,21 +39,20 @@ sendscpi 1 'TRIG:DELay 2E-3'
 sendscpi 1 'TRIGger:SOURce IMM'
 sendscpi 1 'SYST:ERR?'
 
-
 sendscpi 2 "*IDN?"
 IDN="$RESULT"
 echo $IDN
 sendscpi 2 'SYST:ERR?'
 sendscpi 2 '*CLS'
 
-DFILE="$DFILEPREFIX$( echo $IDN | sed -e 's%[, /:]%_%g')"
+DFILE=$DFILEPREFIX$( echo $IDN | sed -e 's%[, /:]%_%g')
 
 #echo "<$DFILE>"
 #exit 
 mkdir -p $DDIR
 
 echo ""
-echo "Starting recording voltages to $DDIR$DFILE..."
+echo "Starting recording voltages to <$DDIR$DFILE>..."
 
 {
 
