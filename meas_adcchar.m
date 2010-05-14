@@ -166,6 +166,17 @@ meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 
 meas.MeasCond='ADCCHAR'; multi.R22=0;%14;
 multi.RMATRIX=[];
+
+for VADCm=[1.0 0.8 0.6];
+    for VADCp= VADCm:0.1:4;
+multi.RMATRIX(end+1,:)=[
+   %R1    R26   R27   R11    R13    R14    VADCp VADCm
+    1     0     50     0      1      1     VADCp VADCm
+];
+    end
+end
+
+%{
 for VADCp=[3.6 3.4 3.2];
     for VADCm=-[ 0:.1:VADCp ]+VADCp;
 multi.RMATRIX(end+1,:)=[
@@ -174,7 +185,7 @@ multi.RMATRIX(end+1,:)=[
 ];
     end
 end
-
+%}
 
 multi.nrofacq=size(multi.RMATRIX,1);
 if strcmp(meas.MeasCond(1:5),'First'); multi.nrofacq=1; end
