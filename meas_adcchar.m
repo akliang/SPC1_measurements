@@ -47,7 +47,7 @@ setup.POWERMEAS.I.V5p = {setup.POWERMEAS.FILENAME{1},'text_env1',11};
 setup.POWERMEAS.V.dVADC={setup.POWERMEAS.FILENAME{2},'text_env1',5};
 
 
-setup.ARRAYTYPE='PSI-3';
+setup.ARRAYTYPE='PSI-1';
 setup.WAFERCODE='ADCCHAR';
 setup.PLATFORM='ADCCHAR';
 setup.PF_dataCards='00'; % PSI-3 only has one dataCard
@@ -131,7 +131,8 @@ if ts(1,2,3)==1; % PSI-1 settings and calculations
     geo.G3_SORTMODE=10;
     geo.GL=256+geo.extra_gatelines;%+32; do NOT use 256+32 (288) or 256+128 ! with pre-2010-03 interface card firmwares!
     geo.G3GL=geo.GL-1; % for regular arrays - PSI2/3 arrays have different values
-    geo.DL=386;
+    %geo.DL=386;
+    geo.DL=256;
     geo.G3DL=ceil((geo.DL+1)/512)*512/2 -1;
 end
 
@@ -167,6 +168,43 @@ meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 meas.MeasCond='ADCCHAR'; multi.R22=0;%14;
 multi.RMATRIX=[];
 
+%{
+for VADCm=[1.0 0.8 0.6];
+    for VADCp= 0:0.1:4;
+multi.RMATRIX(end+1,:)=[
+   %R1    R26   R27   R11    R13    R14        dV        Vref
+    1     0     200     0      1      1       VADCp       VADCm
+];
+    end
+end
+%}
+
+%{
+for VADCm=[1.0 0.8 0.6];
+    for VADCp= 0:0.1:4;
+multi.RMATRIX(end+1,:)=[
+   %R1    R26   R27   R11    R13    R14         dV         Vref
+    1     0     200     0      1      1       4.0-VADCp   4.2-VADCm
+];
+    end
+end
+%}
+
+%%{
+for VADCm=[2.2 2.3 2.4];
+    for VADCp= 0:0.1:3;
+multi.RMATRIX(end+1,:)=[
+   %R1    R26   R27   R11    R13    R14         dV         Vref
+    1     0     200     0      1      1       3.0-VADCp   4.6-VADCm
+];
+    end
+end
+%}
+
+
+
+
+%{
 for VADCm=[1.0 0.8 0.6];
     for VADCp= VADCm:0.1:4;
 multi.RMATRIX(end+1,:)=[
@@ -175,6 +213,7 @@ multi.RMATRIX(end+1,:)=[
 ];
     end
 end
+%}
 
 %{
 for VADCp=[3.6 3.4 3.2];
@@ -264,8 +303,8 @@ meas.BaseName=[ meas.DirName ...
  ...sprintf('_%02dR22', multi.R22)  ...
  ...sprintf('_%02dR26', multi.R26)  ...
  ...sprintf('_%02dR27', multi.R27)  ...
-    sprintf('_VADCp%04dmV' , multi.VADCp*1000)   ...
-    sprintf('_VADCm%04dmV' , multi.VADCm*1000)   ...
+    sprintf('_VADCp%04dmV' , round(multi.VADCp*1000))   ...
+    sprintf('_VADCm%04dmV' , round(multi.VADCm*1000))   ...
    ];
 
 meas.AcqFile=[ pwd() '/' meas.BaseName '.bin' ];
