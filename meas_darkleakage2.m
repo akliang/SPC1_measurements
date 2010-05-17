@@ -179,8 +179,8 @@ multi.RMATRIX=[
 %}
 
 %%{
-meas.MeasCond='FloodLeakageNoise'; multi.R22=ts(4,0,0);
-%meas.MeasCond='DarkLeakageNoise'; multi.R22=ts(4,0,0);
+%meas.MeasCond='FloodLeakageNoise'; multi.R22=ts(4,0,0);
+meas.MeasCond='DarkLeakageNoise'; multi.R22=ts(4,0,0);
 multi.RMATRIX=[
    %R1      R26  R27  
        1     0   1000
@@ -203,8 +203,9 @@ multi.RMATRIX=[
 %      40000  0    2 %added 2010-04-27, mk
 %      60000  0    2 %added 2010-04-27, mk
  ];
-if strcmp(meas.MeasCond(1:5),'Flood'); multi.nrofacq=14; end
-
+if strcmp(meas.MeasCond(1:5),'Flood');
+    multi.RMATRIX=multi.RMATRIX(1:14,:);
+end
 %}
 
 
