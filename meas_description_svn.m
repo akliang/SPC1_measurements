@@ -581,6 +581,63 @@ setup.PF_CrossCable='normal';
 setup.special='';
 %}
 
+%{
+setup.ARRAYTYPE='PSI-1';
+setup.WAFERCODE='29A25-5';
+setup.PLATFORM='PF-G1-07-7';
+setup.arrdefcnt=setup.arrdefcnt+1;
+setup.PF_dataCards='ad-a2-aa'; % first is the outermost, last is the innermost
+setup.PF_dataCardDIPs='1111111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
+setup.PF_dataCardVref='0.86'; % nominal Vref, set by resistor divider
+setup.PF_dataBoardDIPs='00000000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
+setup.PF_dataBoardJumper='JP1=Vbias1';
+setup.PF_gateCards='a6-a4';
+setup.PF_analogCard='V1N2';
+setup.PF_arrayLogic='none';
+setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
+setup.PF_CrossCable='normal';
+%setup.PF_CrossCable='Vbias1 open, Vbias1 left floating';
+setup.special='';
+%}
+
+%{
+setup.ARRAYTYPE='PSI-1';
+setup.WAFERCODE='29A23A-8';
+setup.PLATFORM='PF-G1-06-4';
+setup.arrdefcnt=setup.arrdefcnt+1;
+setup.PF_dataCards='ad-a2-aa'; % first is the outermost, last is the innermost
+setup.PF_dataCardDIPs='1111111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
+setup.PF_dataCardVref='0.86'; % nominal Vref, set by resistor divider
+setup.PF_dataBoardDIPs='01000000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
+setup.PF_dataBoardJumper='JP1=Vbias1';
+setup.PF_gateCards='a6-a4';
+setup.PF_analogCard='V1N2';
+setup.PF_arrayLogic='none';
+setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
+setup.PF_CrossCable='normal';
+%setup.PF_CrossCable='Vbias1 open, Vbias1 left floating';
+setup.special='';
+%}
+
+%{
+setup.ARRAYTYPE='PSI-1';
+setup.WAFERCODE='29A30-2';
+setup.PLATFORM='PF-G1-10-1';
+setup.arrdefcnt=setup.arrdefcnt+1;
+setup.PF_dataCards='ad-a2-aa'; % first is the outermost, last is the innermost
+setup.PF_dataCardDIPs='1111111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
+setup.PF_dataCardVref='0.86'; % nominal Vref, set by resistor divider
+setup.PF_dataBoardDIPs='01000000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
+setup.PF_dataBoardJumper='JP1=Vbias1';
+setup.PF_gateCards='a6-a4';
+setup.PF_analogCard='V1N2';
+setup.PF_arrayLogic='none';
+setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
+setup.PF_CrossCable='normal';
+setup.PF_CrossCable='Vbias1 open, Vbias1 left floating';
+setup.special='_VbiasFloating';
+%}
+
 
 if (setup.arrdefcnt~=1);
 	error('Multiple or no array selected!');

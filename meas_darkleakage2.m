@@ -108,8 +108,8 @@ end
 multi.MMATRIX=[
     %R13 %R14 %R6  %R4  %R3
        1    1 1600 1200 1
-       1    1  800  600 6
-       1    1 3200 2800 1
+  %     1    1  800  600 6
+  %     1    1 3200 2800 1
   %     1    2 1600 1200 1
   %{
        1    3
@@ -152,26 +152,10 @@ multi.R3=multi.MMATRIX(multi.mmid,5);
 
 meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 
+%{
 meas.MeasCond='DarkLeakage'; multi.R22=ts(4,0,0);
-%meas.Comment=[ meas.MeasCond ' Line mapping Measurement' ];
-
-% technically, not only R's can be changed in multi-sequence mode - 
-% is RMATRIX an inappropriate name?
+meas.MeasCond='FloodLeakage'; multi.R22=ts(4,0,0);
 multi.RMATRIX=[
-   %R1      R26  R27   R11    R13    R14
-   %{   1      100   10   0       1      1       
-   %   100    10    10   0       1      1 
-   %   1      10   10   0       2      1
-   %   100    10    10   0       2      1    
-   %   1      10   10   1       2      1
-   %   100    10    10   1       2      1
-   %   1      10   10   0       1      2   
-   %   100    10    10   0       1      2
-   %   1      10   10   0       2      2
-   %   100    10    10   0       2      2
-   %   1      10   10   1       2      2
-   %   100    10    10   1       2      2 
-    %}
        1     500  20
        2     100  20   % not necessary for PSI-2
        5     100  20   % not necessary for PSI-2
@@ -187,11 +171,39 @@ multi.RMATRIX=[
       6000   0    2
       8900   0    2
       11900  0    2
+%      15700  0    2
+%      19550  0    2    
+%      40000  0    2 %added 2010-04-27, mk
+%      60000  0    2 %added 2010-04-27, mk
+ ];
+%}
+
+%%{
+meas.MeasCond='FloodLeakageNoise'; multi.R22=ts(4,0,0);
+meas.MeasCond='DarkLeakageNoise'; multi.R22=ts(4,0,0);
+multi.RMATRIX=[
+   %R1      R26  R27  
+       1     0   1000
+       2     0    200   % not necessary for PSI-2
+       5     0   1000   % not necessary for PSI-2
+      10     0    50   % not necessary for PSI-2
+      20     0    50
+      50     0    50
+      100    0    200
+      200    0    30
+      400    0    100
+      1000   0    5
+      2000   0    5
+      4000   0    2
+      6000   0    2
+      8900   0    2
+      11900  0    2
       15700  0    2
       19550  0    2    
 %      40000  0    2 %added 2010-04-27, mk
 %      60000  0    2 %added 2010-04-27, mk
  ];
+%}
 
 
 
@@ -208,7 +220,7 @@ meas.MeasDetails=[ sprintf('%s', meas.MeasCond) ...
     ...sprintf( '_Tbias%s', volt2str(env.V(id.Tbias)) ) ...
     ...sprintf( '_Vcc%s', volt2str(env.V(id.Vcc)) ) ...
     ...sprintf( '_Voff%s',  volt2str(env.V(id.AVoff)) ) ...    
-    ...sprintf( '_VQinj%s', volt2str(env.V(id.VQinj)) ) ...
+    sprintf( '_VQinj%s', volt2str(env.V(id.VQinj)) ) ...
     sprintf( '_%02dR22', multi.R22                 ) ...
     ...sprintf( '_RST%s',    setup.PF_globalReset     ) ...
     sprintf('_%04dR6', multi.R6)  ...
