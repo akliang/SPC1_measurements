@@ -180,7 +180,7 @@ multi.RMATRIX=[
 
 %%{
 %meas.MeasCond='FloodLeakageNoise'; multi.R22=ts(4,0,0);
-meas.MeasCond='DarkLeakageNoise'; multi.R22=ts(4,0,0);
+meas.MeasCond='DarkLeakageNoise'; multi.R22=ts(4,0,0); multi.R22=2;
 multi.RMATRIX=[
    %R1      R26  R27  
        1     0   1000
