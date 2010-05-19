@@ -259,7 +259,7 @@ for mid=1:multi.nrofacq; multi.mid=mid;
 
    multi.R1 =multi.RMATRIX(multi.mid,1);
    %multi.R11=multi.RMATRIX(multi.mid,4);
-   multi.R11=0;
+   multi.R11=255-16;
    %multi.R13=multi.RMATRIX(multi.mid,5);
    %multi.R13=1;%2
    %multi.R14=multi.RMATRIX(multi.mid,6);
