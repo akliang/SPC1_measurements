@@ -203,6 +203,9 @@ multi.RMATRIX=[
 %      40000  0    2 %added 2010-04-27, mk
 %      60000  0    2 %added 2010-04-27, mk
  ];
+%}
+
+
 %{
 multi.RMATRIX=[ % overnight long run noise measurement
    %R1      R26  R27  
