@@ -179,7 +179,7 @@ multi.RMATRIX=[
 %}
 
 %%{
-%meas.MeasCond='FloodLeakageNoise'; multi.R22=ts(4,0,0);
+meas.MeasCond='FloodLeakageNoise'; multi.R22=ts(4,0,0); multi.R22=2;
 meas.MeasCond='DarkLeakageNoise'; multi.R22=ts(4,0,0); multi.R22=2;
 multi.RMATRIX=[
    %R1      R26  R27  
@@ -203,6 +203,28 @@ multi.RMATRIX=[
 %      40000  0    2 %added 2010-04-27, mk
 %      60000  0    2 %added 2010-04-27, mk
  ];
+multi.RMATRIX=[ % overnight long run noise measurement
+   %R1      R26  R27  
+       1    500   500
+       2     0    500   % not necessary for PSI-2
+       5     0    500   % not necessary for PSI-2
+      10     0    200   % not necessary for PSI-2
+      20     0    200
+      50     0    200
+      100    0    200
+      200    0    200
+      400    0    200
+      1000   0    100
+      2000   0    100 
+      4000   0    100 
+      6000   0    50 
+      8900   0    50
+      11900  0    50
+      15700  0    50
+      19550  0    50    
+      40000  0    50 %added 2010-04-27, mk
+      60000  0    50 %added 2010-04-27, mk
+ ];
 if strcmp(meas.MeasCond(1:5),'Flood');
     multi.RMATRIX=multi.RMATRIX(1:14,:);
 end
@@ -216,6 +238,7 @@ if strcmp(meas.MeasCond(1:4),'Qinj' ); multi.nrofacq=1; end
 
 meas.MeasDetails=[ sprintf('%s', meas.MeasCond) ...
     sprintf( '_Vbias%s', volt2str(env.V(id.Vbias)) ) ...
+    sprintf( '_Vguard2%s', volt2str(env.V(id.Vguard2)) ) ...
     sprintf( '_Von%s', volt2str(env.V(id.Von)) ) ...
     ...sprintf( '_Vrst%s', volt2str(env.V(id.Vreset)) ) ...  not needed for PSI-1
     sprintf( '_Voff%s', volt2str(env.V(id.AVoff)) ) ...    
@@ -259,7 +282,7 @@ for mid=1:multi.nrofacq; multi.mid=mid;
 
    multi.R1 =multi.RMATRIX(multi.mid,1);
    %multi.R11=multi.RMATRIX(multi.mid,4);
-   multi.R11=255-16;
+   multi.R11=0; %255-16;
    %multi.R13=multi.RMATRIX(multi.mid,5);
    %multi.R13=1;%2
    %multi.R14=multi.RMATRIX(multi.mid,6);
