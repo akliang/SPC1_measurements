@@ -203,6 +203,7 @@ multi.RMATRIX=[
 %      40000  0    2 %added 2010-04-27, mk
 %      60000  0    2 %added 2010-04-27, mk
  ];
+%{
 multi.RMATRIX=[ % overnight long run noise measurement
    %R1      R26  R27  
        1    500   500
@@ -225,6 +226,8 @@ multi.RMATRIX=[ % overnight long run noise measurement
       40000  0    50 %added 2010-04-27, mk
       60000  0    50 %added 2010-04-27, mk
  ];
+ %}
+ 
 if strcmp(meas.MeasCond(1:5),'Flood');
     multi.RMATRIX=multi.RMATRIX(1:14,:);
 end
