@@ -1,10 +1,14 @@
 #!/bin/bash
 
+cd "$( dirname $0 )"
+
 SRC1="/mnt/TFTAutoMeas/export/WeatherOS/DATA/TH/sensor*-1day.csv"
 
 DDIR='../measurements/environment/'
 DFILEPREFIX="measTEMP_$(hostname)_"
 DFILE="$DFILEPREFIX""RMS300A_N1"
+
+mkdir -p "$DDIR"
 
 function splittemp() {
 T_date="$1" ; shift
@@ -21,7 +25,7 @@ T_dew="$1" ; shift
 echo ""
 echo "Starting recording temperatures"
 echo "  from '$SRC1'"
-echo "   to  '$DDIR$DFILE'..."
+echo "   to  '$(pwd)/$DDIR$DFILE'..."
 
 {
 
