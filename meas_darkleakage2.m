@@ -229,6 +229,56 @@ multi.RMATRIX=[ % overnight long run noise measurement
       40000  0    50 %added 2010-04-27, mk
       60000  0    50 %added 2010-04-27, mk
  ];
+%}
+
+%%{
+multi.RMATRIX=[ % overnight long run measurement, aiming for temperature drift
+   %R1      R26  R27  
+       1    500   500
+       2     0    500   % not necessary for PSI-2
+       5     0    500   % not necessary for PSI-2
+      10     0    200   % not necessary for PSI-2
+      20     0    200
+      50     0    200
+      100    0    200
+      200    0    200
+      400    0    200
+      1000   0    100
+      2000   0    100 
+      4000   0    100 
+      4010   0    100 
+      4020   0    100 
+      4030   0    100 
+      4040   0    100 
+      4050   0    100 
+      4060   0    100 
+      4060   0    100 
+      4070   0    100 
+      4080   0    100 
+      4090   0    100 
+      4100   0    100 
+      4100   0    100 
+      4110   0    100 
+      4120   0    100 
+      4130   0    100 
+      4140   0    100 
+      4150   0    100 
+      4160   0    100 
+      4170   0    100 
+      4180   0    100 
+      4190   0    100 
+      4200   0    100 
+      4210   0    100 
+      4220   0    100 
+      4230   0    100 
+      4240   0    100 
+      4250   0    100 
+      4260   0    100 
+      4270   0    100 
+      4280   0    100 
+      4290   0    100 
+      4300   0    100 
+ ];
  %}
  
 if strcmp(meas.MeasCond(1:5),'Flood');
@@ -255,9 +305,9 @@ meas.MeasDetails=[ sprintf('%s', meas.MeasCond) ...
     sprintf( '_VQinj%s', volt2str(env.V(id.VQinj)) ) ...
     sprintf( '_%02dR22', multi.R22                 ) ...
     ...sprintf( '_RST%s',    setup.PF_globalReset     ) ...
-    sprintf('_%04dR6', multi.R6)  ...
-    sprintf('_%04dR4', multi.R4)  ...
-    sprintf('_%03dR3', multi.R3)  ...
+    ...sprintf('_%04dR6', multi.R6)  ...
+    ...sprintf('_%04dR4', multi.R4)  ...
+    ...sprintf('_%03dR3', multi.R3)  ...
     ...sprintf('_%02dR13', multi.R13)  ...
     ...sprintf('_%02dR14', multi.R14)  ...
     ...sprintf( '_GC%s',    setup.PF_gateCards        ) ...

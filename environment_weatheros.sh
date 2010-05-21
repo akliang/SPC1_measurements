@@ -30,8 +30,9 @@ while true; do
 TEMPSTR=""
 for F in $SRC1; do
   TEMPDATA="$( cat $F | sed -e 's%,%\t%g' )"
+  TEMPSENS="$( echo $F | sed -e 's%.*/%%' -e 's%-1day.csv%%')"
   splittemp $TEMPDATA
-  TEMPSTR="$TEMPSTR,$T_temp"
+  TEMPSTR="$TEMPSTR,$TEMPSENS,$T_time,$T_temp,$T_humid"
 done
 
 echo -e "$(date +"%Y-%m-%d %H:%M:%S,%s.%N")$TEMPSTR" | sed -e 's/,/\t/g' 
