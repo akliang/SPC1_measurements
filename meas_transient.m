@@ -171,18 +171,18 @@ meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 meas.MeasCond='FloodTransNoise'; multi.R22=ts(4,0,0); multi.R22=2;
 meas.MeasCond='DarkTransNoise'; multi.R22=ts(4,0,0); multi.R22=2;
 multi.RMATRIX=[
-   %R1      R26  R27  
-      1      0   200
-      2      0   200
-      5      0   200
-      10     0   200
-      20     0   200
-      50     0   200
-      100    0   200
-      200    0   200
-      400    0   200
-      1000   0   200
-      2000   0   200
+   %R1       R26    R27  
+      1      1000   200
+      2      500      200
+      5      500      200
+      10     500      200
+      20     500      200
+      50     500      200
+      100    0      200
+      200    0      200
+      400    0      200
+      1000   0      200
+      2000   0      200
 ];
 %}
 

@@ -57,6 +57,7 @@ setup.POWERMEAS.V.V5p ={setup.POWER_ARRAY,'text_env1',7};
 setup.POWERMEAS.I.V24m={setup.POWER_PSI,'text_env1',9};
 setup.POWERMEAS.I.V24p={setup.POWER_PSI,'text_env1',10};
 setup.POWERMEAS.I.V5p ={setup.POWER_ARRAY,'text_env1',11};
+setup.TEMPMEAS.ARRAY={ 'TEMP_Driftwood_RMS300A_N1', 'text_env_tempwos1', 'sensor2' };
 %}
 
 
@@ -72,14 +73,19 @@ setup.ARRAYTYPE='PSI-1';
 setup.WAFERCODE='29A31-11';
 setup.PLATFORM='PF-G1-10-4';
 setup.arrdefcnt=setup.arrdefcnt+1;
-setup.PF_dataCards='ad-a2-a6'; % first is the outermost, last is the innermost
+setup.PF_dataCards='ad-a2-aa'; % first is the outermost, last is the innermost
 setup.PF_dataCardDIPs='1111111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
 setup.PF_dataCardVref='0.86'; % nominal Vref, set by resistor divider
-setup.PF_dataBoardDIPs='00000000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
-setup.PF_gateCards='a4-a2';
-setup.PF_analogCard='V1N1';
+%setup.PF_dataBoardDIPs='01000000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
+setup.PF_dataBoardDIPs='00100000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
+setup.PF_dataBoardJumper='JP1=Vbias1';
+setup.PF_gateCards='a6-a4';
+setup.PF_analogCard='V1N2';
 setup.PF_arrayLogic='none';
 setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
+setup.PF_CrossCable='normal';
+%setup.PF_CrossCable='Vbias1 open, Vbias1 left floating';
+setup.special='_RF_wbox';
 %}
 
 %{
@@ -568,17 +574,19 @@ setup.ARRAYTYPE='PSI-1';
 setup.WAFERCODE='29A31-8';
 setup.PLATFORM='PF-G1-06-1';
 setup.arrdefcnt=setup.arrdefcnt+1;
-setup.PF_dataCards='a7-a8-a5'; % first is the outermost, last is the innermost
+setup.PF_dataCards='ad-a2-aa'; % first is the outermost, last is the innermost
 setup.PF_dataCardDIPs='1111111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
 setup.PF_dataCardVref='0.86'; % nominal Vref, set by resistor divider
-setup.PF_dataBoardDIPs='00000000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
+%setup.PF_dataBoardDIPs='01000000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
+setup.PF_dataBoardDIPs='00100000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
 setup.PF_dataBoardJumper='JP1=Vbias1';
-setup.PF_gateCards='a1-a5';
-setup.PF_analogCard='V1N1';
+setup.PF_gateCards='a6-a4';
+setup.PF_analogCard='V1N2';
 setup.PF_arrayLogic='none';
 setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
 setup.PF_CrossCable='normal';
-setup.special='';
+%setup.PF_CrossCable='Vbias1 open, Vbias1 left floating';
+setup.special='_RF_wbox';
 %}
 
 %{
@@ -586,17 +594,19 @@ setup.ARRAYTYPE='PSI-1';
 setup.WAFERCODE='29A31-9';
 setup.PLATFORM='PF-G1-10-3';
 setup.arrdefcnt=setup.arrdefcnt+1;
-setup.PF_dataCards='a7-a8-a5'; % first is the outermost, last is the innermost
+setup.PF_dataCards='ad-a2-aa'; % first is the outermost, last is the innermost
 setup.PF_dataCardDIPs='1111111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
 setup.PF_dataCardVref='0.86'; % nominal Vref, set by resistor divider
-setup.PF_dataBoardDIPs='00000000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
+%setup.PF_dataBoardDIPs='01000000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
+setup.PF_dataBoardDIPs='00100000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
 setup.PF_dataBoardJumper='JP1=Vbias1';
-setup.PF_gateCards='a1-a5';
-setup.PF_analogCard='V1N1';
+setup.PF_gateCards='a6-a4';
+setup.PF_analogCard='V1N2';
 setup.PF_arrayLogic='none';
 setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
 setup.PF_CrossCable='normal';
-setup.special='';
+%setup.PF_CrossCable='Vbias1 open, Vbias1 left floating';
+setup.special='_RF_wbox';
 %}
 
 %{
@@ -660,14 +670,14 @@ setup.ARRAYTYPE='PSI-1';
 setup.WAFERCODE='29A11-5';
 setup.PLATFORM='PF-G1-04-3';
 setup.arrdefcnt=setup.arrdefcnt+1;
-setup.PF_dataCards='ad-a2-aa'; % first is the outermost, last is the innermost
+setup.PF_dataCards='a7-a8-a5'; % first is the outermost, last is the innermost
 setup.PF_dataCardDIPs='1111111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
 setup.PF_dataCardVref='0.86'; % nominal Vref, set by resistor divider
 %setup.PF_dataBoardDIPs='01000000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
 setup.PF_dataBoardDIPs='00100000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
 setup.PF_dataBoardJumper='JP1=Vbias1';
-setup.PF_gateCards='a6-a4';
-setup.PF_analogCard='V1N2';
+setup.PF_gateCards='a1-a5';
+setup.PF_analogCard='V1N1';
 setup.PF_arrayLogic='none';
 setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
 setup.PF_CrossCable='normal';
@@ -692,7 +702,7 @@ setup.PF_arrayLogic='none';
 setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
 setup.PF_CrossCable='normal';
 %setup.PF_CrossCable='Vbias1 open, Vbias1 left floating';
-setup.special='';
+setup.special='_RF_wbox';
 %}
 
 %{
@@ -736,7 +746,7 @@ end
 % 2. Are the cables hooked up correctly? (if applicable)
 %    - Cross-over cable with all pins connected
 %    - Vrst shorted to Vbias if applicable
-%    - +Q adapter for ADCs
+%    - +Q adapter for ADCs (for PSI-2 or PSI-3)
 % 3. Are all the voltages correct?
 %    - Vrst
 %    - Qinj
@@ -751,18 +761,18 @@ env.V(end+1)=  15.0 ; id.Von     =numel(env.V);                             % Te
 env.V(end+1)=  0.0  ; id.Vout10  =numel(env.V);   id.RevBias =numel(env.V); % Vn.Vout10=0.0;  %PSI3: Vn.RevBias=-2.5;         % Vout10
 env.V(end+1)=  0.0  ; id.Vout9   =numel(env.V);   id.Vreset  =numel(env.V); % Vn.Vout9=0.0;   %PSI3: Vn.Vreset=15.0;          % Vout9
 env.V(end+1)=  0.0  ; id.Vout8   =numel(env.V);   id.Vcc     =numel(env.V); % Vn.Vout8=0.0;   %PSI3: Vn.Vcc=8;                % Vout8
-env.V(end+1)=  0.0  ; id.Vguard2 =numel(env.V);   id.Tbias   =numel(env.V); % Vn.Vguard2=0.0; %PSI3: Vn.Tbias=5.5;            % Vout7
+env.V(end+1)= -0.0  ; id.Vguard2 =numel(env.V);   id.Tbias   =numel(env.V); % Vn.Vguard2=0.0; %PSI3: Vn.Tbias=5.5;            % Vout7
 env.V(end+1)=  0.0  ; id.Vguard1 =numel(env.V);   id.Vgnd    =numel(env.V); % Vn.Vguard1=0.0; %PSI3: Vn.Vgnd=1.0;             % Vout6
 env.V(end+1)=  0.0  ; id.Vbias2  =numel(env.V);   id.MuxHigh =numel(env.V); % Vn.Vbias2=0.0 ; %PSI3: Vn.Mux_High=15.0;        % Vout5
-env.V(end+1)= -3.0  ; id.Vbias   =numel(env.V);                   % Vn.Vbias=-3.0;   env.V(end+1)=env.V(id.Vgnd)   env.V(id.Vreset)  % Vout4
-env.V(end+1)=  1.5  ; id.VQinj   =numel(env.V);                              % Vn.Qinj=2.0; % toggle between 1 and 2 V         % Vout3
+env.V(end+1)= -1.0  ; id.Vbias   =numel(env.V);                   % Vn.Vbias=-3.0;   env.V(end+1)=env.V(id.Vgnd)   env.V(id.Vreset)  % Vout4
+env.V(end+1)=  2.5  ; id.VQinj   =numel(env.V);                              % Vn.Qinj=2.0; % toggle between 1 and 2 V         % Vout3
 env.V(end+1)=  0.86 ; id.Vref    =numel(env.V);                             % Vn.Vref=0.856; 2.303  for PSI2/3 cards  %   usually generated by R/R on Masda-R card
 env.V(end+1)=  env.V(id.RevBias)  ; id.DLrstGate =numel(env.V);                  % env.V(id.Vguard2)
 env.V(end+1)=  0    ; id.DLrstGnd   =numel(env.V);                           % hard-wired to Analog Ground on PSI-2
 env.V(end+1)=  env.V(id.AVoff)    ; id.SRCommon   =numel(env.V);                           
 
-env.I.V24m=0.095;  % Current in amperes on the BK PRECISION -24V power supply
-env.I.V24p=0.098;  % Current in amperes on the BK PRECISION +24V power supply
+env.I.V24m=0.103;  % Current in amperes on the BK PRECISION -24V power supply
+env.I.V24p=0.104;  % Current in amperes on the BK PRECISION +24V power supply
 
 meas.MFileDesc=[ mfilename() '.m' ];
 
