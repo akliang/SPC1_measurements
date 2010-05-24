@@ -168,7 +168,7 @@ end
 meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 
 %%{
-meas.MeasCond='FloodTransNoise'; multi.R22=ts(4,0,0); multi.R22=2;
+%meas.MeasCond='FloodTransNoise'; multi.R22=ts(4,0,0); multi.R22=2;
 meas.MeasCond='DarkTransNoise'; multi.R22=ts(4,0,0); multi.R22=2;
 multi.RMATRIX=[
    %R1       R26    R27  
@@ -177,18 +177,18 @@ multi.RMATRIX=[
       5      500      200
       10     500      200
       20     500      200
-      30     500      200
-      40     500      200
-      50     500      200
-      60     500      200
-      70     500      200
-      100    200      200
-      200    200      200
-      400    200      200
-      1000   200      200
-      2000   200      200
-      4000   200      200  % for overnight
-      6000   200      200  % for overnight
+      30     200      200
+      40     200      200
+      50     200      200
+      60     200      200
+      70     200      200
+      100    200*0      200
+      200    200*0      200
+      400    200*0      200
+      1000   200*0      200
+      2000   200*0      200
+      %4000   200      200  % for overnight
+      %6000   200      200  % for overnight
   ];
 %}
 

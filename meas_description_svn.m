@@ -654,7 +654,8 @@ setup.arrdefcnt=setup.arrdefcnt+1;
 setup.PF_dataCards='ad-a2-aa'; % first is the outermost, last is the innermost
 setup.PF_dataCardDIPs='1111111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
 setup.PF_dataCardVref='0.86'; % nominal Vref, set by resistor divider
-setup.PF_dataBoardDIPs='01000000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
+%setup.PF_dataBoardDIPs='01000000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
+setup.PF_dataBoardDIPs='00100000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
 setup.PF_dataBoardJumper='JP1=Vbias1';
 setup.PF_gateCards='a6-a4';
 setup.PF_analogCard='V1N2';
@@ -662,7 +663,7 @@ setup.PF_arrayLogic='none';
 setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
 setup.PF_CrossCable='normal';
 %setup.PF_CrossCable='Vbias1 open, Vbias1 left floating';
-setup.special='';
+setup.special='_RF_wbox';
 %}
 
 %{
@@ -772,7 +773,7 @@ env.V(end+1)=  0    ; id.DLrstGnd   =numel(env.V);                           % h
 env.V(end+1)=  env.V(id.AVoff)    ; id.SRCommon   =numel(env.V);                           
 
 env.I.V24m=0.103;  % Current in amperes on the BK PRECISION -24V power supply
-env.I.V24p=0.104;  % Current in amperes on the BK PRECISION +24V power supply
+env.I.V24p=0.105;  % Current in amperes on the BK PRECISION +24V power supply
 
 meas.MFileDesc=[ mfilename() '.m' ];
 
