@@ -195,7 +195,7 @@ for VADCm=[2.2 2.3 2.4];
     for VADCp= 0:0.1:3;
 multi.RMATRIX(end+1,:)=[
    %R1    R26   R27   R11    R13    R14         dV         Vref
-    1     0     200     0      1      1       3.0-VADCp   4.6-VADCm
+   500     0     200     0      1      1       3.0-VADCp   4.6-VADCm
 ];
     end
 end

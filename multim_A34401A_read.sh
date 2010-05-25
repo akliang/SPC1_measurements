@@ -56,8 +56,8 @@ echo "Starting recording voltages to <$DDIR$DFILE>..."
 
 {
 
-until read -t 1 K; do
-sendscpi 1 'READ?' silent
+until read -t 0.3  K; do
+sendscpi 0.3 'READ?' silent
 echo "$(date +"%Y-%m-%d %H:%M:%S,%s.%N"),VOLT:,$RESULT" | sed -e 's/,/\t/g'
 done
 

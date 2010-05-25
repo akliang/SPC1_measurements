@@ -231,7 +231,7 @@ multi.RMATRIX=[ % overnight long run noise measurement
  ];
 %}
 
-%%{
+%{
 multi.RMATRIX=[ % overnight long run measurement, aiming for temperature drift
    %R1      R26  R27  
        1    500   500
