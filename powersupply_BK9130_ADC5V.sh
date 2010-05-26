@@ -52,7 +52,7 @@ echo "Starting recording currents and voltages to $DDIR$DFILE..."
 {
 
 until read -t 4 K; do
-read -t 1 RESULTFLASH <&5
+read -t 1 RESULTFLUSH <&5
 echo -e -n "MEAS:VOLT:ALL?\n" >&5
 echo -e -n "MEAS:CURR:ALL?\n" >&5
 read -t 2 RESULTVOLT <&5

@@ -56,9 +56,14 @@ echo "Starting recording voltages to <$DDIR$DFILE>..."
 
 {
 
-until read -t 0.3  K; do
-sendscpi 0.3 'READ?' silent
-echo "$(date +"%Y-%m-%d %H:%M:%S,%s.%N"),VOLT:,$RESULT" | sed -e 's/,/\t/g'
+T1=0.1 # use full integers for some older BASH shells
+T2=1
+
+until read -t $T1  K; do
+  read -t $T1 RESULTFLUSH <&5 # wait T1 seconds to sync in case of unexpected response etc.
+  echo -e -n "READ?\n" >&5
+  read -t $T2 RESULT <&5 # a full line should be available before T2 elapsed, ie T2 can be larger
+  echo "$(date +"%Y-%m-%d %H:%M:%S,%s.%N"),VOLT:,$RESULT" | sed -e 's/,/\t/g'
 done
 
 } | tee -a $DDIR$DFILE
