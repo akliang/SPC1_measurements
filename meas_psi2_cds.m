@@ -90,7 +90,7 @@ end
 if ts(1,2,3)==2; % PSI-2 settings and calculations
     geo.G3_SORTMODE=11;
     geo.GL=256+geo.extra_gatelines;
-    geo.GL=32;
+    geo.GL=16;
     geo.G3GL=16*geo.GL-1;
     %GL=G3GL+1; % for cyclops data sorting, i.e. SORTMODE 10
     geo.DL=384;
@@ -120,12 +120,23 @@ meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 meas.MeasCond='PSI2CDS'; multi.R22=ts(4,0,0);
 multi.RMATRIX=[
    %R1    R26   R27   R11    R13    R14
-    %1     256   4*512   0      16      2       
-    200   256   4*512   0      16      2 
+    1     256   4*512   0      24      2       
+    200   256   4*512   0      24      2 
 ];
 multi.R11=multi.RMATRIX(1,4);
 multi.R13=multi.RMATRIX(1,5);
 multi.R14=multi.RMATRIX(1,6);
+referenceFPS = [
+    %R1   %FPS 
+    %      geo.GL=32   geo.GL=16
+    1      14.2362     26.6
+    5      13.8329     0
+    50     10.4897     0
+    100    8.2691      0
+    200    5.8095      7.1759
+    500    3.0700      0
+];
+
 %}
 
 
