@@ -328,9 +328,9 @@ setup.WAFERCODE='29A31-9';
 setup.PLATFORM='PF-G1-06-8';
 setup.arrdefcnt=setup.arrdefcnt+1;
 setup.PF_dataCards='c2'; % PSI-3 and PSI-2 only have one dataCard
-setup.PF_dataCardDIPs='0111111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
+setup.PF_dataCardDIPs='0011111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
 setup.PF_dataCardVref='2.20'; % nominal Vref, set by resistor divider
-setup.PF_dataBoardDIPs='00000000'; % [ PG3 PG4 PG5 NC NC NC NC NC ]
+setup.PF_dataBoardDIPs='11100000'; % [ PG3 PG4 PG5 NC NC NC NC NC ]
 setup.PF_gateCards='a2-a3'; %v card1, card2
 setup.PF_analogCard='V2N4';
 setup.PF_arrayLogic='V30-N3-PSI2-20100525-SVN48'; %V10: CPLD, no DIPS  V20: CPLD, 12 DIPS, V30: FPGA, 12 DIPS
@@ -340,9 +340,10 @@ setup.PF_arrayLogicDIPs='000010000000'; setup.PF_globalReset='128';  % DIPs labe
 setup.PF_arrayLogicDIPs='000000000100'; setup.PF_globalReset='004';
 setup.PF_arrayLogicDIPs='100000010000'; setup.PF_globalReset='016';
 setup.PF_arrayLogicDIPs='100100000000'; setup.PF_globalReset='256';
+setup.PF_arrayLogicDIPs='101000000000'; setup.PF_globalReset='512';
 setup.PF_CrossCable='';
 setup.PF_CrossCable='Vbias1 open, Vbias shorted to Vreset';
-setup.special='';
+setup.special='_lowGain_dataCardDIPs_and_dataBoardDIPs';
 %}
 
 
@@ -762,7 +763,7 @@ end
 
 
 env.V=[];
-env.V(end+1)= -4.0  ; id.AVoff   =numel(env.V);                             % Test Point near to Gate Card
+env.V(end+1)= -3.0  ; id.AVoff   =numel(env.V);                             % Test Point near to Gate Card
 env.V(end+1)=  15.0 ; id.Von     =numel(env.V);                             % Test Point near to Gate Card
 env.V(end+1)= -1.0  ; id.Vout10  =numel(env.V);   id.RevBias =numel(env.V); % Vn.Vout10=0.0;  %PSI3: Vn.RevBias=-2.5;         % Vout10
 env.V(end+1)=  6.0  ; id.Vout9   =numel(env.V);   id.Vreset  =numel(env.V); % Vn.Vout9=0.0;   %PSI3: Vn.Vreset=15.0;          % Vout9
