@@ -29,7 +29,7 @@ setup.HOSTNAME='Pion'; % hostname of computer running this script
 setup.G3_system='9of9-vanilla';
 setup.G3_interface='a2-V20-20100408'; % serial number - hardware version - bitfile version
 %setup.G3_interface='a1-V20-20100316'; % serial number - hardware version - bitfile version
-setup.G3_adcCards='a1-00-00-00-00-00-00-00'; % On G3 ADC Board, they are labeled ADC8-...-1
+setup.G3_adcCards='a1-a2-00-00-00-00-00-00'; % On G3 ADC Board, they are labeled ADC8-...-1
 
 setup.POWER_G3='Built-in';
 setup.POWER_ADC='BKPRECISION1761#2_AND_AGILENT_E3612A';
@@ -111,15 +111,17 @@ end
 %
 
 if ts(1,2,3)==1; % PSI-1 settings and calculations
-    geo.extra_gatelines=128;
-    geo.extra_gatelines=64;
+    %geo.extra_gatelines=128;
+    %geo.extra_gatelines=64;
+    geo.extra_gatelines=0;
 end
 if ts(1,2,3)==2; % PSI-2 settings and calculations
     geo.extra_gatelines=0;
 end
 if ts(1,2,3)==3; % PSI-3 settings and calculations
-    geo.extra_gatelines=128;
-    geo.extra_gatelines=64;
+    %geo.extra_gatelines=128;
+    %geo.extra_gatelines=64;
+    geo.extra_gatelines=0;
 end
 
 
@@ -130,8 +132,9 @@ end
 if ts(1,2,3)==1; % PSI-1 settings and calculations
     geo.G3_SORTMODE=10;
     geo.GL=256+geo.extra_gatelines;%+32; do NOT use 256+32 (288) or 256+128 ! with pre-2010-03 interface card firmwares!
+    geo.GL=32+geo.extra_gatelines;
     geo.G3GL=geo.GL-1; % for regular arrays - PSI2/3 arrays have different values
-    %geo.DL=386;
+    %geo.DL=384;
     geo.DL=256;
     geo.G3DL=ceil((geo.DL+1)/512)*512/2 -1;
 end
@@ -141,7 +144,7 @@ if ts(1,2,3)==2; % PSI-2 settings and calculations
     geo.GL=256+geo.extra_gatelines;
     geo.G3GL=16*geo.GL-1;
     %GL=G3GL+1; % for cyclops data sorting, i.e. SORTMODE 10
-    geo.DL=386;
+    geo.DL=384;
     geo.G3DL=ceil((geo.DL/16+1)/512)*512/2 -1;
 end
 
@@ -168,63 +171,29 @@ meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 meas.MeasCond='ADCCHAR'; multi.R22=0;%14;
 multi.RMATRIX=[];
 
-%{
-for VADCm=[1.0 0.8 0.6];
-    for VADCp= 0:0.1:4;
+%%{
+for Vref=[1.0 0.8 0.6];
+    for VdV=[0:0.05:0.5 0.7:0.2:Vref];
 multi.RMATRIX(end+1,:)=[
-   %R1    R26   R27   R11    R13    R14        dV        Vref
-    1     0     200     0      1      1       VADCp       VADCm
+   %R1    R26   R27   R11    R13    R14       VADCdV        VADCminus
+   500     0     50     0      1      1       VdV         Vref
 ];
     end
 end
 %}
 
-%{
-for VADCm=[1.0 0.8 0.6];
-    for VADCp= 0:0.1:4;
-multi.RMATRIX(end+1,:)=[
-   %R1    R26   R27   R11    R13    R14         dV         Vref
-    1     0     200     0      1      1       4.0-VADCp   4.2-VADCm
-];
-    end
-end
-%}
 
 %%{
-for VADCm=[2.2 2.3 2.4];
-    for VADCp= 0:0.1:3;
+for Vref=[2.3 2.8 3.3 3.8 4.3];
+    for VdV=[0:0.05:0.5 0.7:0.2:Vref];
 multi.RMATRIX(end+1,:)=[
-   %R1    R26   R27   R11    R13    R14         dV         Vref
-   500     0     200     0      1      1       3.0-VADCp   4.6-VADCm
+   %R1    R26   R27   R11    R13    R14       VADCdV       VADCminus
+   500     0     50     0      1      1        VdV        Vref-VdV
 ];
     end
 end
 %}
 
-
-
-
-%{
-for VADCm=[1.0 0.8 0.6];
-    for VADCp= VADCm:0.1:4;
-multi.RMATRIX(end+1,:)=[
-   %R1    R26   R27   R11    R13    R14    VADCp VADCm
-    1     0     50     0      1      1     VADCp VADCm
-];
-    end
-end
-%}
-
-%{
-for VADCp=[3.6 3.4 3.2];
-    for VADCm=-[ 0:.1:VADCp ]+VADCp;
-multi.RMATRIX(end+1,:)=[
-   %R1    R26   R27   R11    R13    R14    VADCp VADCm
-    1     0     50     0      1      1     VADCp VADCm
-];
-    end
-end
-%}
 
 multi.nrofacq=size(multi.RMATRIX,1);
 if strcmp(meas.MeasCond(1:5),'First'); multi.nrofacq=1; end
@@ -277,14 +246,14 @@ for mid=1:multi.nrofacq; multi.mid=mid;
    multi.R26=multi.RMATRIX(multi.mid,2);
    multi.R27=multi.RMATRIX(multi.mid,3);
    
-   multi.VADCp=multi.RMATRIX(multi.mid,7);
-   multi.VADCm=multi.RMATRIX(multi.mid,8);
+   multi.VADCdV=multi.RMATRIX(multi.mid,7);
+   multi.VADCminus=multi.RMATRIX(multi.mid,8);
 
    disp(multi);
 
    % write voltfile, will be picked up by shell script controlling power supply
    multi.VOLTFILE='adchar_volts.scpi';
-   system(sprintf('echo "APP:VOLT %.3f,%.3f,0.0" >%s.tmp',multi.VADCm,multi.VADCp,multi.VOLTFILE));
+   system(sprintf('echo "APP:VOLT %.3f,%.3f,0.0" >%s.tmp',multi.VADCminus,multi.VADCdV,multi.VOLTFILE));
    system(sprintf('mv %s.tmp %s',multi.VOLTFILE,multi.VOLTFILE));
     
 meas.BaseName=[ meas.DirName ...
@@ -303,8 +272,8 @@ meas.BaseName=[ meas.DirName ...
  ...sprintf('_%02dR22', multi.R22)  ...
  ...sprintf('_%02dR26', multi.R26)  ...
  ...sprintf('_%02dR27', multi.R27)  ...
-    sprintf('_VADCp%04dmV' , round(multi.VADCp*1000))   ...
-    sprintf('_VADCm%04dmV' , round(multi.VADCm*1000))   ...
+    sprintf('_VADCp%04dmV' , round(multi.VADCdV*1000))   ...
+    sprintf('_VADCm%04dmV' , round(multi.VADCminus*1000))   ...
    ];
 
 meas.AcqFile=[ pwd() '/' meas.BaseName '.bin' ];
