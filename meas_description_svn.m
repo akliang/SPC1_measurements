@@ -331,17 +331,24 @@ setup.ARRAYTYPE='PSI-2';
 setup.WAFERCODE='29A31-8';
 setup.PLATFORM='PF-G1-06-6';
 setup.arrdefcnt=setup.arrdefcnt+1;
-setup.PF_dataCards='c1'; % PSI-3 and PSI-2 only have one dataCard
-setup.PF_dataCardDIPs='0111111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
+setup.PF_dataCards='c2'; % PSI-3 and PSI-2 only have one dataCard
+setup.PF_dataCardDIPs='0011111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
 setup.PF_dataCardVref='2.20'; % nominal Vref, set by resistor divider
-setup.PF_dataBoardDIPs='00000000'; % [ PG3 PG4 PG5 NC NC NC NC NC ]
-setup.PF_gateCards='a1-a5'; %v card1, card2
-setup.PF_analogCard='V2N5';
-setup.PF_arrayLogic='V30-N4-PSI2-20100412'; %V10: CPLD, no DIPS  V20: CPLD, 12 DIPS, V30: FPGA, 12 DIPS
-setup.PF_arrayLogicDIPs='000000000000'; % DIPs labelled 12 to 1
-%setup.PF_CrossCable='normal';
+setup.PF_dataBoardDIPs='11100000'; % [ PG3 PG4 PG5 NC NC NC NC NC ]
+setup.PF_gateCards='a2-a3'; %v card1, card2
+setup.PF_analogCard='V2N2';
+setup.PF_arrayLogic='V30-N3-PSI2-20100525-SVN48'; %V10: CPLD, no DIPS  V20: CPLD, 12 DIPS, V30: FPGA, 12 DIPS
+%setup.PF_analogCard='V2N2';
+%setup.PF_arrayLogic='V10-N2-PSI2-20060707'; %V10: CPLD, no DIPS  V20: CPLD, 12 DIPS, V30: FPGA, 12 DIPS
+setup.PF_arrayLogicDIPs='000010000000'; setup.PF_globalReset='128';  % DIPs labelled 12 to 1
+setup.PF_arrayLogicDIPs='000000000100'; setup.PF_globalReset='004';
+setup.PF_arrayLogicDIPs='100000001000'; setup.PF_globalReset='008';
+%setup.PF_arrayLogicDIPs='100000010000'; setup.PF_globalReset='016';
+%setup.PF_arrayLogicDIPs='100100000000'; setup.PF_globalReset='256';
+%setup.PF_arrayLogicDIPs='101000000000'; setup.PF_globalReset='512';
+setup.PF_CrossCable='';
 setup.PF_CrossCable='Vbias1 open, Vbias shorted to Vreset';
-setup.special='ShiftReg_shorted_to_Voff';
+setup.special='_wbox';
 %}
 
 %{
@@ -814,7 +821,7 @@ env.V=[];
 env.V(end+1)= -1.0  ; id.AVoff   =numel(env.V);                             % Test Point near to Gate Card
 env.V(end+1)=  15.0 ; id.Von     =numel(env.V);                             % Test Point near to Gate Card
 env.V(end+1)= -1.0  ; id.Vout10  =numel(env.V);   id.RevBias =numel(env.V); % Vn.Vout10=0.0;  %PSI3: Vn.RevBias=-2.5;         % Vout10
-env.V(end+1)=  4.0  ; id.Vout9   =numel(env.V);   id.Vreset  =numel(env.V); % Vn.Vout9=0.0;   %PSI3: Vn.Vreset=15.0;          % Vout9
+env.V(end+1)=  6.0  ; id.Vout9   =numel(env.V);   id.Vreset  =numel(env.V); % Vn.Vout9=0.0;   %PSI3: Vn.Vreset=15.0;          % Vout9
 env.V(end+1)=  8.0  ; id.Vout8   =numel(env.V);   id.Vcc     =numel(env.V); % Vn.Vout8=0.0;   %PSI3: Vn.Vcc=8;                % Vout8
 env.V(end+1)=  3.5  ; id.Vguard2 =numel(env.V);   id.Tbias   =numel(env.V); % Vn.Vguard2=0.0; %PSI3: Vn.Tbias=5.5;            % Vout7
 env.V(end+1)=  3.5  ; id.Vguard1 =numel(env.V);   id.Vgnd    =numel(env.V); % Vn.Vguard1=0.0; %PSI3: Vn.Vgnd=1.0;             % Vout6
@@ -826,8 +833,8 @@ env.V(end+1)=  env.V(id.RevBias)  ; id.DLrstGate =numel(env.V);                 
 env.V(end+1)=  0    ; id.DLrstGnd   =numel(env.V);                           % hard-wired to Analog Ground on PSI-2
 env.V(end+1)=  env.V(id.AVoff)    ; id.SRCommon   =numel(env.V);                           
 
-env.I.V24m=0.102;  % Current in amperes on the BK PRECISION -24V power supply
-env.I.V24p=0.104;  % Current in amperes on the BK PRECISION +24V power supply
+env.I.V24m=0.098;  % Current in amperes on the BK PRECISION -24V power supply
+env.I.V24p=0.105;  % Current in amperes on the BK PRECISION +24V power supply
 
 meas.MFileDesc=[ mfilename() '.m' ];
 
