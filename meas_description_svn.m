@@ -63,7 +63,7 @@ setup.TEMPMEAS.ARRAY={ 'TEMP_Driftwood_RMS300A_N1', 'text_env_tempwos1', 'sensor
 
 %{
 setup.LOCATION='Argus Building, Mammo Lab';
-setup.HOSTNAME='Hellboy'; % hostname of computer running this script
+setup.HOSTNAME='hellboy'; % hostname of computer running this script
 setup.G3_system='3of9-vanilla';
 setup.G3_interface='a6-V20-20080108'; % serial number - hardware version - bitfile version
 setup.G3_adcCards='a7-a8-00-00-00-00-00-00'; % On G3 ADC Board, they are labeled ADC8-...-1
@@ -78,7 +78,7 @@ setup.POWERMEAS.V.V5p ={setup.POWER_ARRAY,'text_env1',7};
 setup.POWERMEAS.I.V24m={setup.POWER_PSI,'text_env1',9};
 setup.POWERMEAS.I.V24p={setup.POWER_PSI,'text_env1',10};
 setup.POWERMEAS.I.V5p ={setup.POWER_ARRAY,'text_env1',11};
-setup.TEMPMEAS.ARRAY={ 'TEMP_hellboy_RMS300A_N1', 'text_env_tempwos1', 'sensor2' };
+setup.TEMPMEAS.ARRAY={ 'TEMP_hellboy_RMS300A_N1', 'text_env_tempwos1', 'sensor1' };
 %}
 
 
@@ -562,16 +562,16 @@ setup.special='';
 
 %{
 setup.ARRAYTYPE='PSI-2';
-setup.WAFERCODE='29A33-5';
+setup.WAFERCODE='29A32-5';
 setup.PLATFORM='PF-G1-06-9';
 setup.arrdefcnt=setup.arrdefcnt+1;
 setup.PF_dataCards='c2'; % PSI-3 and PSI-2 only have one dataCard
-setup.PF_dataCardDIPs='0111111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
+setup.PF_dataCardDIPs='0011111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
 setup.PF_dataCardVref='2.20'; % nominal Vref, set by resistor divider
 setup.PF_dataBoardDIPs='00000000'; % [ PG3 PG4 PG5 NC NC NC NC NC ]
 setup.PF_gateCards='a2-a3'; %v card1, card2
 setup.PF_analogCard='V2N4';
-setup.PF_arrayLogic='V30-N3-PSI2-20100525-SVN48'; %V10: CPLD, no DIPS  V20: CPLD, 12 DIPS, V30: FPGA, 12 DIPS
+setup.PF_arrayLogic='V30-N2-PSI2-20100412'; %V10: CPLD, no DIPS  V20: CPLD, 12 DIPS, V30: FPGA, 12 DIPS
 %setup.PF_analogCard='V2N2';
 %setup.PF_arrayLogic='V10-N2-PSI2-20060707'; %V10: CPLD, no DIPS  V20: CPLD, 12 DIPS, V30: FPGA, 12 DIPS
 setup.PF_arrayLogicDIPs='000010000000'; setup.PF_globalReset='128';  % DIPs labelled 12 to 1
@@ -579,9 +579,10 @@ setup.PF_arrayLogicDIPs='000000000100'; setup.PF_globalReset='004';
 setup.PF_arrayLogicDIPs='100000010000'; setup.PF_globalReset='016';
 setup.PF_arrayLogicDIPs='100100000000'; setup.PF_globalReset='256';
 setup.PF_arrayLogicDIPs='101000000000'; setup.PF_globalReset='512';
-setup.PF_arrayLogicDIPs='100000000001'; setup.PF_globalReset='1';
+setup.PF_arrayLogicDIPs='100000000001'; setup.PF_globalReset='1'; % "normal" operation without special clock swallowing
 setup.PF_CrossCable='';
-setup.PF_CrossCable='Vbias1 open, Vbias shorted to Vreset';
+%setup.PF_CrossCable='Vbias1 open, Vbias shorted to Vreset';
+setup.PF_CrossCable='VBias, VRst, VQinj open - tied to BK Precision';
 setup.special='';
 %}
 

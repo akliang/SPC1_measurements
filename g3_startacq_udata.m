@@ -53,7 +53,7 @@ function message = g3_startacq_udata( host, port, R, udata, AcqFile, SORTMODE, n
             if nuke;
             send_uint( [ 1201 0 ], 32 );  
             read_response();
-            pause(1.0);
+            pause(5.0);
             end
 
             % suspend queue processing (pause queue)
