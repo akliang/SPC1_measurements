@@ -5,8 +5,13 @@ fclose('all');
 
 %{
 ---- MAIN CHANGES IN THIS SCRIPT ----
-** R11 must be 1 or greater
-
+** R11 should be 2 or greater and R13 should be 2 or greater - if DIP12 is OFF
+    (for R11 mode of glue logic V30-N3-PSI2-20100525-SVN48 - DIP12 OFF
+        i.e. it swallows 1 data clk during reset, 2 data clks otherwise)
+** R14 must be 2 and R13 should be 2 or greater - if DIP12 is ON
+    (for R14 mode of new glue logic - DIP12 ON,
+        i.e. it swallows no data clks to accomplish reset - so the aray bins,
+        and swallows one data clk otherwise - regular reading of the array)
 
 %}
 
@@ -117,11 +122,21 @@ meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 
 
 %%{
-meas.MeasCond='PSI2CDS'; multi.R22=ts(4,0,0);
+meas.MeasCond='PSI2CDS'; %multi.R22=ts(4,0,0);
+multi.R22=14;
 multi.RMATRIX=[
    %R1    R26   R27   R11    R13    R14
-    1     256   4*512   0      24      2       
-    200   256   4*512   0      24      2 
+    1    1024   40*512   0      24      2
+    200   256   40*512   0      24      2 
+    400   256   40*512   0      24      2 
+
+    1    1024   40*512   0      22      2
+    200   256   40*512   0      22      2 
+    400   256   40*512   0      22      2
+    
+    1    1024   40*512   0      32      2
+    200   256   40*512   0      32      2 
+    400   256   40*512   0      32      2     
 ];
 multi.R11=multi.RMATRIX(1,4);
 multi.R13=multi.RMATRIX(1,5);
