@@ -340,20 +340,15 @@ setup.PF_analogCard='V2N2';
 setup.PF_arrayLogic='V30-N3-PSI2-20100525-SVN48'; %V10: CPLD, no DIPS  V20: CPLD, 12 DIPS, V30: FPGA, 12 DIPS
 %setup.PF_analogCard='V2N2';
 %setup.PF_arrayLogic='V10-N2-PSI2-20060707'; %V10: CPLD, no DIPS  V20: CPLD, 12 DIPS, V30: FPGA, 12 DIPS
-%setup.PF_arrayLogicDIPs='000010000000'; setup.PF_globalReset='128';  % DIPs labelled 12 to 1
-%setup.PF_arrayLogicDIPs='000000000100'; setup.PF_globalReset='004';
+setup.PF_arrayLogicDIPs='000010000000'; setup.PF_globalReset='128';  % DIPs labelled 12 to 1
+setup.PF_arrayLogicDIPs='000000000100'; setup.PF_globalReset='004';
 setup.PF_arrayLogicDIPs='100000001000'; setup.PF_globalReset='008';
 %setup.PF_arrayLogicDIPs='100000010000'; setup.PF_globalReset='016';
-%setup.PF_arrayLogicDIPs='100000100000'; setup.PF_globalReset='032';
-%setup.PF_arrayLogicDIPs='100001000000'; setup.PF_globalReset='064';
-%setup.PF_arrayLogicDIPs='100010000000'; setup.PF_globalReset='128';
 %setup.PF_arrayLogicDIPs='100100000000'; setup.PF_globalReset='256';
 %setup.PF_arrayLogicDIPs='101000000000'; setup.PF_globalReset='512';
 setup.PF_CrossCable='';
 setup.PF_CrossCable='Vbias1 open, Vbias shorted to Vreset';
-setup.PF_CrossCable='Vbias1 and Vcc open, Vcc via DG303ACJ';
-%setup.special='_wbox';
-setup.special='_VccSwitch8V0to8V0';
+setup.special='_wbox';
 %}
 
 %{
@@ -838,8 +833,8 @@ env.V(end+1)=  env.V(id.RevBias)  ; id.DLrstGate =numel(env.V);                 
 env.V(end+1)=  0    ; id.DLrstGnd   =numel(env.V);                           % hard-wired to Analog Ground on PSI-2
 env.V(end+1)=  env.V(id.AVoff)    ; id.SRCommon   =numel(env.V);                           
 
-env.I.V24m=0.098;  % Current in amperes on the BK PRECISION -24V power supply
-env.I.V24p=0.105;  % Current in amperes on the BK PRECISION +24V power supply
+env.I.V24m=0.000;  % Current in amperes on the BK PRECISION -24V power supply. Only report when not recorded, e.g. by BK 9130s
+env.I.V24p=0.000;  % Current in amperes on the BK PRECISION +24V power supply. Only report when not recorded, e.g. by BK 9130s
 
 meas.MFileDesc=[ mfilename() '.m' ];
 
