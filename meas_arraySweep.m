@@ -137,7 +137,7 @@ end
 %}
 
 %%{
-% VRst sweep
+% VRst sweep for Vbias==Vrst
 for VQinj=[1];
     for VRst=[0:0.5:8];
 multi.MMATRIX(end+1,:)=[
@@ -148,7 +148,19 @@ multi.MMATRIX(end+1,:)=[
 end
 %}
 
+%%{
+% VRst sweep for Vbias 3V below Vrst
+for VQinj=[1];
+    for VRst=[0:0.5:8];
+multi.MMATRIX(end+1,:)=[
+   %VBias %VRst %VQinj
+   VRst-3  VRst   VQinj
+];
+    end
+end
+%}
 
+flag.first_run=true;
 multi.mnrofacq=size(multi.MMATRIX,1);
 for mmid=1:multi.mnrofacq; multi.mmid=mmid;
 %multi.R13=multi.MMATRIX(multi.mmid,1);
@@ -165,7 +177,8 @@ multi.VQinj=multi.MMATRIX(multi.mmid,3);
 
    % write voltfile, will be picked up by shell script controlling power supply
    multi.VOLTFILE='./commtemp/arraySweep_volts.scpi';
-   system(sprintf('echo "APP:VOLT %.3f,%.3f,%.3f" >%s.tmp',multi.VBias,multi.VRst,multi.VQinj,multi.VOLTFILE));
+   system(sprintf('echo "APP:VOLT %.3f,%.3f,%.3f" >%s.tmp',...
+       multi.VRst-multi.VBias,multi.VRst,multi.VQinj,multi.VOLTFILE));
    system(sprintf('mv %s.tmp %s',multi.VOLTFILE,multi.VOLTFILE));
    
    
@@ -183,12 +196,14 @@ env.V(id.VQinj) = multi.VQinj;
 meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 
 %%{
-meas.MeasCond='TwinDark'; multi.R22=0;
-%meas.MeasCond='TwinFlood'; multi.R22=0;
+%meas.MeasCond='TwinDark'; multi.R22=0;
+meas.MeasCond='TwinFlood'; multi.R22=0;
 multi.RMATRIX=[
    %R1    R26   R27   R11    R13    R14
-    1     100   10     0      1      1       
+    1     20    10     0      1      1
     1     10    10     0      2      2
+   1000   10    10     0      1      1
+   1000   10    10     0      2      2
 ];
 %}
 
@@ -239,7 +254,6 @@ end;
 %
 
 flag.G3_nuke=true;
-flag.first_run=true;
 flag.finished=false;
 for mid=1:multi.nrofacq; multi.mid=mid;
 

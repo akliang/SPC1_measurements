@@ -33,8 +33,8 @@ meas_description
 %   heavily measurement-type dependent settings
 %
 
-env.G3ExtClock=100000; env.UseExtClock=1;
-%env.G3ExtClock=1000000; env.UseExtClock=0;
+%env.G3ExtClock=100000; env.UseExtClock=1;
+env.G3ExtClock=1000000; env.UseExtClock=0;
 
 
 %
@@ -77,7 +77,7 @@ if ts(1,2,3)==1; % PSI-1 settings and calculations
     geo.G3_SORTMODE=10;
     geo.GL=256+geo.extra_gatelines;%+32; do NOT use 256+32 (288) or 256+128 ! with pre-2010-03 interface card firmwares!
     geo.G3GL=geo.GL-1; % for regular arrays - PSI2/3 arrays have different values
-    geo.DL=386;
+    geo.DL=384;
     geo.G3DL=ceil((geo.DL+1)/512)*512/2 -1;
 end
 
@@ -86,7 +86,7 @@ if ts(1,2,3)==2; % PSI-2 settings and calculations
     geo.GL=256+geo.extra_gatelines;
     geo.G3GL=16*geo.GL-1;
     %GL=G3GL+1; % for cyclops data sorting, i.e. SORTMODE 10
-    geo.DL=386;
+    geo.DL=384;
     geo.G3DL=ceil((geo.DL/16+1)/512)*512/2 -1;
 end
 
@@ -99,7 +99,26 @@ if ts(1,2,3)==3; % PSI-3 settings and calculations
     geo.G3DL=ceil((geo.DL/8+1)/512)*512/2 -1;
 end
 
+%
+% Voltage Setting capability (if available)
+%
+multi.VBias=0;
+multi.VRst=6;
+multi.VQinj=1;
 
+env.V(id.Vreset)= multi.VRst;
+env.V(id.Vbias) = multi.VBias;
+env.V(id.VQinj) = multi.VQinj;
+
+   % write voltfile, will be picked up by shell script controlling power supply
+   multi.VOLTFILE='./commtemp/arraySweep_volts.scpi';
+   system(sprintf('echo "APP:VOLT %.3f,%.3f,%.3f" >%s.tmp',...
+       multi.VRst-multi.VBias,multi.VRst,multi.VQinj,multi.VOLTFILE));
+   system(sprintf('mv %s.tmp %s',multi.VOLTFILE,multi.VOLTFILE));
+
+
+
+   
 %
 % Multi-Measurement Setup (experimental)
 %
@@ -183,10 +202,10 @@ meas.MeasCond='FloodLeakageNoise'; multi.R22=ts(4,0,0); multi.R22=2;
 meas.MeasCond='DarkLeakageNoise'; multi.R22=ts(4,0,0); multi.R22=2;
 multi.RMATRIX=[
    %R1      R26  R27  
-       1     0   1000
-       2     0    200   % not necessary for PSI-2
-       5     0   1000   % not necessary for PSI-2
-      10     0    50   % not necessary for PSI-2
+       1    200  200 %1000
+%       2     0    200   % not necessary for PSI-2
+%       5     0   1000   % not necessary for PSI-2
+%      10     0    50   % not necessary for PSI-2
       20     0    50
       50     0    50
       100    0    200

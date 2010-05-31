@@ -77,7 +77,7 @@ if ts(1,2,3)==1; % PSI-1 settings and calculations
     geo.G3_SORTMODE=10;
     geo.GL=256+geo.extra_gatelines;%+32; do NOT use 256+32 (288) or 256+128 ! with pre-2010-03 interface card firmwares!
     geo.G3GL=geo.GL-1; % for regular arrays - PSI2/3 arrays have different values
-    geo.DL=386;
+    geo.DL=384;
     geo.G3DL=ceil((geo.DL+1)/512)*512/2 -1;
 end
 
@@ -86,7 +86,7 @@ if ts(1,2,3)==2; % PSI-2 settings and calculations
     geo.GL=256+geo.extra_gatelines;
     geo.G3GL=16*geo.GL-1;
     %GL=G3GL+1; % for cyclops data sorting, i.e. SORTMODE 10
-    geo.DL=386;
+    geo.DL=384;
     geo.G3DL=ceil((geo.DL/16+1)/512)*512/2 -1;
 end
 
@@ -137,7 +137,18 @@ multi.MMATRIX=[
        1    8
 %}
    ];
-
+% PSI-2 compatible matrix
+multi.MMATRIX=[
+     %R13  %R14 %R6  %R4  %R3   %R11   %geo.GL  %geo.extra_gatelines Vbias  
+        1    1 1600 1200   1     0       256           0               0
+        1    1 1600 1200   1    255-16    16           16              0
+        1    1 1600 1200   1     0       256           0               2
+        1    1 1600 1200   1    255-16    16           16              2
+        1    1 1600 1200   1     0       256           0               4
+        1    1 1600 1200   1    255-16    16           16              4
+        1    1 1600 1200   1     0       256           0               6
+        1    1 1600 1200   1    255-16    16           16              6
+];
 
 multi.mnrofacq=size(multi.MMATRIX,1);
 for mmid=1:multi.mnrofacq; multi.mmid=mmid;
@@ -159,6 +170,29 @@ if ts(1,2,3)==1; % PSI-1 settings and calculations
     geo.G3GL=geo.G3GL-1;
     multi.R12=geo.G3GL;
 end
+if ts(1,2,3)==2; % PSI-2 settings and calculations
+    geo.GL=geo.GL+geo.extra_gatelines;
+    geo.G3GL=16*geo.GL-1;
+    multi.R12=geo.G3GL;
+end
+
+
+%
+% Voltage Setting capability (if available)
+%
+multi.VBias=multi.MMATRIX(multi.mmid,9);
+multi.VRst=6;
+multi.VQinj=1;
+
+env.V(id.Vreset)= multi.VRst;
+env.V(id.Vbias) = multi.VBias;
+env.V(id.VQinj) = multi.VQinj;
+
+   % write voltfile, will be picked up by shell script controlling power supply
+   multi.VOLTFILE='./commtemp/arraySweep_volts.scpi';
+   system(sprintf('echo "APP:VOLT %.3f,%.3f,%.3f" >%s.tmp',...
+       multi.VRst-multi.VBias,multi.VRst,multi.VQinj,multi.VOLTFILE));
+   system(sprintf('mv %s.tmp %s',multi.VOLTFILE,multi.VOLTFILE));
 
 
 % 
