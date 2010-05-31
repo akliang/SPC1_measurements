@@ -340,15 +340,20 @@ setup.PF_analogCard='V2N2';
 setup.PF_arrayLogic='V30-N3-PSI2-20100525-SVN48'; %V10: CPLD, no DIPS  V20: CPLD, 12 DIPS, V30: FPGA, 12 DIPS
 %setup.PF_analogCard='V2N2';
 %setup.PF_arrayLogic='V10-N2-PSI2-20060707'; %V10: CPLD, no DIPS  V20: CPLD, 12 DIPS, V30: FPGA, 12 DIPS
-setup.PF_arrayLogicDIPs='000010000000'; setup.PF_globalReset='128';  % DIPs labelled 12 to 1
-setup.PF_arrayLogicDIPs='000000000100'; setup.PF_globalReset='004';
+%setup.PF_arrayLogicDIPs='000010000000'; setup.PF_globalReset='128';  % DIPs labelled 12 to 1
+%setup.PF_arrayLogicDIPs='000000000100'; setup.PF_globalReset='004';
 setup.PF_arrayLogicDIPs='100000001000'; setup.PF_globalReset='008';
 %setup.PF_arrayLogicDIPs='100000010000'; setup.PF_globalReset='016';
+%setup.PF_arrayLogicDIPs='100000100000'; setup.PF_globalReset='032';
+%setup.PF_arrayLogicDIPs='100001000000'; setup.PF_globalReset='064';
+%setup.PF_arrayLogicDIPs='100010000000'; setup.PF_globalReset='128';
 %setup.PF_arrayLogicDIPs='100100000000'; setup.PF_globalReset='256';
 %setup.PF_arrayLogicDIPs='101000000000'; setup.PF_globalReset='512';
 setup.PF_CrossCable='';
 setup.PF_CrossCable='Vbias1 open, Vbias shorted to Vreset';
-setup.special='_wbox';
+setup.PF_CrossCable='Vbias1 and Vcc open, Vcc via DG303ACJ';
+%setup.special='_wbox';
+setup.special='_VccSwitch8V0to8V0';
 %}
 
 %{
