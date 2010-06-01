@@ -196,8 +196,8 @@ env.V(id.VQinj) = multi.VQinj;
 meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 
 %%{
-%meas.MeasCond='TwinDark'; multi.R22=0;
-meas.MeasCond='TwinFlood'; multi.R22=0;
+meas.MeasCond='TwinDark'; multi.R22=0;
+%meas.MeasCond='TwinFlood'; multi.R22=0;
 multi.RMATRIX=[
    %R1    R26   R27   R11    R13    R14
     1     20    10     0      1      1
