@@ -598,6 +598,33 @@ setup.PF_CrossCable='VBias, VRst, VQinj open - tied to BK Precision';
 setup.special='';
 %}
 
+%{
+setup.ARRAYTYPE='PSI-2';
+setup.WAFERCODE='29A32A-4';
+setup.PLATFORM='PF-G1-04-4';
+setup.arrdefcnt=setup.arrdefcnt+1;
+setup.PF_dataCards='c1'; % PSI-3 and PSI-2 only have one dataCard
+setup.PF_dataCardDIPs='0011111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
+setup.PF_dataCardVref='2.20'; % nominal Vref, set by resistor divider
+setup.PF_dataBoardDIPs='00000000'; % [ PG3 PG4 PG5 NC NC NC NC NC ]
+setup.PF_gateCards='a1-a5'; %v card1, card2
+setup.PF_analogCard='V2N4';
+setup.PF_arrayLogic='V30-N2-PSI2-20100412'; %V10: CPLD, no DIPS  V20: CPLD, 12 DIPS, V30: FPGA, 12 DIPS
+%setup.PF_analogCard='V2N2';
+%setup.PF_arrayLogic='V10-N2-PSI2-20060707'; %V10: CPLD, no DIPS  V20: CPLD, 12 DIPS, V30: FPGA, 12 DIPS
+%setup.PF_arrayLogicDIPs='000010000000'; setup.PF_globalReset='128';  % DIPs labelled 12 to 1
+%setup.PF_arrayLogicDIPs='000000000100'; setup.PF_globalReset='004';
+%setup.PF_arrayLogicDIPs='100000010000'; setup.PF_globalReset='016';
+%setup.PF_arrayLogicDIPs='100100000000'; setup.PF_globalReset='256';
+%setup.PF_arrayLogicDIPs='101000000000'; setup.PF_globalReset='512';
+%setup.PF_arrayLogicDIPs='100000000001'; setup.PF_globalReset='001'; % "normal" operation without special clock swallowing
+setup.PF_arrayLogicDIPs='000000000000'; setup.PF_globalReset='0'; % non-swallowing FPGA
+setup.PF_CrossCable='';
+%setup.PF_CrossCable='Vbias1 open, Vbias shorted to Vreset';
+setup.PF_CrossCable='VBias, VRst, VQinj open - tied to BK Precision';
+setup.special='';
+%}
+
 
 %{
 setup.ARRAYTYPE='PSI-1';
