@@ -124,7 +124,7 @@ end
 % Set up the desired voltage sweep range
 multi.MMATRIX=[];
 
-%%{
+%{
 % Qinj sweep
 for VQinj=[0:0.5:2];
     for VRst=[0];
@@ -136,7 +136,7 @@ multi.MMATRIX(end+1,:)=[
 end
 %}
 
-%%{
+%{
 % VRst sweep for Vbias==Vrst
 for VQinj=[1];
     for VRst=[0:0.5:8];
@@ -148,7 +148,7 @@ multi.MMATRIX(end+1,:)=[
 end
 %}
 
-%%{
+%{
 % VRst sweep for Vbias 3V below Vrst
 for VQinj=[1];
     for VRst=[0:0.5:8];
@@ -157,6 +157,16 @@ multi.MMATRIX(end+1,:)=[
    VRst-3  VRst   VQinj
 ];
     end
+end
+%}
+
+%%{
+% Dark Leakage for PSI-2
+for VBias=[2:0.5:6];
+multi.MMATRIX(end+1,:)=[
+   %VBias %VRst %VQinj
+   VBias  6   1
+];
 end
 %}
 
@@ -195,7 +205,7 @@ env.V(id.VQinj) = multi.VQinj;
 
 meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 
-%%{
+%{
 meas.MeasCond='TwinDark'; multi.R22=0;
 %meas.MeasCond='TwinFlood'; multi.R22=0;
 multi.RMATRIX=[
@@ -205,6 +215,35 @@ multi.RMATRIX=[
    1000   10    10     0      1      1
    1000   10    10     0      2      2
 ];
+%}
+
+%%{
+%meas.MeasCond='FloodLeakageNoise'; multi.R22=ts(4,0,0); multi.R22=2;
+meas.MeasCond='DarkLeakageNoise'; multi.R22=ts(4,0,0); multi.R22=2;
+multi.RMATRIX=[
+   %R1      R26  R27        R11 R13 R14
+       1    200  200         0   1   1%1000
+%       2     0    200   % not necessary for PSI-2
+%       5     0   1000   % not necessary for PSI-2
+%      10     0    50   % not necessary for PSI-2
+      20     0    50        0   1   1
+      50     0    50        0   1   1
+      100    0    200        0   1   1
+      200    0    30        0   1   1
+      400    0    100        0   1   1
+      1000   0    5        0   1   1
+      2000   0    5        0   1   1
+      4000   0    5        0   1   1
+      6000   0    5        0   1   1
+      8900   0    5        0   1   1
+      11900  0    5        0   1   1
+      15700  0    5        0   1   1
+      19550  0    5           0   1   1 
+%      40000  0    2 %added 2010-04-27, mk
+%      60000  0    2 %added 2010-04-27, mk
+ ];
+
+env.G3ExtClock=100000; env.UseExtClock=1;
 %}
 
 

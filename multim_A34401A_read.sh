@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MDEV="/dev/ttyUSB0"
+MDEV="/dev/ttyUSB1"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
 
@@ -56,11 +56,10 @@ echo "Starting recording voltages to <$DDIR$DFILE>..."
 
 {
 
-T1=1 # use full integers for some older BASH shells
+T1=0.1 # use full integers for some older BASH shells
 T2=1
 
-#until read -t $T1  K; do
-until false; do
+until read -t $T1  K; do
   read -t $T1 RESULTFLUSH <&5 # wait T1 seconds to sync in case of unexpected response etc.
   echo -e -n "READ?\n" >&5
   read -t $T2 RESULT <&5 # a full line should be available before T2 elapsed, ie T2 can be larger
