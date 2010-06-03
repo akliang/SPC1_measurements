@@ -21,6 +21,10 @@ flag.dryrun=false;
 flag.jabber=false;
 flag.jabber=true;
 
+% flag.BKvoltage for BK Precision voltage control for select voltages
+flag.BKvoltage=false;
+%flag.BKvoltage=true;
+
 
 
 % Setup descriptions in external file now
@@ -138,6 +142,7 @@ multi.MMATRIX=[
 %}
    ];
 % PSI-2 compatible matrix
+%{
 multi.MMATRIX=[
      %R13  %R14 %R6  %R4  %R3   %R11   %geo.GL  %geo.extra_gatelines Vbias  
         1    1 1600 1200   1     0       256           0               0
@@ -149,6 +154,7 @@ multi.MMATRIX=[
         1    1 1600 1200   1     0       256           0               6
         1    1 1600 1200   1    255-16    16           16              6
 ];
+%}
 
 multi.mnrofacq=size(multi.MMATRIX,1);
 for mmid=1:multi.mnrofacq; multi.mmid=mmid;
@@ -161,7 +167,7 @@ multi.R3=multi.MMATRIX(multi.mmid,5);
 
 
 % gate-line calculations for MMATRIX
-% (warning!  currently only valid for PSI-1 arrays)
+% (warning!  currently only valid for PSI-1 and PSI-2 arrays)
 multi.R11=multi.MMATRIX(multi.mmid,6);
 geo.GL=multi.MMATRIX(multi.mmid,7);
 geo.extra_gatelines=multi.MMATRIX(multi.mmid,8);
@@ -180,20 +186,21 @@ end
 %
 % Voltage Setting capability (if available)
 %
-multi.VBias=multi.MMATRIX(multi.mmid,9);
-multi.VRst=6;
-multi.VQinj=1;
+if (flag.BKvoltage==true)
+   multi.VBias=multi.MMATRIX(multi.mmid,9);
+   multi.VRst=6;
+   multi.VQinj=1;
 
-env.V(id.Vreset)= multi.VRst;
-env.V(id.Vbias) = multi.VBias;
-env.V(id.VQinj) = multi.VQinj;
+   env.V(id.Vreset)= multi.VRst;
+   env.V(id.Vbias) = multi.VBias;
+   env.V(id.VQinj) = multi.VQinj;
 
    % write voltfile, will be picked up by shell script controlling power supply
    multi.VOLTFILE='./commtemp/arraySweep_volts.scpi';
    system(sprintf('echo "APP:VOLT %.3f,%.3f,%.3f" >%s.tmp',...
        multi.VRst-multi.VBias,multi.VRst,multi.VQinj,multi.VOLTFILE));
    system(sprintf('mv %s.tmp %s',multi.VOLTFILE,multi.VOLTFILE));
-
+end
 
 % 
 % Multi-Sequence-Setup
@@ -318,7 +325,7 @@ if strcmp(meas.MeasCond(1:4),'Qinj' ); multi.nrofacq=1; end
 meas.MeasDetails=[ sprintf('%s', meas.MeasCond) ...
     sprintf( '_Vbias%s', volt2str(env.V(id.Vbias)) ) ...
     sprintf( '_Vguard2%s', volt2str(env.V(id.Vguard2)) ) ...
-    sprintf( '_Von%s', volt2str(env.V(id.Von)) ) ...
+    ...sprintf( '_Von%s', volt2str(env.V(id.Von)) ) ...
     ...sprintf( '_Vrst%s', volt2str(env.V(id.Vreset)) ) ...  not needed for PSI-1
     sprintf( '_Voff%s', volt2str(env.V(id.AVoff)) ) ...    
     ...sprintf( '_Vgnd%s', volt2str(env.V(id.Vgnd)) ) ...

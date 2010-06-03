@@ -33,8 +33,8 @@ meas_description
 %   heavily measurement-type dependent settings
 %
 
-%env.G3ExtClock=100000; env.UseExtClock=1;
-env.G3ExtClock=1000000; env.UseExtClock=0;
+env.G3ExtClock=100000; env.UseExtClock=1;
+%env.G3ExtClock=1000000; env.UseExtClock=0;
 
 
 %
@@ -99,6 +99,7 @@ if ts(1,2,3)==3; % PSI-3 settings and calculations
     geo.G3DL=ceil((geo.DL/8+1)/512)*512/2 -1;
 end
 
+%{
 %
 % Voltage Setting capability (if available)
 %
@@ -115,7 +116,7 @@ env.V(id.VQinj) = multi.VQinj;
    system(sprintf('echo "APP:VOLT %.3f,%.3f,%.3f" >%s.tmp',...
        multi.VRst-multi.VBias,multi.VRst,multi.VQinj,multi.VOLTFILE));
    system(sprintf('mv %s.tmp %s',multi.VOLTFILE,multi.VOLTFILE));
-
+%}
 
 
    
@@ -314,9 +315,9 @@ if strcmp(meas.MeasCond(1:4),'Qinj' ); multi.nrofacq=1; end
 meas.MeasDetails=[ sprintf('%s', meas.MeasCond) ...
     sprintf( '_Vbias%s', volt2str(env.V(id.Vbias)) ) ...
     sprintf( '_Vguard2%s', volt2str(env.V(id.Vguard2)) ) ...
-    sprintf( '_Von%s', volt2str(env.V(id.Von)) ) ...
+    ...sprintf( '_Von%s', volt2str(env.V(id.Von)) ) ...
     ...sprintf( '_Vrst%s', volt2str(env.V(id.Vreset)) ) ...  not needed for PSI-1
-    sprintf( '_Voff%s', volt2str(env.V(id.AVoff)) ) ...    
+    ...sprintf( '_Voff%s', volt2str(env.V(id.AVoff)) ) ...    
     ...sprintf( '_Vgnd%s', volt2str(env.V(id.Vgnd)) ) ...
     ...sprintf( '_Tbias%s', volt2str(env.V(id.Tbias)) ) ...
     ...sprintf( '_Vcc%s', volt2str(env.V(id.Vcc)) ) ...
