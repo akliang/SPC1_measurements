@@ -60,7 +60,7 @@ setup.PF_arrayLogic='n/a'; %V10: CPLD, no DIPS  V20: CPLD, 12 DIPS, V30: FPGA, 1
 setup.PF_arrayLogicDIPs='000000000000'; % DIPs labelled 12 to 1
 setup.PF_CrossCable='n/a';
 setup.PF_globalReset='all';
-setup.special='_ADCch17_set1';
+setup.special='_ADCch13_set1';
 
 env.V=[];
 env.V(end+1)=  0.0  ; id.AVoff   =numel(env.V);                             % Test Point near to Gate Card
@@ -172,8 +172,8 @@ meas.MeasCond='ADCCHAR'; multi.R22=0;%14;
 multi.RMATRIX=[];
 
 %%{
- Vref =1.377;
-     VdV =1.3855;
+  Vref =1.373;
+     VdV =1.3458;
 multi.RMATRIX(end+1,:)=[
    %R1    R26   R27   R11    R13    R14       VADCdV     VADCminus
    500     0     50     0      1      1       VdV         Vref
@@ -182,8 +182,8 @@ multi.RMATRIX(end+1,:)=[
 %}
 
 %{
-for Vref=1.3854+2.758
-    for VdV=1.3854
+for Vref=1.3472+2.694;
+    for VdV=1.3472;
 multi.RMATRIX(end+1,:)=[
    %R1    R26   R27   R11    R13    R14       VADCdV       VADCminus
    500     0     50     0      1      1        VdV        Vref-VdV
