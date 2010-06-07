@@ -34,6 +34,10 @@ flag.dryrun=false;
 flag.jabber=false;
 flag.jabber=true;
 
+% flag.BKvoltage for BK Precision voltage control for select voltages
+flag.BKvoltage=false;
+flag.BKvoltage=true;
+
 % Setup descriptions in external file now
 % (too many arrays, and too many different measurement scripts made this necessary)
 meas_description
@@ -120,6 +124,25 @@ end
 meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 
 
+%
+% Voltage Setting capability (if available)
+%
+if (flag.BKvoltage==true)
+   multi.VBias=5;
+   multi.VRst=6;
+   multi.VQinj=1;
+
+   env.V(id.Vreset)= multi.VRst;
+   env.V(id.Vbias) = multi.VBias;
+   env.V(id.VQinj) = multi.VQinj;
+
+   % write voltfile, will be picked up by shell script controlling power supply
+   multi.VOLTFILE='./commtemp/arraySweep_volts.scpi';
+   system(sprintf('echo "APP:VOLT %.3f,%.3f,%.3f" >%s.tmp',...
+       multi.VRst-multi.VBias,multi.VRst,multi.VQinj,multi.VOLTFILE));
+   system(sprintf('mv %s.tmp %s',multi.VOLTFILE,multi.VOLTFILE));
+end
+
 
 %%{
 meas.MeasCond='PSI2CDS'; %multi.R22=ts(4,0,0);
@@ -129,8 +152,8 @@ F=8;
 %F=40;
 multi.RMATRIX=[
    %R1    R26   R27   R11    R13    R14
-    1    1024   F*512   0      24      2
-    200   512   F*512   0      24      2
+%    1    1024   F*512   0      24      2
+%    200   512   F*512   0      24      2
     %400   256   F*512   0      24      2 
     %{ 
     1    1024   F*512   0      22      2
@@ -141,6 +164,22 @@ multi.RMATRIX=[
     200   256   F*512   0      32      2 
     400   256   F*512   0      32      2
     %}
+    
+     %R1    R26  R27   R11    R13    R14
+      1    1024   512     0      24     2
+      20     0    512     0      24     2
+      50     0    256     0      24     2
+      100    0    256     0      24     2
+      200    0    128     0      24     2
+      400    0    64     0      24     2
+      1000   0    32     0      24     2
+      2000   0    32     0      24     2
+      4000   0    16     0      24     2
+      6000   0    16     0      24     2
+      8900   0    8      0      24     2
+      11900  0    4      0      24     2
+      15700  0    4      0      24     2
+      19550  0    4      0      24     2
 ];
 clear F;
 multi.R11=multi.RMATRIX(1,4);
@@ -160,130 +199,7 @@ referenceFPS = [
 %}
 
 
-%meas.MeasCond='FirstFlood'; multi.R22=ts(4,0,0);
-%meas.MeasCond='FirstDark'; multi.R22=ts(4,0,0);
-%meas.MeasCond='QinjDark'; multi.R22=ts(4,0,0); multi.R22=2;
-%meas.MeasCond='MapFlood'; multi.R22=14; %R22=14; % use 14 for no-PIN arrays? of flood conditions?
-%meas.MeasCond='MapDark'; multi.R22=14; %R22=14; % use 14 for no-PIN arrays?
-%meas.Comment=[ meas.MeasCond ' Line mapping Measurement' ];
 
-% technically, not only R's can be changed in multi-sequence mode - 
-% is RMATRIX an inappropriate name?
-%{
-multi.RMATRIX=[
-   %R1    R26   R27   R11    R13    R14
-    1     100   10     0      1      1       
-   100    10    10     0      1      1 
-    1     10    10     0      2      1
-   100    10    10     0      2      1 
-    1     10    10     1      2      1
-   100    10    10     1      2      1
-    1     10    10     0      1      2   
-   100    10    10     0      1      2
-    1     10    10     0      2      2
-   100    10    10     0      2      2
-    1     10    10     1      2      2
-   100    10    10     1      2      2 
-];
-
-%}
-
-%{
-meas.MeasCond='MapDark4'; multi.R22=0;%14;
-multi.RMATRIX=[
-   %R1    R26   R27   R11    R13    R14
-    1     100   10     0      1      1       
-   100    10    10     0      1      1 
-    1     10    10     0      2      1
-   100    10    10     0      2      1 
-%    1     10    10     1      2      1
-%   100    10    10     1      2      1
-    1     10    10     0      1      2   
-   100    10    10     0      1      2
-    1     10    10     0      2      2
-   100    10    10     0      2      2
-%    1     10    10     1      2      2
-%   100    10    10     1      2      2 
-];
-%}
-
-%{
-meas.MeasCond='TwinDark'; multi.R22=0;
-%meas.MeasCond='TwinFlood'; multi.R22=0;
-multi.RMATRIX=[
-   %R1    R26   R27   R11    R13    R14
-    1     100   10     0      1      1       
-    1     10    10     0      2      2
-];
-%}
-
-
-%{
-%meas.MeasCond='TwinDarkSpecial2'; multi.R22=0;
-meas.MeasCond='TwinFloodSpecial2'; multi.R22=0;
-multi.RMATRIX=[
-   %R1   R26    R27    R11    R13    R14
-    1    100     20     0      1      1       
-    1     0     100     0      2      2
-    1     0     100     1      2      2
-    1     0     100     0      2      1
-    1     0     100     1      2      1
-];
-%}
-
-%{
-meas.MeasCond='TwinDarkSpecial3'; multi.R22=0;
-%meas.MeasCond='TwinFloodSpecial3'; multi.R22=0;
-multi.RMATRIX=[
-   %R1   R26    R27    R11    R13    R14
-    1    100    20      0      1      1       
-    1     0     20      0      2      2
-    1     0     20      1      2      2
-];
-%}
-
-%{
-meas.MeasCond='TwinDarkVarR1'; multi.R22=0;
-%meas.MeasCond='TwinFloodSpecial3'; multi.R22=0;
-multi.RMATRIX=[
-   %R1   R26    R27    R11    R13    R14
-    1    100    20      0      1      1       
-    1     0     20      0      2      2
-    1     0     20      1      2      2
-   1000   0     30      0      1      1       
-   1000   0     10      0      2      2
-   1000   0     10      1      2      2
-  10000   0     8       0      1      1       
-  10000   0     4       0      2      2
-  10000   0     4       1      2      2
-];
-%}
-
-%{
-meas.MeasCond='MultiDarkVarR1'; multi.R22=0;
-%meas.MeasCond='TwinFloodSpecial3'; multi.R22=0;
-multi.RMATRIX=[
-   %R1   R26    R27    R11    R13    R14
-    1    100    20      0      1      1       
-    1     0     20      0      1      2
-    1     0     20      0      2      2
-    1     0     20      0      2      3
-    1     0     20      0      2      4
-    1     0     20      0      2      8
-   1000   0     30      0      1      1       
-   1000   0     10      0      1      2
-   1000   0     10      0      2      2
-   1000   0     10      0      2      3
-   1000   0     10      0      2      4
-   1000   0     10      0      2      8
-  10000   0     8       0      1      1       
-  10000   0     4       0      1      2
-  10000   0     4       0      2      2
-  10000   0     4       0      2      3
-  10000   0     4       0      2      4
-  10000   0     4       0      2      8
-];
-%}
 
 
 
@@ -292,10 +208,10 @@ if strcmp(meas.MeasCond(1:5),'First'); multi.nrofacq=1; end
 if strcmp(meas.MeasCond(1:4),'Qinj' ); multi.nrofacq=1; end
 
 meas.MeasDetails=[ sprintf('%s', meas.MeasCond) ...
-    ...sprintf( '_Vbias%s', volt2str(env.V(id.Vbias)) ) ... not needed for PSI-2/3
+    sprintf( '_Vbias%s', volt2str(env.V(id.Vbias)) ) ... not needed for PSI-2/3
     sprintf( '_Vrst%s', volt2str(env.V(id.Vreset)) ) ... for AP pixels 
     ...sprintf( '_Von%s', volt2str(env.V(id.Von)) ) ... not needed for PSI-2/3
-    sprintf( '_Voff%s', volt2str(env.V(id.AVoff)) ) ... not needed for PSI-2/3
+    ...sprintf( '_Voff%s', volt2str(env.V(id.AVoff)) ) ... not needed for PSI-2/3
     ...sprintf( '_Vgnd%s', volt2str(env.V(id.Vgnd)) ) ...
     ...sprintf( '_Tbias%s', volt2str(env.V(id.Tbias)) ) ... PSI-3 specific
     ...sprintf( '_Vcc%s', volt2str(env.V(id.Vcc)) ) ...  for AP pixels 
@@ -304,8 +220,8 @@ meas.MeasDetails=[ sprintf('%s', meas.MeasCond) ...
     ...sprintf( '_Vref%s',volt2str(env.V(id.Vref)) )...
     ...sprintf( '_%02dR22', multi.R22                 ) ...
     ...sprintf( '_%02dR11', multi.R11                 ) ...
-    sprintf( '_%02dR13', multi.R13                 ) ...
-    sprintf( '_%02dR14', multi.R14                 ) ...
+    ...sprintf( '_%02dR13', multi.R13                 ) ...
+    ...sprintf( '_%02dR14', multi.R14                 ) ...
     ...sprintf( '_RST%s',    setup.PF_globalReset     ) ... PSI-3 specific
     ...sprintf( '_GC%s',    setup.PF_gateCards        ) ...
     ...sprintf( '_DC%s',    setup.PF_dataCards        ) ...

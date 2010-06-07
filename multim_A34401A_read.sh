@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MDEV="/dev/ttyUSB1"
+MDEV="/dev/ttyUSB2"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
 
