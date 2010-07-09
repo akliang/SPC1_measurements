@@ -11,22 +11,29 @@ fclose('all');
         - why script and not function? -> debugging easier. if a function bails out in production, all internal states are lost.
     - concise, compact, not convoluted
     - try to use all variables as part of a struct to clarify their scope
+
+    Albert addition to this scrit
+    - goal was to limit the "editable" variables to the top-half of the script
+    - another goal was to decrease the number of variable change locations (increase dependencies between variables)
 %}
 
 % flag.dryrun true will neither create folders nor talk to jjam
 flag.dryrun=true;
-flag.dryrun=false;
+%flag.dryrun=false;
 
 % flag.jabber is to turn on/off chat notification
 flag.jabber=false;
-flag.jabber=true;
+%flag.jabber=true;
+
+% flag.BKvoltage is automatically set to true if you define VMATRIX
+flag.BKvoltage=false;
 
 
 
-% Setup descriptions in external file now
-% (too many arrays, and too many different measurement scripts made this necessary)
+% Array and platform description
 meas_description
 
+% Additional description information for BK Precision varying experimental voltages
 setup.POWER_SWEEP=[ setup.HOSTNAME '_BK_9130_005004156568001013_V1.69' ];
 setup.POWERMEAS.V.VBiasVRst={setup.POWER_SWEEP,'text_env1',5};   % Power Measurements: file or db descriptor, file format, data channel
 setup.POWERMEAS.V.VRst     ={setup.POWER_SWEEP,'text_env1',6};
@@ -47,7 +54,7 @@ setup.SWEEP.BKOut3N='AGND';
 %   heavily measurement-type dependent settings
 %
 
-%env.G3ExtClock=100000; env.UseExtClock=1;
+% By default, using no external clock, unless explicitly set by measurement condition
 env.G3ExtClock=1000000; env.UseExtClock=0;
 
 
@@ -89,8 +96,8 @@ end
 
 if ts(1,2,3)==1; % PSI-1 settings and calculations
     geo.G3_SORTMODE=10;
-    geo.GL=256+geo.extra_gatelines;%+32; do NOT use 256+32 (288) or 256+128 ! with pre-2010-03 interface card firmwares!
-    geo.G3GL=geo.GL-1; % for regular arrays - PSI2/3 arrays have different values
+    geo.GL=256+geo.extra_gatelines;%+32; do NOT use 256+32 or 256+128 with pre-2010-03 interface card firmwares!
+    geo.G3GL=geo.GL-1;
     geo.DL=384;
     geo.G3DL=ceil((geo.DL+1)/512)*512/2 -1;
 end
@@ -122,163 +129,187 @@ end
 
 
 % Set up the desired voltage sweep range
-multi.MMATRIX=[];
+multi.VMATRIX=[];  % [VBias  %VRst  %VQinj]
 
 %{
-% Qinj sweep
-for VQinj=[0:0.5:2];
-    for VRst=[0];
-multi.MMATRIX(end+1,:)=[
-   %VBias %VRst %VQinj
-   VRst  VRst   VQinj
-];
+% QInj/VRst sweep
+flag.BKvoltage=true;
+
+    for VQinj=[0:0.5:2];  % Qinj sweep
+        multi.VMATRIX(end+1,:)=[0   0   VQinj];
     end
-end
+
+    for VRst=[0:0.5:8];  % VRst sweep for Vbias==Vrst
+        multi.VMATRIX(end+1,:)=[VRst   VRst   1];
+    end
+    for VRst=[0:0.5:8];  % VRst sweep for Vbias 3V below Vrst
+        multi.VMATRIX(end+1,:)=[VRst-3   VRst   1];
+    end
+    meas.MeasDetailsVars={
+    'Vbias'     'env'
+    'Vreset'    'env'
+    'VQinj'     'env'
+    'R22'       'multi'
+    'special'   'setup'
+    };
+
 %}
+
+
 
 %{
-% VRst sweep for Vbias==Vrst
-for VQinj=[1];
-    for VRst=[0:0.5:8];
-multi.MMATRIX(end+1,:)=[
-   %VBias %VRst %VQinj
-   VRst  VRst   VQinj
-];
-    end
-end
-%}
-
-%{
-% VRst sweep for Vbias 3V below Vrst
-for VQinj=[1];
-    for VRst=[0:0.5:8];
-multi.MMATRIX(end+1,:)=[
-   %VBias %VRst %VQinj
-   VRst-3  VRst   VQinj
-];
-    end
-end
-%}
-
-%%{
 % Dark Leakage for PSI-2
-for VBias=[2:0.5:6];
-multi.MMATRIX(end+1,:)=[
-   %VBias %VRst %VQinj
-   VBias  6   1
-];
-end
+flag.BKvoltage=true;
+
+    for VBias=[2:0.5:6];
+        multi.VMATRIX(end+1,:)=[VBias   6   1];
+    end
+    meas.MeasDetailsVars={
+    'Vbias'     'env'
+    'Vreset'    'env'
+    'VQinj'     'env'
+    'R22'       'multi'
+    'special'   'setup'
+    };
 %}
 
+
+%{
+% Single "static" voltage
+flag.BKvoltage=true;
+    
+    multi.VMATRIX(end+1,:)=[3 5 0.5];
+    meas.MeasDetailsVars={
+    'Vbias'     'env'
+    'Vreset'    'env'
+    'VQinj'     'env'
+    'R22'       'multi'
+    'special'   'setup'
+    };
+%}
+
+
+
+% 
+% BEGIN first outer loop
+%
+
+% if you want just a static voltage run, this will force the outer loop to run once
+if (flag.BKvoltage==false); multi.VMATRIX=[1]; end;
 flag.first_run=true;
-multi.mnrofacq=size(multi.MMATRIX,1);
+multi.mnrofacq=size(multi.VMATRIX,1);
 for mmid=1:multi.mnrofacq; multi.mmid=mmid;
-%multi.R13=multi.MMATRIX(multi.mmid,1);
-%multi.R14=multi.MMATRIX(multi.mmid,2);
-
-%multi.R6=multi.MMATRIX(multi.mmid,3);
-%multi.R4=multi.MMATRIX(multi.mmid,4);
-%multi.R3=multi.MMATRIX(multi.mmid,5);
-
-multi.VBias=multi.MMATRIX(multi.mmid,1);
-multi.VRst =multi.MMATRIX(multi.mmid,2);
-multi.VQinj=multi.MMATRIX(multi.mmid,3);
-
-
-   % write voltfile, will be picked up by shell script controlling power supply
-   multi.VOLTFILE='./commtemp/arraySweep_volts.scpi';
-   system(sprintf('echo "APP:VOLT %.3f,%.3f,%.3f" >%s.tmp',...
-       multi.VRst-multi.VBias,multi.VRst,multi.VQinj,multi.VOLTFILE));
-   system(sprintf('mv %s.tmp %s',multi.VOLTFILE,multi.VOLTFILE));
    
+   if (flag.BKvoltage==true);
+      multi.VBias=multi.VMATRIX(multi.mmid,1);
+      multi.VRst =multi.VMATRIX(multi.mmid,2);
+      multi.VQinj=multi.VMATRIX(multi.mmid,3);
+      env.V(id.Vreset)= multi.VRst;
+      env.V(id.Vbias) = multi.VBias ;
+      env.V(id.VQinj) = multi.VQinj;
+
+      % write voltfile, will be picked up by shell script controlling power supply
+      multi.VOLTFILE='./commtemp/arraySweep_volts.scpi';
+      system(sprintf('echo "APP:VOLT %.3f,%.3f,%.3f" >%s.tmp',...
+          multi.VRst-multi.VBias,multi.VRst,multi.VQinj,multi.VOLTFILE));
+      system(sprintf('mv %s.tmp %s',multi.VOLTFILE,multi.VOLTFILE));
+   end
    
 
 
-env.V(id.Vreset)= multi.VRst;
-env.V(id.Vbias) = multi.VBias ;
-env.V(id.VQinj) = multi.VQinj;
 
 
 % 
 % Multi-Sequence-Setup
 %
 
-meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
-
-%{
-meas.MeasCond='TwinDark'; multi.R22=0;
-%meas.MeasCond='TwinFlood'; multi.R22=0;
-multi.RMATRIX=[
-   %R1    R26   R27   R11    R13    R14
-    1     20    10     0      1      1
-    1     10    10     0      2      2
-   1000   10    10     0      1      1
-   1000   10    10     0      2      2
-];
-%}
 
 %%{
-%meas.MeasCond='FloodLeakageNoise'; multi.R22=ts(4,0,0); multi.R22=2;
-meas.MeasCond='DarkLeakageNoise'; multi.R22=ts(4,0,0); multi.R22=14;
-multi.RMATRIX=[
-   %R1      R26  R27        R11 R13 R14
-       1    200  200         0   1   1%1000
-%       2     0    200   % not necessary for PSI-2
-%       5     0   1000   % not necessary for PSI-2
-%      10     0    50   % not necessary for PSI-2
-      20     0    50        0   1   1
-      50     0    50        0   1   1
-      100    0    200        0   1   1
-      200    0    30        0   1   1
-      400    0    100        0   1   1
-      1000   0    5        0   1   1
-      2000   0    5        0   1   1
-      4000   0    5        0   1   1
-      6000   0    5        0   1   1
-      8900   0    5        0   1   1
-      11900  0    5        0   1   1
-      15700  0    5        0   1   1
-      19550  0    5           0   1   1 
-%      40000  0    2 %added 2010-04-27, mk
-%      60000  0    2 %added 2010-04-27, mk
- ];
+% For "regular measurements"
+ meas.MeasCond='TwinFlood';         meas.RMATvers=2; multi.R22=ts(0,0,0);
+%meas.MeasCond='TwinDark';          meas.RMATvers=1; multi.R22=ts(0,0,0);
+%meas.MeasCond='FloodLeakageNoise'; meas.RMATvers=1; multi.R22=ts(4,0,0); multi.R22=2;
+%meas.MeasCond='DarkLeakageNoise';  meas.RMATvers=1; multi.R22=ts(4,0,0); multi.R22=14;
 
-env.G3ExtClock=100000; env.UseExtClock=1;
+% call the meas_condition "database"
+% right-click and "open selection" to see the database
+meas_conditions
 %}
 
 
+% Re-define or add variables to the folder name, if necessary
+% Be aware and conscious of the R parameters
+% ... not all exist at this point of the measurement yet
+% Normally, automatically generated by the MMATRIX settings
+%meas.MeasDetailsVars={};
 
 
 
-multi.nrofacq=size(multi.RMATRIX,1);
-if strcmp(meas.MeasCond(1:5),'First'); multi.nrofacq=1; end
-if strcmp(meas.MeasCond(1:4),'Qinj' ); multi.nrofacq=1; end
-
-meas.MeasDetails=[ sprintf('%s', meas.MeasCond) ...
-    sprintf( '_Vbias%s', volt2str(env.V(id.Vbias)) ) ...
-    ...sprintf( '_Vguard2%s', volt2str(env.V(id.Vguard2)) ) ...
-    ...sprintf( '_Von%s', volt2str(env.V(id.Von)) ) ...
-    sprintf( '_Vrst%s', volt2str(env.V(id.Vreset)) ) ...  not needed for PSI-1
-    ...sprintf( '_Voff%s', volt2str(env.V(id.AVoff)) ) ...    
-    ...sprintf( '_Vgnd%s', volt2str(env.V(id.Vgnd)) ) ...
-    ...sprintf( '_Tbias%s', volt2str(env.V(id.Tbias)) ) ...
-    ...sprintf( '_Vcc%s', volt2str(env.V(id.Vcc)) ) ...
-    ...sprintf( '_Voff%s',  volt2str(env.V(id.AVoff)) ) ...    
-    sprintf( '_VQinj%s', volt2str(env.V(id.VQinj)) ) ...
-    ...sprintf( '_RST%s',    setup.PF_globalReset     ) ...
-    ...sprintf('_%04dR6', multi.R6)  ...
-    ...sprintf('_%04dR4', multi.R4)  ...
-    ...sprintf('_%03dR3', multi.R3)  ...
-    ...sprintf('_%02dR13', multi.R13)  ...
-    ...sprintf('_%02dR14', multi.R14)  ...
-    ...sprintf( '_%02dR22', multi.R22                 ) ...
-    ...sprintf( '_GC%s',    setup.PF_gateCards        ) ...
-    ...sprintf( '_DC%s',    setup.PF_dataCards        ) ...
-    ...sprintf( '_GL%03d',  geo.GL                    ) ...
-    sprintf( '%s',    setup.special     ) ...
-  ];
+% Re-define or add variables to the file name
+% Normally, automatically generated by the meas.MeasCond selection
+%meas.BaseNameVars={};
 
 
+
+
+
+
+%
+%
+% NO MORE EDITING NEEDED BEYOND THIS LINE!!
+%
+%
+
+
+% look-up tables for all the sprintf calls
+multiLUT.R1='_%05dR1';
+multiLUT.R3='_%03dR3';
+multiLUT.R4='_%04dR4';
+multiLUT.R6='_%04dR6';
+multiLUT.R11='_%05dR11';
+multiLUT.R13='_%03dR13';
+multiLUT.R14='_%03dR14';
+multiLUT.R22='_%02dR22';
+multiLUT.R26='_%02dR26';
+multiLUT.R27='_%02dR27';
+
+envLUT.Vbias='_Vbias%s';
+envLUT.Vreset='_Vrst%s';
+envLUT.VQinj='_VQinj%s';
+envLUT.AVoff='_Voff%s';
+envLUT.Von='_Von%s';
+envLUT.Vgnd='_Vgnd%s';
+envLUT.Tbias='_Tbias%s';
+envLUT.Vcc='_Vcc%s';
+envLUT.Vguard2='_VguardTwo%s';
+
+setupLUT.PF_globalReset='_RST%s';
+setupLUT.PF_gateCards='_GC%s';
+setupLUT.PF_dataCards='_DC%s';
+setupLUT.special='%s';
+
+geoLUT.GL='_GL%03d';
+
+
+
+% Create the folder name
+meas.MeasDetails=[sprintf('%s', meas.MeasCond)];
+for meas_i=1:size(meas.MeasDetailsVars,1);
+    if strcmp(meas.MeasDetailsVars{meas_i,2},'env');
+        meas.MeasDetails=[meas.MeasDetails sprintf(envLUT.(meas.MeasDetailsVars{meas_i,1}), volt2str(env.V(id.(meas.MeasDetailsVars{meas_i,1}))))];
+    elseif strcmp(meas.MeasDetailsVars{meas_i,2},'multi');
+        meas.MeasDetails=[meas.MeasDetails sprintf(multiLUT.(meas.MeasDetailsVars{meas_i,1}), multi.(meas.MeasDetailsVars{meas_i,1}))];
+    elseif strcmp(meas.MeasDetailsVars{meas_i,2},'setup');
+        meas.MeasDetails=[meas.MeasDetails sprintf(setupLUT.(meas.MeasDetailsVars{meas_i,1}), setup.(meas.MeasDetailsVars{meas_i,1}))];
+    elseif strcmp(meas.MeasDetailsVars{meas_i,2},'geo');
+        meas.MeasDetails=[meas.MeasDetails sprintf(geoLUT.(meas.MeasDetailsVars{meas_i,1}), geo.(meas.MeasDetailsVars{meas_i,1}))];
+    else
+        error('Undefined LUT parameter detected.');
+    end
+end
+
+
+meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 meas.MeasID=datestr(now(),30);
 meas.DirName=[ '../measurements/' meas.DUT '/' meas.MeasID '_' meas.MeasDetails '/' ];
 meas.MFile=[ mfilename() '.m' ];
@@ -286,54 +317,72 @@ if ~flag.dryrun;
     mkdir(meas.DirName);    
     copyfile(meas.MFile,[ meas.DirName meas.MFile ]);
     copyfile(meas.MFileDesc,[ meas.DirName meas.MFileDesc ]);
+
+    %%{
+    % write the RMATRIX that was actually used to a file
+    rmat_file = fopen([ meas.DirName 'meas_conditions.m'],'w');
+    fprintf(rmat_file,'switch meas.MeasCond \n case \''%s\''\n',meas.MeasCond);
+    fprintf(rmat_file,'switch meas.RMATvers \n case %d\n',meas.RMATvers);
+    
+    fprintf(rmat_file,'multi.RMATheader={ \n');
+    fprintf(rmat_file,'\''%s\'' ',multi.RMATheader{1,:});
+    fprintf(rmat_file,'};\n');
+    
+    fprintf(rmat_file,'multi.RMATRIX=[\n');
+    for rmat_i=1:size(multi.RMATRIX,1);
+        fprintf(rmat_file,'%d ',multi.RMATRIX(rmat_i,:));
+        fprintf(rmat_file,'\n');
+    end
+    fprintf(rmat_file,']; \n end \n end');
+    fclose(rmat_file);
+    %}
+    
+    % or... write the entire RMATRIX database to file?
+    %copyfile(meas.MFileCond,[ meas.DirName meas.MFileCond ]);
 end;
 
+
+
+
 %
-% Multi-Sequence Loop
+% BEGIN second outer loop
 %
+
+multi.nrofacq=size(multi.RMATRIX,1);
+if strcmp(meas.MeasCond(1:5),'First'); multi.nrofacq=1; end
+if strcmp(meas.MeasCond(1:4),'Qinj' ); multi.nrofacq=1; end
 
 flag.G3_nuke=true;
-flag.finished=false;
 for mid=1:multi.nrofacq; multi.mid=mid;
-
-   multi.R1 =multi.RMATRIX(multi.mid,1);
-   multi.R11=multi.RMATRIX(multi.mid,4);
-   %multi.R11=0; %255-16;
-   multi.R13=multi.RMATRIX(multi.mid,5);
-   %multi.R13=1;%2
-   multi.R14=multi.RMATRIX(multi.mid,6);
-   %multi.R14=1;%3
-   multi.R26=multi.RMATRIX(multi.mid,2);
-   multi.R27=multi.RMATRIX(multi.mid,3);
-
-   %multi.R4=multi.RMATRIX(multi.mid,7);
-   %multi.R21=multi.RMATRIX(multi.mid,8);
-   %multi.R5=multi.RMATRIX(multi.mid,9);
-   %multi.R6=multi.RMATRIX(multi.mid,10);
-
-   %multi.R3=multi.RMATRIX(multi.mid,11);
+    
+    
+    % load the R1...R27 variables for measurement
+    for header_i=1:size(multi.RMATheader,2);
+        multi.(multi.RMATheader{header_i})=multi.RMATRIX(multi.mid,header_i);
+    end
+    
    
    disp(multi);
     
   
 
-meas.BaseName=[ meas.DirName ...
-    meas.MeasID ... '_' meas.DUT   ...     
-    sprintf('_Acq%03d', multi.mid) ...
- ...'_' meas.MeasDetails ...    
-    sprintf('_%05dR1' , multi.R1)   ...
- ...sprintf('_%05dR3' , multi.R3)   ...
- ...sprintf('_%02dR4' , multi.R4)   ...
- ...sprintf('_%02dR21', multi.R21)  ...
- ...sprintf('_%02dR5' , multi.R5)   ...
- ...sprintf('_%02dR6' , multi.R6)   ...
- ...sprintf('_%05dR11', multi.R11)  ...
- ...sprintf('_%05dR13', multi.R13)  ...
- ...sprintf('_%05dR14', multi.R14)  ...
- ...sprintf('_%02dR22', multi.R22)  ...
-    sprintf('_%02dR26', multi.R26)  ...
-    sprintf('_%02dR27', multi.R27)  ...
-   ];
+   
+   
+
+
+% Create the BaseName (folder name)
+meas.BaseName=[
+    meas.DirName meas.MeasID '_' meas.DUT ...
+    sprintf('_Acq%03d', multi.mid)
+];
+for basename_i=1:size(meas.BaseNameVars,2);
+    meas.BaseName=[meas.BaseName...
+        sprintf(multiLUT.(meas.BaseNameVars{basename_i}),multi.(meas.BaseNameVars{basename_i}));
+    ];
+end
+
+
+
 
 meas.AcqFile=[ pwd() '/' meas.BaseName '.bin' ];
 meas.MatFile=[ meas.BaseName '.settings.mat' ];
@@ -343,6 +392,18 @@ meas.MatFile=[ meas.BaseName '.settings.mat' ];
 % G3Ext registers?
 % easily switch between sets of values? good visualization?
 % more array types...?
+
+% Make sure commonly manipulated R variables have values
+if (~isfield(multi,'R1'));  error('No multi.R1 set!');  end;
+if (~isfield(multi,'R11')); error('No multi.R11 set!'); end;
+if (~isfield(multi,'R13')); error('No multi.R13 set!'); end;
+if (~isfield(multi,'R14')); error('No multi.R14 set!'); end;
+if (~isfield(multi,'R22')); error('No multi.R22 set!'); end;
+if (~isfield(multi,'R26')); error('No multi.R26 set!'); end;
+if (~isfield(multi,'R27')); error('No multi.R27 set!'); end;
+
+
+
 
 meas.R=[
  %value PSI-1 PSI-2 PSI-3   %name  bits  (default)units        Description
@@ -412,13 +473,14 @@ flag.G3_nuke=false;
 tool_notification(flag.jabber&&flag.first_run,env,meas,multi,'started',[0 0]);
 flag.first_run=false;
 
-end % end for-loop for R (R1, R26, R27) matrix
+end % end INNER LOOP
 
 display('Measurement complete');
 
-end  % end for-loop for R (R13, R14) matrix
+end  % end OUTER LOOP
 
-% jabber work in progress
-flag.finished=true;
+
+% Jabber notification
 tool_notification(flag.jabber,env,meas,multi,'finished',[0 0]);
+
 
