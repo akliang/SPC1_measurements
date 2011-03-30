@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MDEV="/dev/ttyUSB0"
+MDEV="/dev/ttyUSB4"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
 
@@ -19,46 +19,57 @@ function sendscpi() {
 }
 
 sendscpi 2 '*RST' 
-sendscpi 2 'SYST:ERR?'
-sendscpi 2 '*CLS'
+sendscpi 1 'SYST:ERR?'
+sendscpi 1 '*CLS'
 
-sendscpi 2 "*IDN?"
+sendscpi 1 "*IDN?"
 IDN="$RESULT"
 echo $IDN
-sendscpi 2 'SYST:ERR?'
-sendscpi 2 '*CLS'
+sendscpi 1 'SYST:ERR?'
+sendscpi 1 '*CLS'
+
+until  [ "$ans" == "y" ]; 
+do
+        echo -n "Is the right device connected? y/n"
+        read ans
+        if [ "$ans" == "n" ]; then
+                sendscpi 2 'SYST:LOC'
+                exit
+        fi
+done
 
 DFILE="$DFILEPREFIX$( echo $IDN | sed -e 's%[, /:]%_%g')"
 mkdir -p $DDIR
 
-TO=1
+TO=.5
 sendscpi $TO 'APP:OUT 0,0,0'
 sendscpi $TO 'SYST:ERR?'
 sendscpi $TO '*CLS'
 #sendscpi 'APP:PROT 24,24,5' 0.5
-sendscpi $TO 'APP:VOLT 24,24,5.4'
+sendscpi $TO 'APP:VOLT 24,24,3.3'
 sendscpi $TO 'SYST:ERR?'
 sendscpi $TO '*CLS'
-sendscpi $TO 'APP:CURR 0.2,0.2,1.5' 
+sendscpi $TO 'APP:CURR 0.2,0.2,0.2' 
 sendscpi $TO 'SYST:ERR?'
 sendscpi $TO '*CLS'
 sendscpi $TO 'APP:OUT 1,1,1'
-sendscpi $TO 'SYST:ERR?'
-sendscpi $TO '*CLS'
+#sendscpi $TO 'SYST:ERR?'
+#sendscpi $TO '*CLS'
 
 echo ""
 echo "Starting recording currents and voltages to $DDIR$DFILE..."
 
 {
 
-until read -t 4 K; do
-read -t 1 RESULTFLUSH <&5
+while true; do 
+read -t .1 RESULTFLUSH <&5
 echo -e -n "MEAS:VOLT:ALL?\n" >&5
 echo -e -n "MEAS:CURR:ALL?\n" >&5
 read -t 2 RESULTVOLT <&5
 read -t 2 RESULTCURR <&5
 echo "$(date +"%Y-%m-%d %H:%M:%S,%s"),VOLT:,$RESULTVOLT,CURR:,$RESULTCURR" | sed -e 's/,/\t/g'
-done
+read -t 1 K && break
+done 
 
 } | tee -a $DDIR$DFILE
 

@@ -30,6 +30,7 @@ setup.G3_system='9of9-vanilla';
 setup.G3_interface='a2-V20-20100408'; % serial number - hardware version - bitfile version
 %setup.G3_interface='a1-V20-20100316'; % serial number - hardware version - bitfile version
 setup.G3_adcCards='a1-a2-00-00-00-00-00-00'; % On G3 ADC Board, they are labeled ADC8-...-1
+%setup.G3_adcCards='mod+-20V-a2-00-00-00-00-00-00'; % On G3 ADC Board, they are labeled ADC8-...-1
 
 setup.POWER_G3='Built-in';
 setup.POWER_ADC='BKPRECISION1761#2_AND_AGILENT_E3612A';
@@ -60,7 +61,14 @@ setup.PF_arrayLogic='n/a'; %V10: CPLD, no DIPS  V20: CPLD, 12 DIPS, V30: FPGA, 1
 setup.PF_arrayLogicDIPs='000000000000'; % DIPs labelled 12 to 1
 setup.PF_CrossCable='n/a';
 setup.PF_globalReset='all';
-setup.special='_ADCch13_set1';
+setup.special='';
+setup.battery=false;
+%setup.special='_ADCch1_set1'; 
+ setup.ADCtype='normal';
+ setup.ADCconnected='a2';
+%setup.ADCtype='+-20V';
+%setup.ADCconnected='mod+-20V';
+
 
 env.V=[];
 env.V(end+1)=  0.0  ; id.AVoff   =numel(env.V);                             % Test Point near to Gate Card
@@ -171,9 +179,10 @@ meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 meas.MeasCond='ADCCHAR'; multi.R22=0;%14;
 multi.RMATRIX=[];
 
-%%{
+if(strcmp(setup.ADCtype,'normal'))
+%{
   Vref =1.373;
-     VdV =1.3458;
+     VdV =1.2;
 multi.RMATRIX(end+1,:)=[
    %R1    R26   R27   R11    R13    R14       VADCdV     VADCminus
    500     0     50     0      1      1       VdV         Vref
@@ -193,7 +202,7 @@ end
 %}
 
 
-%{
+%%{
 for Vref=[1.0 0.8 0.6];
     for VdV=[0:0.05:0.5 0.7:0.2:4.1];
 multi.RMATRIX(end+1,:)=[
@@ -205,7 +214,7 @@ end
 %}
 
 
-%{
+%%{
 for Vref=[2.3 2.8 3.3 3.8 4.3];
     for VdV=[0:0.05:0.5 0.7:0.2:Vref];
 multi.RMATRIX(end+1,:)=[
@@ -215,6 +224,33 @@ multi.RMATRIX(end+1,:)=[
     end
 end
 %}
+end
+
+if(strcmp(setup.ADCtype,'+-20V'))
+%%{
+    %%{
+for Vref=0;
+    for VdV=[0:0.2:20];
+multi.RMATRIX(end+1,:)=[
+   %R1    R26   R27   R11    R13    R14       VADCdV       VADCminus
+   500     0     50     0      1      1        VdV           Vref
+   ];
+    end
+end
+    %}
+    
+    %{
+for Vref=0;
+    for VdV=[20:-0.2:0];
+multi.RMATRIX(end+1,:)=[
+   %R1    R26   R27   R11    R13    R14       VADCdV       VADCminus
+   500     0     50     0      1      1        VdV           Vref
+   ];
+    end
+end
+    %}
+%}
+end
 
 
 multi.nrofacq=size(multi.RMATRIX,1);

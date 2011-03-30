@@ -28,6 +28,16 @@ echo $IDN
 sendscpi 2 'SYST:ERR?'
 sendscpi 2 '*CLS'
 
+until  [ "$ans" == "y" ]; 
+do
+	echo -n "Is the right device connected? y/n"
+	read ans
+	if [ "$ans" == "n" ]; then
+		sendscpi 2 'SYST:LOC'
+                exit
+	fi
+done   
+
 DFILE="$DFILEPREFIX$( echo $IDN | sed -e 's%[, /:]%_%g')"
 mkdir -p $DDIR
 

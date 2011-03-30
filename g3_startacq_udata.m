@@ -7,7 +7,7 @@ function message = g3_startacq_udata( host, port, R, udata, AcqFile, SORTMODE, n
         wait4end=false;
     end
 
-    
+    debug=false;
 
     import java.net.Socket
     import java.io.*
@@ -25,25 +25,25 @@ function message = g3_startacq_udata( host, port, R, udata, AcqFile, SORTMODE, n
 
         retry = retry + 1;
         if ((number_of_retries > 0) && (retry > number_of_retries))
-            fprintf(1, 'Too many retries\n');
+            dfprintf(1, 'Too many retries\n');
             break;
         end
         
         %try
-            fprintf(1, 'Retry %d connecting to %s:%d\n', ...
+            dfprintf(1, 'Retry %d connecting to %s:%d\n', ...
                     retry, host, port);
 
             % throws if unable to connect
             my_socket = Socket(host, port);
-            fprintf(1, 'Connected to server\n');
+            dfprintf(1, 'Connected to server\n');
 
             % get a buffered data input stream from the socket
-            fprintf(1, 'Input stream connected\n');
+            dfprintf(1, 'Input stream connected\n');
             input_stream   = my_socket.getInputStream;
             d_input_stream = DataInputStream(input_stream);
 
             
-            fprintf(1, 'Output stream connected\n');
+            dfprintf(1, 'Output stream connected\n');
             output_stream   = my_socket.getOutputStream;
             d_output_stream = DataOutputStream(output_stream);
             %d_output_stream.writeBytes(char(48,50));
@@ -142,7 +142,7 @@ function message = g3_startacq_udata( host, port, R, udata, AcqFile, SORTMODE, n
             break;
             
         %catch
-        %    fprintf(1, '\nCatched!\n', bytes_available);
+        %    dfprintf(1, '\nCatched!\n', bytes_available);
         %    if ~isempty(my_socket)
         %        my_socket.close;
         %    end
@@ -155,20 +155,20 @@ function message = g3_startacq_udata( host, port, R, udata, AcqFile, SORTMODE, n
     function send_uint( valxx, bitwidth )
         for snrxx=1:numel(valxx);
             xx=double(valxx(snrxx));
-            %fprintf(1,'%3d/%3d:  %7d\t',snrxx,numel(valxx),xx);
+            %dfprintf(1,'%3d/%3d:  %7d\t',snrxx,numel(valxx),xx);
             if bitwidth>16;
             xxb4=bitshift( bitand( xx, bitshift(255,24) ), -24);
             xxb3=bitshift( bitand( xx, bitshift(255,16) ), -16);
-            d_output_stream.write(xxb4); fprintf(1,' %3d',xxb4);
-            d_output_stream.write(xxb3); fprintf(1,' %3d',xxb3);
+            d_output_stream.write(xxb4); dfprintf(1,' %3d',xxb4);
+            d_output_stream.write(xxb3); dfprintf(1,' %3d',xxb3);
             end
             if bitwidth>8;
             xxb2=bitshift( bitand( xx, bitshift(255, 8) ),  -8);
-            d_output_stream.write(xxb2); fprintf(1,' %3d',xxb2);
+            d_output_stream.write(xxb2); dfprintf(1,' %3d',xxb2);
             end
             xxb1=bitshift( bitand( xx, bitshift(255, 0) ),  -0);
-            d_output_stream.write(xxb1); fprintf(1,' %3d',xxb1);
-            %fprintf(1,'\n');
+            d_output_stream.write(xxb1); dfprintf(1,' %3d',xxb1);
+            %dfprintf(1,'\n');
         end
     end
 
@@ -178,20 +178,20 @@ function message = g3_startacq_udata( host, port, R, udata, AcqFile, SORTMODE, n
             if xx<0; % building two-complement in decimal world               
                 xx=2^16+xx;
             end
-            %fprintf(1,'%3d/%3d:  %7d\t',snrxx,numel(valxx),xx);
+            %dfprintf(1,'%3d/%3d:  %7d\t',snrxx,numel(valxx),xx);
             if bitwidth>16;
             xxb4=bitshift( bitand( xx, bitshift(255,24) ), -24);
             xxb3=bitshift( bitand( xx, bitshift(255,16) ), -16);
-            d_output_stream.write(xxb4); fprintf(1,' %3d',xxb4);
-            d_output_stream.write(xxb3); fprintf(1,' %3d',xxb3);
+            d_output_stream.write(xxb4); dfprintf(1,' %3d',xxb4);
+            d_output_stream.write(xxb3); dfprintf(1,' %3d',xxb3);
             end
             if bitwidth>8;
             xxb2=bitshift( bitand( xx, bitshift(255, 8) ),  -8);
-            d_output_stream.write(xxb2); fprintf(1,' %3d',xxb2);
+            d_output_stream.write(xxb2); dfprintf(1,' %3d',xxb2);
             end
             xxb1=bitshift( bitand( xx, bitshift(255, 0) ),  -0);
-            d_output_stream.write(xxb1); fprintf(1,' %3d',xxb1);
-            %fprintf(1,'\n');
+            d_output_stream.write(xxb1); dfprintf(1,' %3d',xxb1);
+            %dfprintf(1,'\n');
         end
     end
 
@@ -199,31 +199,44 @@ function message = g3_startacq_udata( host, port, R, udata, AcqFile, SORTMODE, n
     function read_response()
             pause(0.2);
             bytes_available = input_stream.available;
-            fprintf(1, ' <Reading %d bytes:\t', bytes_available);
+            dfprintf(1, ' <Reading %d bytes:\t', bytes_available);
             
             message = zeros(1, bytes_available, 'uint8');
             for i = 1:bytes_available/4
                 b=d_input_stream.readInt;
-                fprintf(1,'%6d\t',b);
+                dfprintf(1,'%6d\t',b);
             end
-            fprintf(1, '\n');
+            dfprintf(1, '\n');
     end
 
 
     function wait_for_response()
             pause(0.2);
             bytes_available = 8;%input_stream.available;
-            fprintf(1, ' <Reading %d bytes:\t', bytes_available);
+            dfprintf(1, ' <Reading %d bytes:\t', bytes_available);
             
             message = zeros(1, bytes_available, 'uint8');
             for i = 1:bytes_available/4
                 b=d_input_stream.readInt;
-                fprintf(1,'%6d\t',b);
+                dfprintf(1,'%6d\t',b);
             end
-            fprintf(1, '\n');
+            dfprintf(1, '\n');
     end
 
-
+    function dfprintf(descr, fstr, varargin)
+        if debug;
+            na=size(varargin,2);
+            if na==0;
+                fprintf(descr,fstr);
+            elseif na==1;
+                fprintf(descr,fstr, varargin{1});
+            elseif na==2;
+                fprintf(descr,fstr, varargin{1}, varargin{2});
+            elseif na==3;
+                fprintf(descr,fstr, varargin{1}, varargin{2}, varargin{3});
+            end
+        end
+    end
 
 end
 

@@ -25,11 +25,22 @@ sendscpi 1 'SYSTem:REMote'
 sendscpi 1 '*RST'
 sendscpi 1 '*CLS'
 sendscpi 1 '*IDN?'
-sendscpi 1 'VOLT:DC:RANGE 5'
+
+until  [ "$ans" == "y" ]; 
+do
+        echo -n "Is the right device connected? y/n"
+        read ans
+        if [ "$ans" == "n" ]; then
+                sendscpi 2 'SYST:LOC'
+                exit
+        fi
+done
+
+sendscpi 1 'VOLT:DC:RANGE 20'
 sendscpi 1 'VOLT:DC:RANGE?'
 sendscpi 1 'SYST:ERR?'
 sendscpi 1 'VOLT:DC:NPLC .2'
-sendscpi 1 'SENS:ZERO:AUTO ONCE'
+#sendscpi 1 'SENS:ZERO:AUTO ONCE'
 sendscpi 1 'SYSTem:BEEPer:STATe OFF'
 #sendscpi 1 'CALC:FUNC AVER'
 #sendscpi 1 'CALC:STAT 1'

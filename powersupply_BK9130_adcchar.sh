@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MDEV="/dev/ttyUSB1"
+MDEV="/dev/ttyUSB0"
 DDIR='../measurements/environment/'
 DFILEPREFIX="measADC_$(hostname)_"
 
@@ -29,6 +29,16 @@ IDN="$RESULT"
 echo $IDN
 sendscpi 1 'SYST:ERR?'
 sendscpi 1 '*CLS'
+
+until  [ "$ans" == "y" ]; 
+do
+        echo -n "Is the right device connected? y/n"
+        read ans
+        if [ "$ans" == "n" ]; then
+                sendscpi 2 'SYST:LOC'
+                exit
+        fi
+done
 
 DFILE="$DFILEPREFIX$( echo $IDN | sed -e 's%[, /:]%_%g')"
 mkdir -p $DDIR
