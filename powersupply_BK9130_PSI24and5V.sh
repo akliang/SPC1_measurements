@@ -1,6 +1,7 @@
 #!/bin/bash
 
-MDEV="/dev/ttyUSB4"
+#MDEV="/dev/ttyUSB4"
+MDEV="/dev/ttyUSB0"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
 
@@ -45,11 +46,12 @@ TO=.5
 sendscpi $TO 'APP:OUT 0,0,0'
 sendscpi $TO 'SYST:ERR?'
 sendscpi $TO '*CLS'
-#sendscpi 'APP:PROT 24,24,5' 0.5
-sendscpi $TO 'APP:VOLT 24,24,3.3'
+#sendscpi $TO 'APP:VOLT 24,24,3.3'
+sendscpi $TO 'APP:VOLT 24,24,5.4'
 sendscpi $TO 'SYST:ERR?'
 sendscpi $TO '*CLS'
-sendscpi $TO 'APP:CURR 0.2,0.2,0.2' 
+#sendscpi $TO 'APP:CURR 0.2,0.2,0.2' 
+sendscpi $TO 'APP:CURR 0.2,0.2,1.5' 
 sendscpi $TO 'SYST:ERR?'
 sendscpi $TO '*CLS'
 sendscpi $TO 'APP:OUT 1,1,1'
