@@ -12,9 +12,10 @@ DFILEPREFIX="test01_TAA-29B1-1_ch1=Vsfbgnd_ch2=DL16_ch3=Vgnd_ch4=Vcc_ch5=GL02_ch
 echo "$(date)" >> "$DDIR$DFILEPREFIX.log"
 svn diff "$0"  >> "$DDIR$DFILEPREFIX.log"
 
-CURRFILE='2636_command.scpi'
+SCPIFILE='2636_command.scpi'
 # BASH code for live interaction:
 # while true; do read N; echo "$N" >>2636_command.scpi; done
+DATACTRLFILE='2636_datactrl'
 
 if false; then
   # Code for USB communication - somewhat faulty
@@ -246,7 +247,8 @@ done
 sendscpi .1 "$MSG"
 
 check_error
-DFILE=$DFILEPREFIX$( echo $IDN | sed -e 's%[, /:]%_%g')
+#DFILE=$DFILEPREFIX$( echo $IDN | sed -e 's%[, /:]%_%g')
+DFILE="$DFILEPREFIX.session"
 
 #echo "<$DFILE>"
 #exit 
@@ -284,11 +286,12 @@ T1=0.1 # use full integers for some older BASH shells
 T2=5
 
 until read -t $T1 K; do
-  if [ -e "$CURRFILE" ]; then
-	mv "$CURRFILE" "$CURRFILE.tmp"
-	sendscpi 0.1 "$(<"$CURRFILE.tmp")" >&2
-	rm "$CURRFILE.tmp"
+  if [ -e "$SCPIFILE" ]; then
+	mv "$SCPIFILE" "$SCPIFILE.tmp"
+	sendscpi 0.1 "$(<"$SCPIFILE.tmp")" >&2
+	rm "$SCPIFILE.tmp"
 	check_error
+        [ "$RESULT" != "" ] && echo "$RESULT" >> "$SCPIFILE.error"
   fi
   sendscpi 5 'MKmultiMeasure() MKmultiPrint() MKcheckError()' silent singleline
   RESLINE="$(
@@ -298,6 +301,11 @@ until read -t $T1 K; do
   #| tee -a $DDIR$DFILE
   sendscpi_cond 0.2 '-- reading errors' >&2
   print_result $RESLINE 
+  if [ -e "$DATACTRLFILE" ]; then
+	DATAEXT="$(<"$DATACTRLFILE")"
+	echo "Data mirror extension active: '$DATAEXT'" >&2
+  	echo "$RESLINE" >>"$DDIR$DFILEPREFIX.$DATAEXT"
+  fi
 done
 
 } \
