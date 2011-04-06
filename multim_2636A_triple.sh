@@ -7,7 +7,10 @@ MDEV="/dev/ttyUSB1"
 NDEV="smu1.imager.umro"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
-DFILEPREFIX="arraytest6_$(hostname)_"
+DFILEPREFIX="test01_TAA-29B1-1_ch1=Vsfbgnd_ch2=DL16_ch3=Vgnd_ch4=Vcc_ch5=GL02_ch6=HI_$(hostname)_"
+
+echo "$(date)" >> "$DDIR$DFILEPREFIX.log"
+svn diff "$0"  >> "$DDIR$DFILEPREFIX.log"
 
 CURRFILE='2636_command.scpi'
 # BASH code for live interaction:
@@ -30,7 +33,7 @@ else
   rm "$TD/p5" "$TD/p6" # actual delete will only occur once files are no longer accessed
   NCPID=$!
   #trap "nc 192.168.0.226 1030; rmdir '$TD'; exit" EXIT
-  trap "nc 192.168.0.226 1030; kill $NCPID; rmdir '$TD'; exit" EXIT
+  trap "nc $NDEV 1030; kill $NCPID; rmdir '$TD'; exit" EXIT
 fi
 
 function sendscpi() {
@@ -120,8 +123,8 @@ $SMU.source.autorangei=$SMU.AUTORANGE_ON
 $SMU.source.autorangev=$SMU.AUTORANGE_ON
 $SMU.source.leveli=0
 $SMU.source.levelv=0
-$SMU.source.limiti=0.005
-$SMU.source.limitv=10.0
+$SMU.source.limiti=0.001
+$SMU.source.limitv=15.0
 $SMU.sense = $SMU.SENSE_LOCAL
 $SMU.measure.nplc = 1
 $SMU.measure.delay = $SMU.DELAY_OFF
@@ -250,7 +253,7 @@ DFILE=$DFILEPREFIX$( echo $IDN | sed -e 's%[, /:]%_%g')
 mkdir -p $DDIR
 
 echo ""
-echo "Starting recording voltages to <$DDIR$DFILE>..."
+echo "Starting recording measurements to <$DDIR$DFILE>..."
 
 function print_result() {
 STR="$1 $2 $3
