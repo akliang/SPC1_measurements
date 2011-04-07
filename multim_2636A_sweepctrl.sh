@@ -39,6 +39,28 @@ function do_sweep() { # performs a defined sweep
   echo "Sweep completed."
 }
 
+function extract_val() {
+  shift $(( $1 + 1 ))
+  echo $1
+}
+function do_sweep_getval() { # performs a defined sweep
+  echo
+  echo "Sweep_getval $SWEEP: CH=$CH, TO=$TO, VALS=( " $VALS " )"
+  GETVALS=""
+  if [ "$1" == "" ]; then echo "Sweep info completed."; return; fi
+  echo $SWEEP >"$DATACTRLFILE"
+  for V in $VALS; do
+      send_cmd "$CH($V)"
+      read -t $TO N && break
+      NEWVALS="$(<$SCPIFILE.result)"
+      echo $( extract_val $GET_COLUMN $NEWVALS )
+  done
+  V=0
+  send_cmd "$CH($V)"
+  rm "$DATACTRLFILE"
+  echo "Sweep completed."
+}
+
 function help() {  # help currently displayed
   FUNCLIST="$( grep "^function " $0 | sed -e 's/[^ ]* /\t/' -e 's/[( ].*#/ \t#/' -e 's/[(].*$//' )"
   echo "Defined functions:"
@@ -103,15 +125,33 @@ function fullchar() {
   read -t $TO N && break
   send_cmd "v3(15)"
   read -t $TO N && break
-  set_sweep "tftro"
+
+  if false; then
+  set_sweep "tftroVsweep"
   VALS="0 0.25 0.5 0.75 1.0 1.25 1.5 1.75 2 2.5 3 3.5 4 4.5 5 6 7 8"
   do_sweep yes
   read -t $TO N && break
+  fi
+
+  if true; then
+  send_cmd "node[2].smub.source.func=smub.OUTPUT_DCAMPS"
+  read -t $TO N && break
+  set_sweep "tftroIsweep"
+  VALS="0 1E-6 3E-6 1E-5 3E-5 1E-4 3E-4 1E-3"
+  CH="i4"
+  GET_COLUMN=$(( 3 + 2*(4-1) ))
+  do_sweep_getval yes
+  read -t $TO N && break
+  send_cmd "i4(0)"
+  read -t $TO N && break
+  send_cmd "node[2].smub.source.func=smub.OUTPUT_DCVOLTS"
+  read -t $TO N && break
+  fi
+
   send_cmd "v3(0)"
   read -t $TO N && break
   send_cmd "v5(0)" 
   read -t $TO N && break
-
 
   if true; then
   sweep_glfull
