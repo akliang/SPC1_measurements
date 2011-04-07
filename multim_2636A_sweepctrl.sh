@@ -71,12 +71,50 @@ function sweep_gateline() {
   do_sweep
 }
 
+function sweep_glfull() {
+  SWEEP="gateline"
+  VALS=$( octave --quiet --eval "for v=-2.5:0.5:15; disp(v); end" )
+  TO=5
+  CH="v5"
+  do_sweep
+}
+
 function sweep_vcc() {
   SWEEP="vcc"
   VALS=$( octave --quiet --eval "for v=0:0.5:8; disp(v); end" )
   TO=5
   CH="v4"
   do_sweep
+}
+
+function sweep_vcc3() {
+  SWEEP="vcc"
+  VALS=$( octave --quiet --eval "for v=0:0.25:3; disp(v); end" )
+  TO=5
+  CH="v4"
+  do_sweep
+}
+
+function fullchar() {
+  if true; then
+  sweep_glfull
+  send_cmd "v6(15)"
+  read -t $TO N && break
+  send_cmd "v4(3)"
+  read -t $TO N && break
+  do_sweep yes
+  read -t $TO N && break
+  send_cmd "v4(0)"
+  read -t $TO N && break
+  fi
+ 
+  sweep_vcc3
+  send_cmd "v5(15)"
+  read -t $TO N && break
+  do_sweep yes
+  read -t $TO N && break
+  send_cmd "v5(0)" 
+  read -t $TO N && break
 }
 
 # main program loop
