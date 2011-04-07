@@ -7,7 +7,7 @@ MDEV="/dev/ttyUSB1"
 NDEV="smu1.imager.umro"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
-DFILEPREFIX="test02_TAA-29B1-1_ch1=Vsfbgnd_ch2=DL01_ch3=Vgnd_ch4=Vcc_ch5=GL02_ch6=HI_$(hostname)_"
+DFILEPREFIX="test04_TAA-29B1-1_ch1=Vsfbgnd_ch2=DL06_ch3=Vgnd_ch4=Vcc_ch5=GL04_ch6=HI_$(hostname)_"
 
 echo "$(date)" >> "$DDIR$DFILEPREFIX.log"
 svn diff "$0"  >> "$DDIR$DFILEPREFIX.log"
@@ -157,11 +157,13 @@ sendscpi .1 '
 node[2].smua.source.func=smua.OUTPUT_DCVOLTS
 node[2].display.smua.measure.func=display.MEASURE_DCAMPS
 node[2].smua.source.sink=smua.ENABLE
+node[2].smua.source.limitv=10
 '
 
 sendscpi .1 '
 node[2].smub.source.func=smub.OUTPUT_DCVOLTS
 node[2].display.smub.measure.func=display.MEASURE_DCAMPS
+node[2].smub.source.limitv=10
 '
 
 sendscpi .1 '

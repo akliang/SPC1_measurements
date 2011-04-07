@@ -96,10 +96,25 @@ function sweep_vcc3() {
 }
 
 function fullchar() {
-  if true; then
-  sweep_glfull
+  sweep_vcc
   send_cmd "v6(15)"
   read -t $TO N && break
+  send_cmd "v5(15)"
+  read -t $TO N && break
+  send_cmd "v3(15)"
+  read -t $TO N && break
+  set_sweep "tftro"
+  VALS="0 0.25 0.5 0.75 1.0 1.25 1.5 1.75 2 2.5 3 3.5 4 4.5 5 6 7 8"
+  do_sweep yes
+  read -t $TO N && break
+  send_cmd "v3(0)"
+  read -t $TO N && break
+  send_cmd "v5(0)" 
+  read -t $TO N && break
+
+
+  if true; then
+  sweep_glfull
   send_cmd "v4(3)"
   read -t $TO N && break
   do_sweep yes
