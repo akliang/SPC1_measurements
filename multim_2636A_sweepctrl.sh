@@ -43,17 +43,22 @@ function extract_val() {
   shift $(( $1 + 1 ))
   echo $1
 }
-function do_sweep_getval() { # performs a defined sweep
+function do_sweep_getval() { # performs a defined sweep, retrieving values
   echo
   echo "Sweep_getval $SWEEP: CH=$CH, TO=$TO, VALS=( " $VALS " )"
   GETVALS=""
   if [ "$1" == "" ]; then echo "Sweep info completed."; return; fi
+  shift 1
   echo $SWEEP >"$DATACTRLFILE"
   for V in $VALS; do
-      send_cmd "$CH($V)"
+      ADD=""; [ "$1" != "" ] && ADD=" + $1"
+      send_cmd "$CH($V$ADD)"
       read -t $TO N && break
       NEWVALS="$(<$SCPIFILE.result)"
-      echo $( extract_val $GET_COLUMN $NEWVALS )
+      GETVAL=$( extract_val $GET_COLUMN $NEWVALS )
+      GETVALS="$GETVALS $GETVAL"
+      echo "READ<< $GETVAL"
+      shift 1
   done
   V=0
   send_cmd "$CH($V)"

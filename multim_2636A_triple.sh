@@ -7,7 +7,7 @@ MDEV="/dev/ttyUSB1"
 NDEV="smu1.imager.umro"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
-DFILEPREFIX="test05_TAA-29B1-1_ch1=Vsfbgnd_ch2=DL06_ch3=Vgnd_ch4=Vcc_ch5=GL04_ch6=HI_$(hostname)_"
+DFILEPREFIX="test07_TAA-29B1-1_ch1=Vsfbgnd_ch2=DL06_ch3=Vgnd_ch4=Vcc_ch5=GL04_ch6=HI_$(hostname)_"
 
 echo "$(date)" >> "$DDIR$DFILEPREFIX.log"
 svn diff "$0"  >> "$DDIR$DFILEPREFIX.log"
