@@ -7,7 +7,7 @@ MDEV="/dev/ttyUSB1"
 NDEV="smu1.imager.umro"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
-DFILEPREFIX="test07_TAA-29B1-1_ch1=Vsfbgnd_ch2=DL06_ch3=Vgnd_ch4=Vcc_ch5=GL04_ch6=HI_$(hostname)_"
+DFILEPREFIX="test02_TAA-29B1-1_ch1=GlobRST_ch2=DL16_ch3=Vgnd_ch4=Vcc_ch5=GL03_ch6=HI_$(hostname)_"
 
 echo "$(date)" >> "$DDIR$DFILEPREFIX.log"
 svn diff "$0"  >> "$DDIR$DFILEPREFIX.log"
@@ -143,14 +143,20 @@ done
 #others  : Non-Floating, Current measurement (source X volts, measure amps)
 #settable using vN(volts), where N is the smu channel as in the order of $SMUS
 
+# Current sourcing:
+#sendscpi .1 '
+#node[1].smua.source.func=smua.OUTPUT_DCAMPS
+#node[1].display.smua.measure.func=display.MEASURE_DCVOLTS
+#'
 sendscpi .1 '
-node[1].smua.source.func=smua.OUTPUT_DCAMPS
-node[1].display.smua.measure.func=display.MEASURE_DCVOLTS
+node[1].smua.source.func=smua.OUTPUT_DCVOLTS
+node[1].display.smua.measure.func=display.MEASURE_DCAMPS
 '
 
 sendscpi .1 '
 node[1].smub.source.func=smub.OUTPUT_DCVOLTS
 node[1].display.smub.measure.func=display.MEASURE_DCAMPS
+node[1].smub.source.highc=smub.DISABLE
 '
 
 sendscpi .1 '
@@ -179,7 +185,7 @@ node[3].display.smub.measure.func=display.MEASURE_DCAMPS
 check_error
 
 
-
+if false; then
 sendscpi .1 'node[1].smua.trigger.measure.iv(node[1].smua.nvbuffer1,node[1].smua.nvbuffer2) '
 sendscpi .1 'node[1].smua.trigger.measure.action = node[1].smua.ENABLE'
 sendscpi .1 'node[1].smua.trigger.measure.stimulus = trigger.EVENT_ID'
@@ -188,8 +194,8 @@ sendscpi .1 'node[2].smua.trigger.measure.iv(node[2].smua.nvbuffer1,node[2].smua
 sendscpi .1 'node[2].smua.trigger.measure.action = node[2].smua.ENABLE'
 sendscpi .1 'node[2].smua.trigger.measure.stimulus = trigger.EVENT_ID'
 #sendscpi .1 'node[2].smua.trigger.initiate() '
-
 check_error
+fi
 
 sendscpi 1 '
 loadandrunscript MKmultiMonitor
