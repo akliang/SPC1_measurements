@@ -7,7 +7,9 @@ MDEV="/dev/ttyUSB1"
 NDEV="smu1.imager.umro"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
-DFILEPREFIX="test02_TAA-29B1-1_ch1=GlobRST_ch2=DL16_ch3=Vgnd_ch4=Vcc_ch5=GL03_ch6=HI_$(hostname)_"
+#DFILEPREFIX="test05_TAA-29B1-1_ch1=GlobRST_ch2=DL12_ch3=Vreset_ch4=Vcc_ch5=GL03_ch6=HI_$(hostname)_"
+#DFILEPREFIX="test06_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=DLrstGate_ch4=Vcc_ch5=GL03_ch6=HI_$(hostname)_"
+DFILEPREFIX="test07_TAA-29B1-1_ch1=Vreset_ch2=DL04_ch3=DLrstGate_ch4=Vcc_ch5=GL03_ch6=HI_$(hostname)_"
 
 echo "$(date)" >> "$DDIR$DFILEPREFIX.log"
 svn diff "$0"  >> "$DDIR$DFILEPREFIX.log"
@@ -153,9 +155,14 @@ node[1].smua.source.func=smua.OUTPUT_DCVOLTS
 node[1].display.smua.measure.func=display.MEASURE_DCAMPS
 '
 
+#sendscpi .1 '
+#node[1].smub.source.func=smub.OUTPUT_DCVOLTS
+#node[1].display.smub.measure.func=display.MEASURE_DCAMPS
+#node[1].smub.source.highc=smub.DISABLE
+#'
 sendscpi .1 '
-node[1].smub.source.func=smub.OUTPUT_DCVOLTS
-node[1].display.smub.measure.func=display.MEASURE_DCAMPS
+node[1].smub.source.func=smub.OUTPUT_DCAMPS
+node[1].display.smub.measure.func=display.MEASURE_DCVOLTS
 node[1].smub.source.highc=smub.DISABLE
 '
 
