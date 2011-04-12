@@ -7,9 +7,9 @@ MDEV="/dev/ttyUSB1"
 NDEV="smu1.imager.umro"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
-#DFILEPREFIX="test05_TAA-29B1-1_ch1=GlobRST_ch2=DL12_ch3=Vreset_ch4=Vcc_ch5=GL03_ch6=HI_$(hostname)_"
+DFILEPREFIX="test04_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL03HI_$(hostname)_"
 #DFILEPREFIX="test06_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=DLrstGate_ch4=Vcc_ch5=GL03_ch6=HI_$(hostname)_"
-DFILEPREFIX="test07_TAA-29B1-1_ch1=Vreset_ch2=DL04_ch3=DLrstGate_ch4=Vcc_ch5=GL03_ch6=HI_$(hostname)_"
+#DFILEPREFIX="test07_TAA-29B1-1_ch1=Vreset_ch2=DL04_ch3=DLrstGate_ch4=Vcc_ch5=GL03_ch6=HI_$(hostname)_"
 
 echo "$(date)" >> "$DDIR$DFILEPREFIX.log"
 svn diff "$0"  >> "$DDIR$DFILEPREFIX.log"
@@ -67,7 +67,7 @@ function sendscpi_cond() {
 }
 
 function check_error() {
-  sendscpi_cond 1 'errorcode, message, severity, errnode = errorqueue.next() if errorcode>0 then print(string.format("%d %s %d",errorcode, message, severity), errnode) end' dontshow "" 5 >&2
+  sendscpi_cond 1 'errorcode, message, severity, errnode = errorqueue.next() if errorcode~=0 then print(string.format("%d %s %d",errorcode, message, severity), errnode) end' "" "" 5 >&2
 }
 
 sendscpi .1 'abort'
@@ -148,7 +148,7 @@ done
 # Current sourcing:
 #sendscpi .1 '
 #node[1].smua.source.func=smua.OUTPUT_DCAMPS
-#node[1].display.smua.measure.func=display.MEASURE_DCVOLTS
+#node[1].DISPLAY.SMUA.MEASURE.FUNc=display.MEASURE_DCVOLTS
 #'
 sendscpi .1 '
 node[1].smua.source.func=smua.OUTPUT_DCVOLTS
@@ -228,7 +228,7 @@ end
 
 function MKcheckError()
   errorcode, message, severity, errnode = errorqueue.next()
-  if errorcode>0 then
+  if errorcode~=0 then
     --print(errorcode, message, severity, errnode)
     print(string.format("%d %s %d",errorcode, message, severity), errnode)
   end
@@ -303,10 +303,10 @@ T2=5
 until read -t $T1 K; do
   if [ -e "$SCPIFILE" ]; then
 	mv "$SCPIFILE" "$SCPIFILE.tmp"
-	sendscpi 0.1 "$(<"$SCPIFILE.tmp")" >&2
+	sendscpi 0 "$(<"$SCPIFILE.tmp")" >&2
 	rm "$SCPIFILE.tmp"
-	check_error
-        [ "$RESULT" != "" ] && echo "$RESULT" >> "$SCPIFILE.error"
+	#check_error
+        #[ "$RESULT" != "" ] && echo "$RESULT" >> "$SCPIFILE.error"
   fi
   sendscpi 5 'MKmultiMeasure() MKmultiPrint() MKcheckError()' silent singleline
   RESLINE="$(
@@ -314,7 +314,7 @@ until read -t $T1 K; do
   )"
   echo "$RESLINE" >>"$DDIR$DFILE"
   #| tee -a $DDIR$DFILE
-  sendscpi_cond 0.2 '-- reading errors' >&2
+  sendscpi_cond 0.1 '-- reading errors' "" "" 5 >&2
   print_result $RESLINE 
   if [ -e "$DATACTRLFILE" ]; then
 	DATAEXT="$(<"$DATACTRLFILE")"
