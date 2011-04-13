@@ -14,6 +14,7 @@ i6=v6+1
 
 set y2tics
 set ytics nomirror
+set xrange [*:*]
 
 #F='./test04_TAA-29B1-1_ch1=Vsfbgnd_ch2=DL06_ch3=Vgnd_ch4=Vcc_ch5=GL04_ch6=HI_simwork_.session'
 
@@ -52,4 +53,13 @@ plot \
 	F u ts:v4 w p lc 4, \
 	F u ts:v5 w p lc 5, \
 	F u ts:v6 w p lc 6
+
+# For TFTrst tests with Vreset on ch3 and reading in voltage with bias current on ch2
+plot \
+	F u ($3-to):v1 w p lc 1, \
+	F u ($3-to):v2 w l lc 2 axis x1y2, \
+	F u ($3-to):v3 w l lc 3 axis x1y2, \
+	F u ($3-to):v4 w p lc 4, \
+	F u ($3-to):v5 w p lc 5, \
+	F u ($3-to):v6 w p lc 6
 

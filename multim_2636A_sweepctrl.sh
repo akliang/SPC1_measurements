@@ -218,50 +218,92 @@ function sfchar() { # Full SF characterization for 29B-1 TAA
   VALS=$( octave --quiet --eval "for v=0:1.00:10; disp(v); end" )
   TO=2
   CH="v3"
+  VHI=15
+  send_cmd "v6($VHI)"
   for VCC in 10 09 08; do
     send_cmd "v4($VCC)"
     send_cmd "v3(0)"
     read -t $TB N && break
-    SWEEP="vcc$VCC"_"idl$I2"
+    SWEEP="vcc$VCC"_"idl$I2"_"vhi$VHI"_"ch2src=current"
     do_sweep yes
   done
+  for VHI in 14; do
+    send_cmd "v6($VHI)"
+    send_cmd "v4($VCC)"
+    send_cmd "v3(0)"
+    read -t $TB N && break
+    SWEEP="vcc$VCC"_"idl$I2"_"vhi$VHI"_"ch2src=current"
+    do_sweep yes
+  done
+  VHI=15
+  send_cmd "v6($VHI)"
   send_cmd "node[1].smub.source.func=smub.OUTPUT_DCVOLTS"
   send_cmd "node[1].display.smub.measure.func=display.MEASURE_DCAMPS"
   for VREF in 02 01 00; do
     send_cmd "v2($VREF)"
     send_cmd "v3(0)"
     read -t $TB N && break
-    SWEEP="vcc$VCC"_"vref$VREF"
+    SWEEP="vcc$VCC"_"vref$VREF"_"vhi$VHI"_"ch2src=voltage"
     do_sweep yes
   done
   for VCC in 10 09 08; do
     send_cmd "v4($VCC)"
     send_cmd "v3(0)"
     read -t $TB N && break
-    SWEEP="vcc$VCC"_"vref$VREF"
+    SWEEP="vcc$VCC"_"vref$VREF"_"vhi$VHI"_"ch2src=voltage"
     do_sweep yes
   done
-
+  for VHI in 14; do
+    send_cmd "v6($VHI)"
+    send_cmd "v4($VCC)"
+    send_cmd "v3(0)"
+    read -t $TB N && break
+    SWEEP="vcc$VCC"_"vref$VREF"_"vhi$VHI"_"ch2src=voltage"
+    do_sweep yes
+  done
+  VHI=15
+  send_cmd "v6($VHI)"
 
   # Load a voltage onto Cpix and mess with it
-  VRST=6
+  for VRST in 5 6 7; do
   TL=20
+  for SOURCEMODE in voltage current; do
+  if [ $SOURCEMODE == 'current' ]; then
   send_cmd "node[1].smub.source.func=smub.OUTPUT_DCAMPS"
   send_cmd "node[1].display.smub.measure.func=display.MEASURE_DCVOLTS"
+  else
+  send_cmd "node[1].smub.source.func=smub.OUTPUT_DCVOLTS"
+  send_cmd "node[1].display.smub.measure.func=display.MEASURE_DCAMPS"
+  fi
   send_cmd "v3($VRST)"
   send_cmd "v1(15)"
   send_cmd "v5(1)"
-  echo "Vreset$VRST"_"pulsing" >"$DATACTRLFILE"
+  echo "Vreset$VRST"_"pulsing_ch2src=$SOURCEMODE" >"$DATACTRLFILE"
   read -t $TB N 
+  # show that reading is not influenced by some switching
+  send_cmd "v6(14)"
+  read -t $TO N 
+  send_cmd "v6(15)"
+  read -t $TO N 
+  send_cmd "v4(9)"
+  read -t $TO N 
+  send_cmd "v4(8)"
+  read -t $TO N 
+  send_cmd "v5(0)"
+  read -t $TO N 
+  send_cmd "v5(1)"
+  read -t $TO N 
+
+  # turn TFTreset OFF and start the interesting pulses
+  send_cmd "v1(0)"
+  read -t $TL N 
+  send_cmd "v1(-1)"
+  read -t $TL N 
   send_cmd "v1(0)"
   read -t $TL N 
   send_cmd "v5(0)"
   read -t $TL N 
   send_cmd "v5(1)"
-  read -t $TL N 
-  send_cmd "v1(-1)"
-  read -t $TL N 
-  send_cmd "v1(0)"
   read -t $TL N 
   send_cmd "v3($VRST-1)"
   read -t $TL N 
@@ -271,15 +313,9 @@ function sfchar() { # Full SF characterization for 29B-1 TAA
   read -t $TL N 
   send_cmd "v4(8)"
   read -t $TL N 
-  send_cmd "node[1].smub.source.func=smub.OUTPUT_DCVOLTS"
-  send_cmd "node[1].display.smub.measure.func=display.MEASURE_DCAMPS"
-  read -t $TL N 
   send_cmd "v2(1)"
   read -t $TL N 
   send_cmd "v2(0)"
-  read -t $TL N 
-  send_cmd "node[1].smub.source.func=smub.OUTPUT_DCAMPS"
-  send_cmd "node[1].display.smub.measure.func=display.MEASURE_DCVOLTS"
   read -t $TL N 
   send_cmd "v6(14)"
   read -t $TL N 
@@ -289,7 +325,14 @@ function sfchar() { # Full SF characterization for 29B-1 TAA
   read -t $TL N 
   send_cmd "v5(1)"
   read -t $TL N 
+  send_cmd "v1(-1)"
+  read -t $TL N 
+  send_cmd "v1(0)"
+  read -t $TL N 
   rm "$DATACTRLFILE"
+
+  done # current vs. voltage
+  done # various vresets
 }
 
 # main program loop
