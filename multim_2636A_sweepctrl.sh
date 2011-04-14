@@ -200,81 +200,97 @@ function sfchar() { # Full SF characterization for 29B-1 TAA
 
   # Initialization
   I2="-1E-7"
+  send_cmd "node[1].smub.source.func=smub.OUTPUT_DCVOLTS"
+  send_cmd "node[1].display.smub.measure.func=display.MEASURE_DCAMPS"
   send_cmd "v1(0) v2(0) v3(0) v4(0) v5(0) v6(0)"
   send_cmd "i1(0) i2(0) i3(0) i4(0) i5(0) i6(0)"
-  send_cmd "v4(8)"
-  send_cmd "v6(15)"
-  send_cmd "v1(15)"
-  send_cmd "i2($I2)"
-  send_cmd "v3(5)"
-  send_cmd "node[1].smub.source.func=smub.OUTPUT_DCAMPS"
-  send_cmd "node[1].display.smub.measure.func=display.MEASURE_DCVOLTS"
-  #send_cmd "node[1].smub.source.func=smub.OUTPUT_DCVOLTS"
-  #send_cmd "node[1].display.smub.measure.func=display.MEASURE_DCAMPS"
+  #send_cmd "node[1].smub.source.func=smub.OUTPUT_DCAMPS"
+  #send_cmd "node[1].display.smub.measure.func=display.MEASURE_DCVOLTS"
   TB=6 # time between sweeps / parts of characterization
   read -t $TB N && break
 
   
   VALS=$( octave --quiet --eval "for v=0:1.00:10; disp(v); end" )
+  VALS="$VALS "$( octave --quiet --eval "for v=10:-1.00:0; disp(v); end" )
   TO=2
   CH="v3"
-  VHI=15
-  send_cmd "v6($VHI)"
-  for VCC in 10 09 08; do
-    send_cmd "v4($VCC)"
-    send_cmd "v3(0)"
-    read -t $TB N && break
-    SWEEP="vcc$VCC"_"idl$I2"_"vhi$VHI"_"ch2src=current"
-    do_sweep yes
-  done
-  for VHI in 14; do
-    send_cmd "v6($VHI)"
-    send_cmd "v4($VCC)"
-    send_cmd "v3(0)"
-    read -t $TB N && break
-    SWEEP="vcc$VCC"_"idl$I2"_"vhi$VHI"_"ch2src=current"
-    do_sweep yes
-  done
-  VHI=15
-  send_cmd "v6($VHI)"
-  send_cmd "node[1].smub.source.func=smub.OUTPUT_DCVOLTS"
-  send_cmd "node[1].display.smub.measure.func=display.MEASURE_DCAMPS"
-  for VREF in 02 01 00; do
-    send_cmd "v2($VREF)"
-    send_cmd "v3(0)"
-    read -t $TB N && break
-    SWEEP="vcc$VCC"_"vref$VREF"_"vhi$VHI"_"ch2src=voltage"
-    do_sweep yes
-  done
-  for VCC in 10 09 08; do
-    send_cmd "v4($VCC)"
-    send_cmd "v3(0)"
-    read -t $TB N && break
-    SWEEP="vcc$VCC"_"vref$VREF"_"vhi$VHI"_"ch2src=voltage"
-    do_sweep yes
-  done
-  for VHI in 14; do
-    send_cmd "v6($VHI)"
-    send_cmd "v4($VCC)"
-    send_cmd "v3(0)"
-    read -t $TB N && break
-    SWEEP="vcc$VCC"_"vref$VREF"_"vhi$VHI"_"ch2src=voltage"
-    do_sweep yes
-  done
-  VHI=15
-  send_cmd "v6($VHI)"
-
+  
+  for I2 in 'voltage' '-1E-7' '-1E-6' '-1E-5' ; do
+  #for I2 in '-1E-7' '-1E-6' '-1E-5' ; do
+  if [ "$I2" != "voltage" ]; then
+    SOURCEMODE=$I2"current"
+    send_cmd "i2($I2)"
+    send_cmd "node[1].smub.source.func=smub.OUTPUT_DCAMPS"
+    send_cmd "node[1].display.smub.measure.func=display.MEASURE_DCVOLTS"
+    send_cmd "v4(8)"
+    send_cmd "v6(15)"
+    send_cmd "v1(15)"
+    send_cmd "v3(5)"
+    send_cmd "v2(0)"
+    send_cmd "v5(0)"
+      # Voltage reading / current sinking characterization
+      VHI=15
+      send_cmd "v6($VHI)"
+      for VCC in 10 09 08; do
+        send_cmd "v4($VCC)"
+        send_cmd "v3(0)"
+        read -t $TB N && break
+        SWEEP="vcc$VCC"_"idl$I2"_"vhi$VHI"_"ch2src=current"
+        do_sweep yes
+      done
+      for VHI in 14; do
+        send_cmd "v6($VHI)"
+        send_cmd "v4($VCC)"
+        send_cmd "v3(0)"
+        read -t $TB N && break
+        SWEEP="vcc$VCC"_"idl$I2"_"vhi$VHI"_"ch2src=current"
+        do_sweep yes
+      done
+      VHI=15
+      send_cmd "v6($VHI)"
+      # End of characterization
+  else
+    SOURCEMODE='voltage'
+    send_cmd "node[1].smub.source.func=smub.OUTPUT_DCVOLTS"
+    send_cmd "node[1].display.smub.measure.func=display.MEASURE_DCAMPS"
+    send_cmd "v4(8)"
+    send_cmd "v6(15)"
+    send_cmd "v1(15)"
+    send_cmd "v3(5)"
+    send_cmd "v2(0)"
+    send_cmd "v5(0)"
+      # Current reading / voltage sourcing characterization
+      VHI=15
+      send_cmd "v6($VHI)"
+      for VREF in 02 01 00; do
+        send_cmd "v2($VREF)"
+        send_cmd "v3(0)"
+        read -t $TB N && break
+        SWEEP="vcc$VCC"_"vref$VREF"_"vhi$VHI"_"ch2src=voltage"
+        do_sweep yes
+      done
+      for VCC in 10 09 08; do
+        send_cmd "v4($VCC)"
+        send_cmd "v3(0)"
+        read -t $TB N && break
+        SWEEP="vcc$VCC"_"vref$VREF"_"vhi$VHI"_"ch2src=voltage"
+        do_sweep yes
+      done
+      for VHI in 14; do
+        send_cmd "v6($VHI)"
+        send_cmd "v4($VCC)"
+        send_cmd "v3(0)"
+        read -t $TB N && break
+        SWEEP="vcc$VCC"_"vref$VREF"_"vhi$VHI"_"ch2src=voltage"
+        do_sweep yes
+      done
+      VHI=15
+      send_cmd "v6($VHI)"
+      # End of characterization
+  fi
   # Load a voltage onto Cpix and mess with it
   for VRST in 5 6 7; do
   TL=20
-  for SOURCEMODE in voltage current; do
-  if [ $SOURCEMODE == 'current' ]; then
-  send_cmd "node[1].smub.source.func=smub.OUTPUT_DCAMPS"
-  send_cmd "node[1].display.smub.measure.func=display.MEASURE_DCVOLTS"
-  else
-  send_cmd "node[1].smub.source.func=smub.OUTPUT_DCVOLTS"
-  send_cmd "node[1].display.smub.measure.func=display.MEASURE_DCAMPS"
-  fi
   send_cmd "v3($VRST)"
   send_cmd "v1(15)"
   send_cmd "v5(1)"
