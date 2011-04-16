@@ -215,8 +215,9 @@ function sfchar() { # Full SF characterization for 29B-1 TAA
   TO=2
   CH="v3"
   
-  for I2 in 'voltage' '-1E-7' '-1E-6' '-1E-5' ; do
-  #for I2 in '-1E-7' '-1E-6' '-1E-5' ; do
+  #for I2 in 'voltage' '-1E-7' '-1E-6' '-1E-5' ; do
+  #for I2 in 'voltage' '-1E-7' '-1E-5' ; do
+  for I2 in 'voltage' '-1E-7' ; do
   if [ "$I2" != "voltage" ]; then
     SOURCEMODE=$I2"current"
     send_cmd "i2($I2)"
@@ -237,6 +238,15 @@ function sfchar() { # Full SF characterization for 29B-1 TAA
         read -t $TB N && break
         SWEEP="vcc$VCC"_"idl$I2"_"vhi$VHI"_"ch2src=current"
         do_sweep yes
+      done
+      for VCC in 08; do
+        send_cmd "v4($VCC)"
+        send_cmd "v3(0)"
+        read -t $TB N && break
+        SWEEP="vcc$VCC"_"idl$I2"_"vhi$VHI"_"ch2src=currentLONG"
+        TO_=$TO; TO=10
+        do_sweep yes
+	TO=$TO_
       done
       for VHI in 14; do
         send_cmd "v6($VHI)"
@@ -269,6 +279,15 @@ function sfchar() { # Full SF characterization for 29B-1 TAA
         SWEEP="vcc$VCC"_"vref$VREF"_"vhi$VHI"_"ch2src=voltage"
         do_sweep yes
       done
+      for VREF in 00; do
+        send_cmd "v2($VREF)"
+        send_cmd "v3(0)"
+        read -t $TB N && break
+        SWEEP="vcc$VCC"_"vref$VREF"_"vhi$VHI"_"ch2src=voltageLONG"
+        TO_=$TO; TO=10
+        do_sweep yes
+	TO=$TO_
+      done
       for VCC in 10 09 08; do
         send_cmd "v4($VCC)"
         send_cmd "v3(0)"
@@ -289,7 +308,8 @@ function sfchar() { # Full SF characterization for 29B-1 TAA
       # End of characterization
   fi
   # Load a voltage onto Cpix and mess with it
-  for VRST in 5 6 7; do
+  #for VRST in 5 6 7; do
+  for VRST in  6 ; do
   TL=20
   send_cmd "v3($VRST)"
   send_cmd "v1(15)"
