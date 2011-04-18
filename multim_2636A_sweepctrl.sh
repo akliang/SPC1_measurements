@@ -261,9 +261,10 @@ function sfchar_singlechan() { # Full SF characterization for 29B-1 TAA
       # End of characterization
   else
     SOURCEMODE='voltage'
+    VCC=08
     send_cmd "node[1].smub.source.func=smub.OUTPUT_DCVOLTS"
     send_cmd "node[1].display.smub.measure.func=display.MEASURE_DCAMPS"
-    send_cmd "v4(8)"
+    send_cmd "v4($VCC)"
     send_cmd "v6(15)"
     send_cmd "v1(15)"
     send_cmd "v3(5)"
@@ -408,6 +409,8 @@ function sfchar_triple() { # Full SF characterization for 29B-1 TAA
   VALS="$VALS "$( octave --quiet --eval "for v=10:-1.00:0; disp(v); end" )
   TO=2
   CH="v3"
+  VHI=15
+  VCC=08
   
   #for I2 in 'voltage' '-1E-7' '-1E-6' '-1E-5' ; do
   #for I2 in 'voltage' '-1E-7' '-1E-5' ; do
@@ -428,7 +431,7 @@ function sfchar_triple() { # Full SF characterization for 29B-1 TAA
     send_cmd "v2(0) v4(0) v6(0)"
     send_cmd "v5(0)"
       # Voltage reading / current sinking characterization
-      VHI=15
+      ##VHI=15
       ##send_cmd "v6($VHI)"
       ##for VCC in 10 09 08; do
       ##  send_cmd "v4($VCC)"
@@ -437,7 +440,7 @@ function sfchar_triple() { # Full SF characterization for 29B-1 TAA
       ##  SWEEP="vcc$VCC"_"idl$I2"_"vhi$VHI"_"ch2src=current"
       ##  do_sweep yes
       ##done
-      for VCC in 08; do
+      for VCC in $VCC; do
         ##send_cmd "v4($VCC)"
         send_cmd "v3(0)"
         read -t $TB N && break
@@ -472,7 +475,7 @@ function sfchar_triple() { # Full SF characterization for 29B-1 TAA
     send_cmd "v2(0) v4(0) v6(0)"
     send_cmd "v5(0)"
       # Current reading / voltage sourcing characterization
-      VHI=15
+      ##VHI=15
       ##send_cmd "v6($VHI)"
       for VREF in 02 01 00; do
         send_cmd "v2($VREF) v4($VREF) v6($VREF)"
