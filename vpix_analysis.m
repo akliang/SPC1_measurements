@@ -18,30 +18,41 @@ clf
 leg3Str={};
 fig3idx=0;
 
-figure(4)
-clf
-leg4Str={};
-fig4idx=0;
+%figure(4)
+%clf
+%leg4Str={};
+%fig4idx=0;
 %}
 
 %GLs={'GL03','GL04','GL05','GL06','GL07'};
 %GLs={'GL11'};
 %GLs={'GL11','GL12'};
 %GLs={'GL11','GL12','GL13','GL14','GL15','GL16'};
-DataSets={ 
+%{
+DataSets={
 'test05_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL02HI_simwork_'
 'test05_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL03HI_simwork_'
 'test05_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL04HI_simwork_'
-'test03_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL11HI_simwork_'
-'test03_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL12HI_simwork_'
+'test05_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL05HI_simwork_'
+'test05_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL06HI_simwork_'
+'test06_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL07HI_simwork_'
+'test06_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL08HI_simwork_'
+'test06_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL09HI_simwork_'
+};
+%}
+DataSets={
+ 'test06_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL10HI_simwork_'
+ 'test03_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL11HI_simwork_'
+%'test06_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL11HI_simwork_'
+ 'test03_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL12HI_simwork_'
+%'test06_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL12HI_simwork_'
 %'test03_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL13HI_simwork_' % To repeat - offset in calibration
-'test05_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL13HI_simwork_' % To repeat - offset in calibration
-'test03_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL14HI_simwork_'
-%'test03_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL15HI_simwork_'
-'test04_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL15HI_simwork_'
-
-% 'test04_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL16HI_simwork_'
-% 'test05_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL01HI_simwork_'
+ 'test05_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL13HI_simwork_' % repetition does not suffer offset
+ 'test03_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL14HI_simwork_'
+ 'test03_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL15HI_simwork_'
+%'test04_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL15HI_simwork_' % both are good
+ 'test04_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL16HI_simwork_'
+ 'test05_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL01HI_simwork_' % different array location - look different!
 };
 
 %for glid=1:numel(GLs);
@@ -292,9 +303,9 @@ for(index=1:length(fileArray2))
     xlabel('Time (s)');
     ylabel('Ipix (A)');
 
-    figure(4);
-    plot(xtime(1:end-0)+fig2idx,abs(dV),['-' cArray{fig2idx}]);
-    hold on;
+    %figure(4);
+    %plot(xtime(1:end-0)+fig2idx,abs(dV),['-' cArray{fig2idx}]);
+    %hold on;
 
     % maximum peak (or average of largest ones) or Vbias pulses
     % => correspond to 'unity charge injection' (one volt thru 'Cpd')
