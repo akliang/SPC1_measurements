@@ -7,7 +7,7 @@ MDEV="/dev/ttyUSB1"
 NDEV="smu1.imager.umro"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
-DFILEPREFIX="test01_TAA-29B1-1_ch1=GlobRST_ch2=DL06_ch3=Vreset_ch4=DL06_ch5=Vbias_ch6=DL12_GL12HI_$(hostname)_"
+DFILEPREFIX="test01_TAA-29B1-1_ch1=GlobRST_ch2=DL06_ch3=Vreset_ch4=DL06_ch5=Vbias_ch6=DL12_GL13HI_$(hostname)_"
 #DFILEPREFIX="test06_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL12HI_$(hostname)_"
 #DFILEPREFIX="test06_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=DLrstGate_ch4=Vcc_ch5=GL03_ch6=HI_$(hostname)_"
 #DFILEPREFIX="test07_TAA-29B1-1_ch1=Vreset_ch2=DL04_ch3=DLrstGate_ch4=Vcc_ch5=GL03_ch6=HI_$(hostname)_"
@@ -188,6 +188,13 @@ node[3].display.smua.measure.func=display.MEASURE_DCAMPS
 sendscpi .1 '
 node[3].smub.source.func=smub.OUTPUT_DCVOLTS
 node[3].display.smub.measure.func=display.MEASURE_DCAMPS
+'
+
+## for triple-channel measurement, no high-C on DL channels
+sendscpi .1 '
+node[1].smub.source.highc=smub.DISABLE
+node[2].smub.source.highc=smub.DISABLE
+node[3].smub.source.highc=smub.DISABLE
 '
 
 check_error

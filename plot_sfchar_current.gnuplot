@@ -20,7 +20,7 @@ plot \
 	F u ($3-to):v1 w p lc 1, \
 	F u ($3-to):i2 w l lc 2 axis x1y2, \
 	F u ($3-to):v3 w p lc 3, \
-	F u ($3-to):v4 w p lc 4, \
+	F u ($3-to):i4 w l lc 4 axis x1y2, \
 	F u ($3-to):v5 w p lc 5, \
-	F u ($3-to):v6 w p lc 6
+	F u ($3-to):i6 w l lc 6 axis x1y2
 

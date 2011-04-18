@@ -414,7 +414,7 @@ function sfchar_triple() { # Full SF characterization for 29B-1 TAA
   for I2 in 'voltage' '-1E-7' ; do
   if [ "$I2" != "voltage" ]; then
     SOURCEMODE=$I2"current"
-    send_cmd "i2($I2)"
+    send_cmd "i2($I2) i4($I2) i6($I2)"
     send_cmd "node[1].smub.source.func=smub.OUTPUT_DCAMPS"
     send_cmd "node[1].display.smub.measure.func=display.MEASURE_DCVOLTS"
     send_cmd "node[2].smub.source.func=smub.OUTPUT_DCAMPS"
@@ -519,14 +519,14 @@ function sfchar_triple() { # Full SF characterization for 29B-1 TAA
   echo "Vreset$VRST"_"pulsing_ch2src=$SOURCEMODE" >"$DATACTRLFILE"
   read -t $TB N 
   # show that reading is not influenced by some switching
-  send_cmd "v6(14)"
-  read -t $TO N 
-  send_cmd "v6(15)"
-  read -t $TO N 
-  send_cmd "v4(9)"
-  read -t $TO N 
-  send_cmd "v4(8)"
-  read -t $TO N 
+  ##send_cmd "v6(14)"
+  ##read -t $TO N 
+  ##send_cmd "v6(15)"
+  ##read -t $TO N 
+  ##send_cmd "v4(9)"
+  ##read -t $TO N 
+  ##send_cmd "v4(8)"
+  ##read -t $TO N 
   send_cmd "v5(0)"
   read -t $TO N 
   send_cmd "v5(1)"
@@ -547,18 +547,18 @@ function sfchar_triple() { # Full SF characterization for 29B-1 TAA
   read -t $TL N 
   send_cmd "v3($VRST)"
   read -t $TL N 
-  send_cmd "v4(9)"
+  ##send_cmd "v4(9)"
+  ##read -t $TL N 
+  ##send_cmd "v4(8)"
+  ##read -t $TL N 
+  send_cmd "v2(1) v4(1) v6(1)"
   read -t $TL N 
-  send_cmd "v4(8)"
+  send_cmd "v2(0) v4(0) v6(0)"
   read -t $TL N 
-  send_cmd "v2(1)"
-  read -t $TL N 
-  send_cmd "v2(0)"
-  read -t $TL N 
-  send_cmd "v6(14)"
-  read -t $TL N 
-  send_cmd "v6(15)"
-  read -t $TL N 
+  ##send_cmd "v6(14)"
+  ##read -t $TL N 
+  ##send_cmd "v6(15)"
+  ##read -t $TL N 
   send_cmd "v5(0)"
   read -t $TL N 
   send_cmd "v5(1)"
