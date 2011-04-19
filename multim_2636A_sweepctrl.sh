@@ -579,36 +579,51 @@ function sfchar_triple() { # Full SF characterization for 29B-1 TAA
   if true; then
   # Load a voltage onto Cpix and perform multiple different sequences
   VRST=6
-  for TYPE in 'None' 'Vbias' 'Reset' 'Vreset' ; do
+  for TYPE in 'None' 'PreSwitch' 'CancelInj' 'Vbias' 'ResetP' 'ResetN' 'VresetP' 'VresetN' ; do
   TL=20
   send_cmd "v3($VRST)"
   send_cmd "v1(15)"
   send_cmd "v5(1)"
   echo "Vreset$VRST"_"pulsing$TYPE"_"ch2src=$SOURCEMODE" >"$DATACTRLFILE"
   read -t $TB N 
+  if [ "$TYPE" == "PreSwitch" ]; then
+    for SW in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do
+      send_cmd "v1(0)"
+      send_cmd "v1(15)"
+    done
+  else
   # show that reading is not influenced by some switching
   send_cmd "v5(0)"
   read -t $TO N 
   send_cmd "v5(1)"
   read -t $TO N 
+  fi
 
   # turn TFTreset OFF 
+  if [ "$TYPE" == "CancelInj" ]; then
+  send_cmd "v1(0) v5(1.2)"
+  else
   send_cmd "v1(0)"
+  fi
   read -t $TL N 
 
   # start the pulses
-  for PULSES in 1 2 3; do
-  if [ "$TYPE" == 'None'   ]; then send_cmd "";            fi
-  if [ "$TYPE" == 'Vbias'  ]; then send_cmd "v5(0)";       fi
-  if [ "$TYPE" == 'Reset'  ]; then send_cmd "v1(-1)";      fi
-  if [ "$TYPE" == 'Vreset' ]; then send_cmd "v3($VRST-1)"; fi
+  for PULSES in 1 2 3 4 5 6; do
+  if [ "$TYPE" == 'None'    ]; then send_cmd "";            fi
+  if [ "$TYPE" == 'Vbias'   ]; then send_cmd "v5(0)";       fi
+  if [ "$TYPE" == 'ResetN'  ]; then send_cmd "v1(-1)";      fi
+  if [ "$TYPE" == 'ResetP'  ]; then send_cmd "v1(1)";       fi
+  if [ "$TYPE" == 'VresetN' ]; then send_cmd "v3($VRST-1)"; fi
+  if [ "$TYPE" == 'VresetP' ]; then send_cmd "v3($VRST+1)"; fi
   #send_cmd "v2(1) v4(1) v6(1)"
   #send_cmd "v2(0) v4(0) v6(0)"
   read -t $TL N 
-  if [ "$TYPE" == 'None'   ]; then send_cmd "";            fi
-  if [ "$TYPE" == 'Vbias'  ]; then send_cmd "v5(1)";       fi
-  if [ "$TYPE" == 'Reset'  ]; then send_cmd "v1(0)";       fi
-  if [ "$TYPE" == 'Vreset' ]; then send_cmd "v3($VRST)";   fi
+  if [ "$TYPE" == 'None'    ]; then send_cmd "";            fi
+  if [ "$TYPE" == 'Vbias'   ]; then send_cmd "v5(1)";       fi
+  if [ "$TYPE" == 'ResetN'  ]; then send_cmd "v1(0)";       fi
+  if [ "$TYPE" == 'ResetP'  ]; then send_cmd "v1(0)";       fi
+  if [ "$TYPE" == 'VresetN' ]; then send_cmd "v3($VRST)";   fi
+  if [ "$TYPE" == 'VresetP' ]; then send_cmd "v3($VRST)";   fi
   read -t $TL N 
   done
   rm "$DATACTRLFILE"

@@ -71,9 +71,10 @@ DataSets={
  'test01_TAA-29B1-1_ch1=GlobRST_ch2=DL16_ch3=Vreset_ch4=DL10_ch5=Vbias_ch6=DL03_GL13HI_simwork_'
 };
 %}
-%DataSets={
+DataSets={
 % 'test02_TAA-29B1-1_ch1=GlobRST_ch2=DL16_ch3=Vreset_ch4=DL10_ch5=Vbias_ch6=DL03_GL13HI_simwork_'
-%}
+ 'test04_TAA-29B1-1_ch1=GlobRST_ch2=DL16_ch3=Vreset_ch4=DL10_ch5=Vbias_ch6=DL03_GL13HI_simwork_'
+}
 
 for dlid=2;%1:1;%:1;
 
@@ -263,7 +264,7 @@ for(index=1:length(fileArray2))
     fSess=fName(1:K-1);
 
     pulsing=regexp(fName, '(pulsing[^_]*)_', 'tokens');
-
+    if strcmp(pulsing{1}{1}, 'pulsingPreSwitch'); continue; end
 
     % matlab ignores errors on converting the first two columns
     % data=load('-ascii',[DDIR fName]);
