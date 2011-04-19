@@ -579,7 +579,7 @@ function sfchar_triple() { # Full SF characterization for 29B-1 TAA
   if true; then
   # Load a voltage onto Cpix and perform multiple different sequences
   VRST=6
-  for TYPE in 'None' 'PreSwitch' 'CancelInj' 'Vbias' 'ResetP' 'ResetN' 'VresetP' 'VresetN' ; do
+  for TYPE in 'PreSwitch' 'None' 'CancelInj' 'Vbias' 'ResetP' 'ResetN' 'VresetP' 'VresetN' ; do
   TL=20
   send_cmd "v3($VRST)"
   send_cmd "v1(15)"

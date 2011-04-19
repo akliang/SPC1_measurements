@@ -73,7 +73,9 @@ DataSets={
 %}
 DataSets={
 % 'test02_TAA-29B1-1_ch1=GlobRST_ch2=DL16_ch3=Vreset_ch4=DL10_ch5=Vbias_ch6=DL03_GL13HI_simwork_'
- 'test04_TAA-29B1-1_ch1=GlobRST_ch2=DL16_ch3=Vreset_ch4=DL10_ch5=Vbias_ch6=DL03_GL13HI_simwork_'
+% 'test04_TAA-29B1-1_ch1=GlobRST_ch2=DL16_ch3=Vreset_ch4=DL10_ch5=Vbias_ch6=DL03_GL13HI_simwork_'
+ 'test05_TAA-29B1-1_ch1=GlobRST_ch2=DL16_ch3=Vreset_ch4=DL10_ch5=Vbias_ch6=DL03_GL13HI_simwork_'
+ 'test06_TAA-29B1-1_ch1=GlobRST_ch2=DL16_ch3=Vreset_ch4=DL10_ch5=Vbias_ch6=DL03_GL13HI_simwork_'
 }
 
 for dlid=2;%1:1;%:1;
@@ -264,7 +266,8 @@ for(index=1:length(fileArray2))
     fSess=fName(1:K-1);
 
     pulsing=regexp(fName, '(pulsing[^_]*)_', 'tokens');
-    if strcmp(pulsing{1}{1}, 'pulsingPreSwitch'); continue; end
+    %if strcmp(pulsing{1}{1}, 'pulsingPreSwitch'); continue; end
+    if strcmp(pulsing{1}{1}, 'pulsingVbias'); continue; end
 
     % matlab ignores errors on converting the first two columns
     % data=load('-ascii',[DDIR fName]);
@@ -273,6 +276,7 @@ for(index=1:length(fileArray2))
     data=load('-ascii','tmp.ascii');
 
     xtime=data(:,3)-data(1,3);
+    if strcmp(pulsing{1}{1}, 'pulsingPreSwitch'); xtime=xtime-15.6; end
     Vref=data(:,ch_sout(dlid)-yChOffset) * Vrefmult;
     Vcc=data(:,c2c(ch_vcc))*c2f(ch_vcc)+c2o(ch_vcc,8);
     Vhi=data(:,c2c(ch_vhi))*c2f(ch_vhi)+c2o(ch_vhi,15);
@@ -324,7 +328,7 @@ for(index=1:length(fileArray2))
         VDiff=diff(V);
         idxDiff=abs(diff(V))>0.5;
         for idx=find(idxDiff)';
-        if idx>25; %idx>50; 
+        if xtime(idx)>8.5; %idx>25; %idx>50; 
           tx=xtime(idx);
           %ty=-0.20-0.05*vid+VDiff(idx)*0.025;
           ty=0.12-0.00*vid;%+VDiff(idx)*0.025;
@@ -336,7 +340,7 @@ for(index=1:length(fileArray2))
           text( tx, ty,
                 sprintf('\n%s\n%+.0f mV', fig2lbr, dV(idx)*1000 ), 'Color', cArray{fig2idx} );
         end
-	if idx>70; %idx>80;
+	if xtime(idx)>10; % idx>70; %idx>80;
 	  PeakTmp(end+1)=abs(dV(idx));
 	end
         end
