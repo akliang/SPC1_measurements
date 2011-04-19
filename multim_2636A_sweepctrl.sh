@@ -512,6 +512,7 @@ function sfchar_triple() { # Full SF characterization for 29B-1 TAA
       ##send_cmd "v6($VHI)"
       # End of characterization
   fi
+  if false; then
   # Load a voltage onto Cpix and mess with it
   #for VRST in 5 6 7; do
   for VRST in  6 ; do
@@ -572,8 +573,50 @@ function sfchar_triple() { # Full SF characterization for 29B-1 TAA
   read -t $TL N 
   rm "$DATACTRLFILE"
 
-  done # current vs. voltage
   done # various vresets
+  fi
+
+  if true; then
+  # Load a voltage onto Cpix and perform multiple different sequences
+  VRST=6
+  for TYPE in 'None' 'Vbias' 'Reset' 'Vreset' ; do
+  TL=20
+  send_cmd "v3($VRST)"
+  send_cmd "v1(15)"
+  send_cmd "v5(1)"
+  echo "Vreset$VRST"_"pulsing$TYPE"_"ch2src=$SOURCEMODE" >"$DATACTRLFILE"
+  read -t $TB N 
+  # show that reading is not influenced by some switching
+  send_cmd "v5(0)"
+  read -t $TO N 
+  send_cmd "v5(1)"
+  read -t $TO N 
+
+  # turn TFTreset OFF 
+  send_cmd "v1(0)"
+  read -t $TL N 
+
+  # start the pulses
+  for PULSES in 1 2 3; do
+  if [ "$TYPE" == 'None'   ]; then send_cmd "";            fi
+  if [ "$TYPE" == 'Vbias'  ]; then send_cmd "v5(0)";       fi
+  if [ "$TYPE" == 'Reset'  ]; then send_cmd "v1(-1)";      fi
+  if [ "$TYPE" == 'Vreset' ]; then send_cmd "v3($VRST-1)"; fi
+  #send_cmd "v2(1) v4(1) v6(1)"
+  #send_cmd "v2(0) v4(0) v6(0)"
+  read -t $TL N 
+  if [ "$TYPE" == 'None'   ]; then send_cmd "";            fi
+  if [ "$TYPE" == 'Vbias'  ]; then send_cmd "v5(1)";       fi
+  if [ "$TYPE" == 'Reset'  ]; then send_cmd "v1(0)";       fi
+  if [ "$TYPE" == 'Vreset' ]; then send_cmd "v3($VRST)";   fi
+  read -t $TL N 
+  done
+  rm "$DATACTRLFILE"
+
+  done # various vresets
+  fi
+
+  done # current vs. voltage
 }
 
 # main program loop

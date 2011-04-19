@@ -71,8 +71,11 @@ DataSets={
  'test01_TAA-29B1-1_ch1=GlobRST_ch2=DL16_ch3=Vreset_ch4=DL10_ch5=Vbias_ch6=DL03_GL13HI_simwork_'
 };
 %}
+%DataSets={
+% 'test02_TAA-29B1-1_ch1=GlobRST_ch2=DL16_ch3=Vreset_ch4=DL10_ch5=Vbias_ch6=DL03_GL13HI_simwork_'
+%}
 
-for dlid=1:1;%:1;
+for dlid=2;%1:1;%:1;
 
 %for glid=1:numel(GLs);
 for glid=1:size(DataSets,1);
@@ -133,7 +136,7 @@ for(index=1:length(fileArray))
     fType=fName(K+2:end);
     fSess=fName(1:K-1);
     DL={};
-
+    
     channels=regexp(fName, '(ch([0-9])+=(DL|GL)*([0-9]+)*([^_]*))_', 'tokens');
     ch_vcc=-1;
     ch_vreset=-1;
@@ -259,6 +262,9 @@ for(index=1:length(fileArray2))
     fType=fName(K+2:end);
     fSess=fName(1:K-1);
 
+    pulsing=regexp(fName, '(pulsing[^_]*)_', 'tokens');
+
+
     % matlab ignores errors on converting the first two columns
     % data=load('-ascii',[DDIR fName]);
     % octave needs a 'clean' file:
@@ -287,7 +293,7 @@ for(index=1:length(fileArray2))
     figure(2);
     plot(xtime,VpixP,['-' cArray{fig2idx}]);
     %leg2Str{end+1}=sprintf('Vrst=%2.2fV mode=%d   DL=%s GL=%s', Vrst(1), mode, DL{dlid}, GL);
-    leg2Str{end+1}=sprintf('Vrst=%2.2fV mode=%d   DLpcb=%s GLarray=%02d', Vrst(1), mode, DL{dlid}, L.GL_Array(ll(gl)) );
+    leg2Str{end+1}=sprintf('Vrst=%2.2fV mode=%d  %s  DLpcb=%s GLarray=%02d', Vrst(1), mode, pulsing{1}{1}, DL{dlid}, L.GL_Array(ll(gl)) );
     hold on;
     %plot(xtime,Spix,['-' cArray{fig2idx}]);
     %leg2Str{end+1}=sprintf('Vrst=%2.2fV mode=%d   DL=%s GL=%s', Vrst(1), mode, DL{dlid}, GL);
