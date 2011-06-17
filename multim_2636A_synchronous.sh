@@ -7,10 +7,7 @@ MDEV="/dev/ttyUSB1"
 NDEV="smu1.imager.umro"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
-DFILEPREFIX="test08_TAA-29B1-1_ch1=GlobRST_ch2=DL16_ch3=Vreset_ch4=DL10_ch5=Vbias_ch6=DL03_GL13HI_$(hostname)_"
-#DFILEPREFIX="test06_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL12HI_$(hostname)_"
-#DFILEPREFIX="test06_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=DLrstGate_ch4=Vcc_ch5=GL03_ch6=HI_$(hostname)_"
-#DFILEPREFIX="test07_TAA-29B1-1_ch1=Vreset_ch2=DL04_ch3=DLrstGate_ch4=Vcc_ch5=GL03_ch6=HI_$(hostname)_"
+DFILEPREFIX="testXX_TAA-29B1-1_ch1=GlobRST_ch2=DL16_ch3=Vreset_ch4=DL10_ch5=Vbias_ch6=DL03_GL13HI_$(hostname)_"
 
 echo "$(date)" >> "$DDIR$DFILEPREFIX.log"
 svn diff "$0"  >> "$DDIR$DFILEPREFIX.log"
@@ -74,7 +71,7 @@ function check_error() {
 sendscpi .1 'abort'
 sendscpi .1 '*RST'
 sendscpi .1 '*CLS'
-sendscpi .5 '*IDN?'
+sendscpi 5  '*IDN?' "" wait4onelineonly
 IDN="$RESULT"
 echo $IDN
 #sendscpi 2 '*CLS'
@@ -96,7 +93,7 @@ echo 'script.factory.scripts.KIParlib.list()' >&5
 while read -t 5 K <&6; do echo "$K"; done
 fi
 
-sendscpi 6 'tsplink.reset() print(tsplink.state)' "" wait4onelineonly
+sendscpi 8 'tsplink.reset() print(tsplink.state)' "" wait4onelineonly
 check_error
 
 SMUS="
@@ -139,6 +136,7 @@ $SMU.source.highc = $SMU.ENABLE
 check_error
 done
 
+if false; then
 
 #Setup:
 #ChannelA: Non-Floating, Voltage measurement (source 0 amps, measure volts)
@@ -198,28 +196,10 @@ node[3].smub.source.highc=smub.DISABLE
 '
 
 check_error
-
-
-if false; then
-for SMU in $SMUS; do
-sendscpi .1 "
-$SMU.trigger.measure.iv($SMU.nvbuffer1,$SMU.nvbuffer2) 
-$SMU.trigger.measure.action = $SMU.ENABLE
--- This event can be triggered by *TRG, but only on the network/usb-connected SMU:
--- smua.trigger.measure.stimulus = trigger.EVENT_ID
--- This event can be initiated by: tsplink.writebit(1,0) tsplink.writebit(1,1)
-$SMU.tsplink.writebit(1,1)
-$SMU.tsplink.trigger[1].mode  = tsplink.TRIG_FALLING
-$SMU.trigger.measure.stimulus = tsplink.trigger[1].EVENT_ID
--- set to N triggers an enable
-$SMU.trigger.count=5
-$SMU.trigger.initiate()
-"
-done
-check_error
 fi
 
-sendscpi 1 '
+
+sendscpi 0.1 '
 loadandrunscript MKmultiMonitor
 
 function MKmultiMeasure()
@@ -254,31 +234,41 @@ end
 endscript
 '
 check_error
-#sendscpi 1 ' errorcode, message, severity, errnode = errorqueue.next() print(errorcode, message, severity, errnode) '
-#sendscpi 2 ' errorcode, message, severity, errnode = errorqueue.next() print(string.format("%d %s %d",errorcode, message, severity), errnode) '
-
-
-#sendscpi 2 '*TRG'
-
-#sendscpi 2 '
-#print(triggered)
-#print(node[1].smua.nvbuffer1[1], node[1].smua.nvbuffer2[1])
-#print(node[2].smua.nvbuffer1[1], node[2].smua.nvbuffer2[1])
-#'
-
-#sendscpi 2 ' errorcode, message, severity, errnode = errorqueue.next() print(errorcode, message, severity, errnode) '
-
-#'printbuffer(1,1,node[1].smua.nvbuffer1)'
-
 
 MSG=""
 for SMU in $SMUS; do
 MSG="$MSG
 $SMU.source.output = $SMU.OUTPUT_ON"
 done
-sendscpi .1 "$MSG"
+sendscpi .5 "$MSG
+MKcheckError()"
 
-check_error
+if true; then
+for SMU in $SMUS; do
+NOD=$( echo $SMU | sed -e 's/\..*//' )
+sendscpi .1 "
+$SMU.nvbuffer1.clear()
+$SMU.nvbuffer1.collecttimestamps = smua.ENABLE
+$SMU.trigger.measure.iv($SMU.nvbuffer1,$SMU.nvbuffer2) 
+$SMU.trigger.measure.action = $SMU.ENABLE
+-- This event can be triggered by *TRG, but only on the network/usb-connected SMU:
+-- smua.trigger.measure.stimulus = trigger.EVENT_ID
+-- This event can be initiated by: tsplink.writebit(1,1) tsplink.writebit(1,0)
+-- Or is it: tsplink.trigger[1].assert()
+-- can't use falling right now - sets the output to always-HI
+-- ATTENTION: TRIG_RISINGM CAN NOT BE DETECTED BY SMUs, DO NOT USE!
+$NOD.tsplink.trigger[1].mode  = tsplink.TRIG_FALLING
+--$NOD.tsplink.writebit(1,0)
+$SMU.trigger.measure.stimulus = tsplink.trigger[1].EVENT_ID
+-- set to N triggers an enable
+$SMU.trigger.count=5
+$SMU.trigger.initiate()
+
+MKcheckError()
+"
+done
+fi
+
 #DFILE=$DFILEPREFIX$( echo $IDN | sed -e 's%[, /:]%_%g')
 DFILE="$DFILEPREFIX.session"
 
@@ -320,11 +310,12 @@ T2=5
 until read -t $T1 K; do
   if [ -e "$SCPIFILE" ]; then
 	mv "$SCPIFILE" "$SCPIFILE.tmp"
-	sendscpi 0 "$(<"$SCPIFILE.tmp")" >&2
+	sendscpi 0.1 "$(<"$SCPIFILE.tmp")" >&2
 	rm "$SCPIFILE.tmp"
-	#check_error
-        #[ "$RESULT" != "" ] && echo "$RESULT" >> "$SCPIFILE.error"
+	check_error
+        [ "$RESULT" != "" ] && echo "$RESULT" >> "$SCPIFILE.error"
   fi
+  if false; then
   sendscpi 5 'MKmultiMeasure() MKmultiPrint() MKcheckError()' silent singleline
   RESLINE="$(
   echo "$(date +"%Y-%m-%d %H:%M:%S,%s.%N"),"$RESULT | sed -e 's/ *, */\t/g' 
@@ -338,6 +329,7 @@ until read -t $T1 K; do
 	echo "Data mirror extension active: '$DATAEXT'" >&2
   	echo "$RESLINE" >>"$DDIR$DFILEPREFIX.$DATAEXT"
 	echo "$RESLINE" >"$SCPIFILE.result"
+  fi
   fi
 done
 

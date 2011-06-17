@@ -3,6 +3,7 @@ clear all
 init_constants
 
 cArray={'b','r','g','m','c','k','y', 'b','r','g','m','c','k','y', 'b','r','g','m','c','k','y'};
+%cArray={'b','r','b','r','b','r'};
 
 
 %%{
@@ -55,7 +56,8 @@ DataSets={
  'test04_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL16HI_simwork_'
  'test05_TAA-29B1-1_ch1=GlobRST_ch2=DL04_ch3=Vreset_ch4=Vcc_ch5=Vbias_ch6=GL01HI_simwork_' % different array location - look different!
 };
-%%{
+dxtime=-9;
+%{
 DDIR='../measurements/environment/'
 DataSets={
  'test01_TAA-29B1-1_ch1=GlobRST_ch2=DL06_ch3=Vreset_ch4=DL03_ch5=Vbias_ch6=DL11_GL13HI_simwork_'
@@ -71,14 +73,16 @@ DataSets={
  'test01_TAA-29B1-1_ch1=GlobRST_ch2=DL16_ch3=Vreset_ch4=DL10_ch5=Vbias_ch6=DL03_GL13HI_simwork_'
 };
 %}
+%{
 DataSets={
 % 'test02_TAA-29B1-1_ch1=GlobRST_ch2=DL16_ch3=Vreset_ch4=DL10_ch5=Vbias_ch6=DL03_GL13HI_simwork_'
 % 'test04_TAA-29B1-1_ch1=GlobRST_ch2=DL16_ch3=Vreset_ch4=DL10_ch5=Vbias_ch6=DL03_GL13HI_simwork_'
  'test05_TAA-29B1-1_ch1=GlobRST_ch2=DL16_ch3=Vreset_ch4=DL10_ch5=Vbias_ch6=DL03_GL13HI_simwork_'
  'test06_TAA-29B1-1_ch1=GlobRST_ch2=DL16_ch3=Vreset_ch4=DL10_ch5=Vbias_ch6=DL03_GL13HI_simwork_'
+% 'test07_TAA-29B1-1_ch1=GlobRST_ch2=DL16_ch3=Vreset_ch4=DL10_ch5=Vbias_ch6=DL03_GL13HI_simwork_'
 }
-
-for dlid=2;%1:1;%:1;
+%}
+for dlid=1;%1:1;%:1;
 
 %for glid=1:numel(GLs);
 for glid=1:size(DataSets,1);
@@ -266,8 +270,10 @@ for(index=1:length(fileArray2))
     fSess=fName(1:K-1);
 
     pulsing=regexp(fName, '(pulsing[^_]*)_', 'tokens');
-    %if strcmp(pulsing{1}{1}, 'pulsingPreSwitch'); continue; end
+    if strcmp(pulsing{1}{1}, 'pulsingPreSwitch'); continue; end
     if strcmp(pulsing{1}{1}, 'pulsingVbias'); continue; end
+    %if strcmp(pulsing{1}{1}, 'pulsingCancelInj'); continue; end
+    if index>3; continue; end
 
     % matlab ignores errors on converting the first two columns
     % data=load('-ascii',[DDIR fName]);
@@ -328,7 +334,7 @@ for(index=1:length(fileArray2))
         VDiff=diff(V);
         idxDiff=abs(diff(V))>0.5;
         for idx=find(idxDiff)';
-        if xtime(idx)>8.5; %idx>25; %idx>50; 
+        if (xtime(idx)+dxtime)>8.5; %idx>25; %idx>50; 
           tx=xtime(idx);
           %ty=-0.20-0.05*vid+VDiff(idx)*0.025;
           ty=0.12-0.00*vid;%+VDiff(idx)*0.025;
@@ -340,7 +346,7 @@ for(index=1:length(fileArray2))
           text( tx, ty,
                 sprintf('\n%s\n%+.0f mV', fig2lbr, dV(idx)*1000 ), 'Color', cArray{fig2idx} );
         end
-	if xtime(idx)>10; % idx>70; %idx>80;
+	if (xtime(idx)+dxtime)>10; % idx>70; %idx>80;
 	  PeakTmp(end+1)=abs(dV(idx));
 	end
         end

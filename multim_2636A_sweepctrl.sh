@@ -477,22 +477,22 @@ function sfchar_triple() { # Full SF characterization for 29B-1 TAA
       # Current reading / voltage sourcing characterization
       ##VHI=15
       ##send_cmd "v6($VHI)"
-      for VREF in 02 01 00; do
+      for VREF in 00; do ##02 01 00; do
         send_cmd "v2($VREF) v4($VREF) v6($VREF)"
         send_cmd "v3(0)"
         read -t $TB N && break
         SWEEP="vcc$VCC"_"vref$VREF"_"vhi$VHI"_"ch2src=voltage"
         do_sweep yes
       done
-      for VREF in 00; do
-        send_cmd "v2($VREF) v4($VREF) v6($VREF)"
-        send_cmd "v3(0)"
-        read -t $TB N && break
-        SWEEP="vcc$VCC"_"vref$VREF"_"vhi$VHI"_"ch2src=voltageLONG"
-        TO_=$TO; TO=10
-        do_sweep yes
-	TO=$TO_
-      done
+      ##for VREF in 00; do
+      ##  send_cmd "v2($VREF) v4($VREF) v6($VREF)"
+      ##  send_cmd "v3(0)"
+      ##  read -t $TB N && break
+      ##  SWEEP="vcc$VCC"_"vref$VREF"_"vhi$VHI"_"ch2src=voltageLONG"
+      ##  TO_=$TO; TO=10
+      ##  do_sweep yes
+      ##  TO=$TO_
+      ##done
       ##for VCC in 10 09 08; do
       ##  send_cmd "v4($VCC)"
       ##  send_cmd "v3(0)"
@@ -580,8 +580,9 @@ function sfchar_triple() { # Full SF characterization for 29B-1 TAA
   # Load a voltage onto Cpix and perform multiple different sequences
   VRST=6
   RSTLO=3
+  RSTLOX=6.1
   RSTHI=15
-  for TYPE in 'PreSwitch' 'None' 'CancelInj' 'Vbias' 'ResetP' 'ResetN' 'VresetP' 'VresetN' ; do
+  for TYPE in 'ResetIsource' 'PreSwitch' 'None' 'CancelInj' 'Vbias' 'ResetP' 'ResetN' 'VresetP' 'VresetN' ; do
   TL=20
   send_cmd "v3($VRST)"
   send_cmd "v1($RSTHI)"
@@ -591,7 +592,7 @@ function sfchar_triple() { # Full SF characterization for 29B-1 TAA
   if [ "$TYPE" == "PreSwitch" ]; then
     for SW in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do
       send_cmd "v1($RSTLO)"
-      send_cmd "v1($RSTLHI)"
+      send_cmd "v1($RSTHI)"
     done
   else
   # show that reading is not influenced by some switching
@@ -604,17 +605,27 @@ function sfchar_triple() { # Full SF characterization for 29B-1 TAA
   # turn TFTreset OFF 
   if [ "$TYPE" == "CancelInj" ]; then
   send_cmd "v1($RSTLO) v5(1.2)"
+  elif [ "$TYPE" == "ResetIsource" ]; then
+  send_cmd "v1($RSTLOX) v5(2)"
   else
   send_cmd "v1($RSTLO)"
   fi
   read -t $TL N 
 
+  if [ "$TYPE" == "ResetIsource" ]; then
+  for P1 in 0 1 2 3 4 5 6 7 8 9; do
+  for P2 in 0 1 2 3 4 5 6 7 8 9; do
+    send_cmd "v5(2+$P2*0.1+$P1)"
+    read -t 2 N 
+  done
+  done
+  else
   # start the pulses
   for PULSES in 1 2 3 4 5 6; do
   if [ "$TYPE" == 'None'    ]; then send_cmd "";            fi
   if [ "$TYPE" == 'Vbias'   ]; then send_cmd "v5(0)";       fi
-  if [ "$TYPE" == 'ResetN'  ]; then send_cmd "v1($RSTLO-1)";      fi
-  if [ "$TYPE" == 'ResetP'  ]; then send_cmd "v1($RSTLO+1)";       fi
+  if [ "$TYPE" == 'ResetN'  ]; then send_cmd "v1($RSTLO-1)";fi
+  if [ "$TYPE" == 'ResetP'  ]; then send_cmd "v1($RSTLO+1)";fi
   if [ "$TYPE" == 'VresetN' ]; then send_cmd "v3($VRST-1)"; fi
   if [ "$TYPE" == 'VresetP' ]; then send_cmd "v3($VRST+1)"; fi
   #send_cmd "v2(1) v4(1) v6(1)"
@@ -622,12 +633,14 @@ function sfchar_triple() { # Full SF characterization for 29B-1 TAA
   read -t $TL N 
   if [ "$TYPE" == 'None'    ]; then send_cmd "";            fi
   if [ "$TYPE" == 'Vbias'   ]; then send_cmd "v5(1)";       fi
-  if [ "$TYPE" == 'ResetN'  ]; then send_cmd "v1($RSTLO)";       fi
-  if [ "$TYPE" == 'ResetP'  ]; then send_cmd "v1($RSTLO)";       fi
+  if [ "$TYPE" == 'ResetN'  ]; then send_cmd "v1($RSTLO)";  fi
+  if [ "$TYPE" == 'ResetP'  ]; then send_cmd "v1($RSTLO)";  fi
   if [ "$TYPE" == 'VresetN' ]; then send_cmd "v3($VRST)";   fi
   if [ "$TYPE" == 'VresetP' ]; then send_cmd "v3($VRST)";   fi
   read -t $TL N 
   done
+  fi
+
   rm "$DATACTRLFILE"
 
   done # various vresets
