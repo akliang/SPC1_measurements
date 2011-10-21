@@ -14,7 +14,7 @@ ch1="Von	15 0.01"
 ch2="Voff	 5 0.01"
 ch3="Qinj        3 0.001"
 ch4="Vbias       5 0.001"
-ch5="Vreset	 5 0.001"
+ch5="Vreset	 8 0.001"
 ch6="VccSF	10 0.01"
 ch7="PLHI	15 0.001"
 ch8="DLHI	15 0.001"
@@ -22,10 +22,10 @@ ch8="DLHI	15 0.001"
 echo "$(date)" >> "$DDIR$DFILEPREFIX.log"
 svn diff "$0"  >> "$DDIR$DFILEPREFIX.log"
 
-SCPIFILE='2636_command.scpi'
+SCPIFILE='commtemp/2636_command.scpi'
 # BASH code for live interaction:
-# while true; do read N; echo "$N" >>2636_command.scpi; done
-DATACTRLFILE='2636_datactrl'
+# while true; do read N; echo "$N" >>commtemp/2636_command.scpi; done
+DATACTRLFILE='commtemp/2636_datactrl'
 
 if false; then
   # Code for USB communication - somewhat faulty
@@ -136,7 +136,7 @@ function get_chan_props() {
 N=0
 for SMU in $SMUS; do
 N=$(( $N + 1 ))
-get_chan_props ${ch$N}
+eval "get_chan_props \${ch$N}" 
 sendscpi 0.1 "
 $SMU.source.autorangei=$SMU.AUTORANGE_ON
 $SMU.source.autorangev=$SMU.AUTORANGE_ON
@@ -150,8 +150,7 @@ $SMU.measure.delay = $SMU.DELAY_OFF
 v$N = makesetter($SMU.source, 'levelv')
 i$N = makesetter($SMU.source, 'leveli')
 $SMU.source.highc = $SMU.ENABLE
-$SMU.source.func=smua.OUTPUT_DCVOLTS
-$SMU.measure.func=display.MEASURE_DCAMPS
+$SMU.source.func=$SMU.OUTPUT_DCVOLTS
 "
 check_error
 done
@@ -282,7 +281,7 @@ done
 {
 
 T1=0.1 # use full integers for some older BASH shells
-T2=5
+T2=5  # Maximum time to wait for results and after error messages
 
 until read -t $T1 K; do
   if [ -e "$SCPIFILE" ]; then
@@ -292,32 +291,44 @@ until read -t $T1 K; do
 	#check_error
         #[ "$RESULT" != "" ] && echo "$RESULT" >> "$SCPIFILE.error"
   fi
-  sendscpi 5 'MKmultiMeasure() MKmultiPrint() MKcheckError()' silent singleline
+  sendscpi $T2 'MKmultiMeasure() MKmultiPrint() MKcheckError()' silent singleline
   RESLINE="$(
   echo "$(date +"%Y-%m-%d %H:%M:%S,%s.%N"),"$RESULT | sed -e 's/ *, */\t/g' 
   )"
   echo "$RESLINE" >>"$DDIR$DFILE"
-  sendscpi_cond 0.1 '-- reading errors' "" "" 5 >&2
+  sendscpi_cond 0.1 '-- reading errors' "" "" $T2 >&2
   if [ -e "$DATACTRLFILE" ]; then
 	DATAEXT="$(<"$DATACTRLFILE")"
 	echo "Data mirror extension active: '$DATAEXT'" >&2
   	echo "$RESLINE" >>"$DDIR$DFILEPREFIX.$DATAEXT"
 	echo "$RESLINE" >"$SCPIFILE.result"
   fi
+  [ "$PRPID" != "" ] && wait $PRPID
   print_result $RESLINE &
+  PRPID=$!
 done
+
+  [ "$PRPID" != "" ] && wait $PRPID
 
 }
 
 MSG=""
 for SMU in $SMUS; do
 MSG="$MSG
-$SMU.source.output=$SMU.OUTPUT_OFF
-$SMU.reset()"
+$SMU.source.output=$SMU.OUTPUT_OFF"
 done
 sendscpi 1 "$MSG"
 
-sendscpi 2 'errorcode, message, severity, errnode = errorqueue.next() print(string.format("%d %s %d",errorcode, message, severity), errnode) '
+if false; then
+MSG=""
+for SMU in $SMUS; do
+MSG="$MSG
+$SMU.reset()"
+done
+sendscpi 1 "$MSG"
+fi
+
+sendscpi 3 'errorcode, message, severity, errnode = errorqueue.next() print(string.format("%d %s %d",errorcode, message, severity), errnode) '
 
 sendscpi 1 'abort'
 
