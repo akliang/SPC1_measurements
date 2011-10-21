@@ -82,6 +82,27 @@ setup.TEMPMEAS.ARRAY={ 'TEMP_hellboy_RMS300A_N1', 'text_env_tempwos1', 'sensor1'
 %}
 
 
+%{
+setup.LOCATION='Argus Building, Electronics Lab';
+setup.HOSTNAME='simwork'; % hostname of computer running this script
+setup.G3_system='1of9-vanilla';
+setup.G3_interface='a6-V20-20080108'; % serial number - hardware version - bitfile version
+setup.G3_adcCards='u3-u4-00-00-00-00-00-00'; % On G3 ADC Board, they are labeled ADC8-...-1
+
+setup.POWER_G3='G3Power#1';
+setup.POWER_ADC='ArrayAndADCPower#5';
+setup.POWER_ARRAY=[ setup.HOSTNAME '_BK_9130_005004156568001088_V1.69' ];
+setup.POWER_PSI = [ setup.HOSTNAME '_BK_9130_005004156568001088_V1.69' ];
+setup.POWERMEAS.V.V24m={setup.POWER_PSI,'text_env1',5};   % Power Measurements: file or db descriptor, file format, data channel
+setup.POWERMEAS.V.V24p={setup.POWER_PSI,'text_env1',6};
+setup.POWERMEAS.V.V5p ={setup.POWER_ARRAY,'text_env1',7};
+setup.POWERMEAS.I.V24m={setup.POWER_PSI,'text_env1',9};
+setup.POWERMEAS.I.V24p={setup.POWER_PSI,'text_env1',10};
+setup.POWERMEAS.I.V5p ={setup.POWER_ARRAY,'text_env1',11};
+setup.TEMPMEAS.ARRAY={ '/mnt/wos1/DATA/TH/Data/realtimelog.txt', 'text_env_tempwos1', 'sensor1' };
+%}
+
+
 
 %
 % Array- and Platform Specific Settings and Information:
