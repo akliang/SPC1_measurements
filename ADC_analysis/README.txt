@@ -24,3 +24,24 @@ total 172
 drwxr-xr-x 8 user user  4096 2011-04-05 17:36 ..
 drwxr-xr-x 2 user user  4096 2011-04-05 17:37 .
 -rw-r--r-- 1 user user     0 2011-04-05 17:37 README.txt
+
+2011-10-21
+moved all solely ADC related files from scriptmeas/
+
+-rw-r--r-- 1 user user  2273 2010-08-03 10:56 adctest.m
+-rw-r--r-- 1 user user   779 2010-10-29 18:38 dactest.m
+-rw-r--r-- 1 user user 17802 2010-07-28 13:29 meas_adcchar.m
+-rw-r--r-- 1 user user 18410 2010-08-13 15:46 meas_adcchar_mod.m
+-rw-r--r-- 1 user user 18821 2010-08-10 15:02 meas_adcchar_monitor.m
+-rw-r--r-- 1 user user  4294 2010-12-13 12:26 meas_adctovolts_dac_AL1.m
+-rw-r--r-- 1 user user  4154 2010-08-20 12:30 meas_adctovolts_dac.m
+-rw-r--r-- 1 user user  4017 2010-08-10 15:11 meas_adctovolts.m
+-rw-r--r-- 1 user user 19887 2010-12-22 16:20 meas_dacchar_mod1.m
+-rw-r--r-- 1 user user 18653 2010-11-19 17:38 meas_dacchar_mod.m
+-rw-r--r-- 1 user user 20605 2010-08-25 14:25 meas_dacchar_monitor1.m
+-rw-r--r-- 1 user user 22299 2010-12-22 16:48 meas_dacchar_monitor2.m
+-rw-r--r-- 1 user user 20228 2010-08-18 17:05 meas_dacchar_monitor.m
+-rw-r--r-- 1 user user  5246 2011-04-05 17:51 README.txt
+
+into
+scriptmeas/ADC_Analysis/scriptmeas_root/
