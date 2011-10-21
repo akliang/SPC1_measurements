@@ -45,3 +45,16 @@ moved all solely ADC related files from scriptmeas/
 
 into
 scriptmeas/ADC_Analysis/scriptmeas_root/
+
+Also moved the ADC-related power control scripts into
+scriptmeas/ADC_Analysis/scriptmeas_root/ :
+-rwxr-xr-x 1 user user 1557 2010-09-20 11:01 powersupply_BK9130_ADC5V.sh
+-rwxr-xr-x 1 user user 1519 2010-09-20 11:15 powersupply_BK9130_ADC12V.sh
+-rwxr-xr-x 1 user user 1651 2010-11-29 13:27 powersupply_BK9130_adcchar.sh
+-rwxr-xr-x 1 user user 3338 2010-12-22 14:06 powersupply_2636A.sh
+leaving the following non-ADC-related scripts in scriptmeas/ :
+-rwxr-xr-x 1 user user 1281 2010-05-26 10:26 powersupply_BK9130_array12V.sh
+-rwxr-xr-x 1 user user 1460 2010-06-03 10:17 powersupply_BK9130_arraySweep.sh
+-rwxr-xr-x 1 user user 1279 2010-05-26 10:26 powersupply_BK9130_PSI24V.sh
+-rwxr-xr-x 1 user user 1639 2011-03-30 11:05 powersupply_BK9130_PSI24and5V.sh
+
