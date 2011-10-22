@@ -59,7 +59,7 @@ end
 % Array- and Measurement-Type dependent settings
 %
 
-    geo.extra_gatelines=64;
+    geo.extra_gatelines=32;
 
 
 %
@@ -68,7 +68,7 @@ end
 switch setup.ARRAYTYPE
   case {'PSI-1'}  % PSI-1 settings and calculations
     geo.G3_SORTMODE=10;
-    geo.GL=256+geo.extra_gatelines;%+32; do NOT use 256+32 (288) or 256+128 ! with pre-2010-03 interface card firmwares!
+    geo.GL=256+geo.extra_gatelines;%+32; do NOT use 256+32 (288) or 256+128 or 96 ! with pre-2010-03 interface card firmwares!
     geo.G3GL=geo.GL-1; % for regular arrays - PSI2/3 arrays have different values
     geo.DL=384;
     geo.G3DL=ceil((geo.DL+1)/512)*512/2 -1;
@@ -124,10 +124,13 @@ env.V(id.VQinj) = multi.VQinj;
      for vid=1:numel(smu.vid2ch);
         if smu.vid2ch(vid)==0; disp(sprintf('Vout%d is not mapped to SMU.',vid)); continue; end
         if ~isnan(smu.chan_is_set(smu.vid2ch(vid))); 
-          if smu.chan_is_set(smu.vid2ch(vid)) ~= env.V(vid); disp('Vout%d already set to %.3f',vid,smu.chan_is_set(smu.vid2ch(vid))); continue; end
+          if smu.chan_is_set(smu.vid2ch(vid)) ~= env.V(vid);
+              disp(sprintf( 'Vout%d already set to %.3f by smu_ch%d',vid,smu.chan_is_set(smu.vid2ch(vid)),smu.vid2ch(vid) ));
+          end
           continue;
         end 
        fwrite(fid, sprintf('v%d(%.5f)\n', smu.vid2ch(vid), env.V(vid) ) );
+       smu.chan_is_set(smu.vid2ch(vid)) = env.V(vid);
    end
    fclose(fid);
    system(sprintf('mv %s.tmp %s',multi.VOLTFILE,multi.VOLTFILE));
@@ -138,6 +141,17 @@ env.V(id.VQinj) = multi.VQinj;
 %
 
 meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
+
+%%{
+meas.MeasCond='Gen2PNC4Test'; multi.R22=0;
+multi.RMATRIX=[
+   %R1    R26   R27   R11    R13    R14
+    1     0     200    0      1      1
+    1     0     200    0      2      2
+  % 1000   0     200    0      1      1
+  % 1000   0     200    0      2      2
+];
+%}
 
 %{
 meas.MeasCond='TwinDark'; multi.R22=0;

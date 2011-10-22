@@ -120,7 +120,7 @@ setup.PF_dataCards='xx-xx-xx'; % first is the outermost, last is the innermost
 setup.PF_dataCardDIPs='1111111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
 setup.PF_dataCardVref='0.86'; % nominal Vref, set by resistor divider
 setup.PF_dataBoardDIPs='01000000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
-setup.PF_dataBoardJumper='JP1=Vbias1';
+setup.PF_dataBoardJumper='';
 setup.PF_gateCards='xx-xx';
 setup.PF_analogCard='PNCV1#04';
 setup.PF_arrayLogic='G3only';

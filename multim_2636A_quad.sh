@@ -10,14 +10,14 @@ DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
 DFILEPREFIX="test01_TAA-29B1-3_ch1=Von_ch2=Voff_ch3=Qinj_ch4=Vbias_ch5=Vreset_ch6=VccSF_ch7=PLHI_ch8=DLHI_$(hostname)_"
 
-ch1="Von	15 0.01"
-ch2="Voff	 5 0.01"
-ch3="Qinj        3 0.001"
-ch4="Vbias       5 0.001"
-ch5="Vreset	 8 0.001"
-ch6="VccSF	10 0.01"
-ch7="PLHI	15 0.001"
-ch8="DLHI	15 0.001"
+ch1="Von	-5 16 0.01"
+ch2="Voff	-5  5 0.01"
+ch3="Qinj        0  3 0.001"
+ch4="Vbias      -4  4 0.001"
+ch5="Vreset	-2 10 0.001"
+ch6="VccSF	-2 10 0.01"
+ch7="PLHI	-2 16 0.001"
+ch8="DLHI	-2 16 0.001"
 
 echo "$(date)" >> "$DDIR$DFILEPREFIX.log"
 svn diff "$0"  >> "$DDIR$DFILEPREFIX.log"
@@ -128,8 +128,9 @@ check_error
 
 function get_chan_props() {
   chname=$1
-  limitv=$2
-  limiti=$3
+  limitvmin=$2
+  limitvmax=$3
+  limiti=$4
 }
 
 # Building defaults for all channels
@@ -139,15 +140,18 @@ N=$(( $N + 1 ))
 eval "get_chan_props \${ch$N}" 
 sendscpi 0.1 "
 $SMU.source.autorangei=$SMU.AUTORANGE_ON
-$SMU.source.autorangev=$SMU.AUTORANGE_ON
+--$SMU.source.autorangev=$SMU.AUTORANGE_ON
+$SMU.source.autorangev=$SMU.AUTORANGE_OFF
+$SMU.source.rangev=math.max(math.abs($limitvmin),math.abs($limitvmax))
 $SMU.source.leveli=0
 $SMU.source.levelv=0
 $SMU.source.limiti=$limiti
-$SMU.source.limitv=$limitv
+$SMU.source.limitv=math.max(math.abs($limitvmin),math.abs($limitvmax))
 $SMU.sense = $SMU.SENSE_LOCAL
 $SMU.measure.nplc = 1
 $SMU.measure.delay = $SMU.DELAY_OFF
-v$N = makesetter($SMU.source, 'levelv')
+--v$N = makesetter($SMU.source, 'levelv')
+v$N = function ( v ) if v<$limitvmin then return end if v>$limitvmax then return end $SMU.source.levelv=v end
 i$N = makesetter($SMU.source, 'leveli')
 $SMU.source.highc = $SMU.ENABLE
 $SMU.source.func=$SMU.OUTPUT_DCVOLTS
