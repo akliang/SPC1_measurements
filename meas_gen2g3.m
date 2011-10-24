@@ -15,7 +15,7 @@ fclose('all');
 
 % flag.dryrun true will neither create folders nor talk to jjam
 flag.dryrun=true;
-flag.dryrun=false;
+%flag.dryrun=false;
 
 % flag.jabber is to turn on/off chat notification
 flag.jabber=false;
@@ -90,13 +90,29 @@ end
 % Set up the desired voltage sweep range
 multi.MMATRIX=[];
 
+% Sweep  Vout3  (VQinj) to verify gain
+% Toggle Vout11 (DataLogicHI) to see difference between addressed and non-addressed array
+% Add CW / CCW scanning direction to description
+
 %%{
-% Dark Leakage for PSI-2
-for VBias=[2:0.5:6];
+% Qinj sweep
+for VQinj=[0:0.5:2];
+    for VRst=[0];
 multi.MMATRIX(end+1,:)=[
-   %VBias %VRst %VQinj
-   VBias  6   1
+   %VDatLHI %VRst %VQinj
+   VRst  VRst   VQinj
 ];
+    end
+end
+
+% another sweep with VQinj=1V and VDatLHI 0 and 7 V
+for VQinj=[1];
+    for VDatLHI=[0 7];
+multi.MMATRIX(end+1,:)=[
+   %VDatLHI %VRst %VQinj
+   VDatLHI  VRst   VQinj
+];
+    end
 end
 %}
 
@@ -106,17 +122,18 @@ for mmid=1:multi.mnrofacq; multi.mmid=mmid;
 %multi.R13=multi.MMATRIX(multi.mmid,1);
 %multi.R14=multi.MMATRIX(multi.mmid,2);
 
-multi.VBias=multi.MMATRIX(multi.mmid,1);
+multi.VDatLHI=multi.MMATRIX(multi.mmid,1);
 multi.VRst =multi.MMATRIX(multi.mmid,2);
 multi.VQinj=multi.MMATRIX(multi.mmid,3);
 
 
 % TODO: adopt for SMU scenario 
 env.V(id.Vreset)= multi.VRst;
-env.V(id.Vbias) = multi.VBias;
+env.V(id.VDatLHI) = multi.VDatLHI;
 env.V(id.VQinj) = multi.VQinj;
 
 % Communicate with multim_2636A_quad.sh :
+if ~flag.dryrun;
    % write voltfile, will be picked up by shell script controlling SMUs
    multi.VOLTFILE='./commtemp/2636_command.scpi';
    smu.chan_is_set=nan(max(smu.vid2ch),1);
@@ -134,7 +151,7 @@ env.V(id.VQinj) = multi.VQinj;
    end
    fclose(fid);
    system(sprintf('mv %s.tmp %s',multi.VOLTFILE,multi.VOLTFILE));
-   
+end   
 
 % 
 % Multi-Sequence-Setup
@@ -146,10 +163,10 @@ meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 meas.MeasCond='Gen2PNC4Test'; multi.R22=0;
 multi.RMATRIX=[
    %R1    R26   R27   R11    R13    R14
-    1     0     200    0      1      1
-    1     0     200    0      2      2
-  % 1000   0     200    0      1      1
-  % 1000   0     200    0      2      2
+    1     0     400    0      1      1
+    1     0     400    0      2      2
+   100    0     200    0      1      1
+   100    0     200    0      2      2
 ];
 %}
 
@@ -203,7 +220,7 @@ if strcmp(meas.MeasCond(1:5),'First'); multi.nrofacq=1; end
 if strcmp(meas.MeasCond(1:4),'Qinj' ); multi.nrofacq=1; end
 
 meas.MeasDetails=[ sprintf('%s', meas.MeasCond) ...
-    sprintf( '_Vbias%s', volt2str(env.V(id.Vbias)) ) ...
+    ...sprintf( '_Vbias%s', volt2str(env.V(id.Vbias)) ) ...
     ...sprintf( '_Vguard2%s', volt2str(env.V(id.Vguard2)) ) ...
     ...sprintf( '_Von%s', volt2str(env.V(id.Von)) ) ...
     sprintf( '_Vrst%s', volt2str(env.V(id.Vreset)) ) ...  not needed for PSI-1
@@ -213,6 +230,7 @@ meas.MeasDetails=[ sprintf('%s', meas.MeasCond) ...
     ...sprintf( '_Vcc%s', volt2str(env.V(id.Vcc)) ) ...
     ...sprintf( '_Voff%s',  volt2str(env.V(id.AVoff)) ) ...    
     sprintf( '_VQinj%s', volt2str(env.V(id.VQinj)) ) ...
+    sprintf( '_VDatLHI%s', volt2str(env.V(id.VDatLHI)) ) ...
     ...sprintf( '_RST%s',    setup.PF_globalReset     ) ...
     ...sprintf('_%04dR6', multi.R6)  ...
     ...sprintf('_%04dR4', multi.R4)  ...
@@ -276,8 +294,8 @@ meas.BaseName=[ meas.DirName ...
  ...sprintf('_%02dR5' , multi.R5)   ...
  ...sprintf('_%02dR6' , multi.R6)   ...
  ...sprintf('_%05dR11', multi.R11)  ...
- ...sprintf('_%05dR13', multi.R13)  ...
- ...sprintf('_%05dR14', multi.R14)  ...
+    sprintf('_%05dR13', multi.R13)  ...
+    sprintf('_%05dR14', multi.R14)  ...
  ...sprintf('_%02dR22', multi.R22)  ...
     sprintf('_%02dR26', multi.R26)  ...
     sprintf('_%02dR27', multi.R27)  ...
