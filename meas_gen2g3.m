@@ -15,7 +15,7 @@ fclose('all');
 
 % flag.dryrun true will neither create folders nor talk to jjam
 flag.dryrun=true;
-%flag.dryrun=false;
+flag.dryrun=false;
 
 % flag.jabber is to turn on/off chat notification
 flag.jabber=false;
@@ -59,7 +59,7 @@ end
 % Array- and Measurement-Type dependent settings
 %
 
-    geo.extra_gatelines=32;
+    geo.extra_gatelines=32+64;
 
 
 %
@@ -164,9 +164,9 @@ meas.MeasCond='Gen2PNC4Test'; multi.R22=0;
 multi.RMATRIX=[
    %R1    R26   R27   R11    R13    R14
     1     0     400    0      1      1
-    1     0     400    0      2      2
+%    1     0     400    0      2      2
    100    0     200    0      1      1
-   100    0     200    0      2      2
+%   100    0     200    0      2      2
 ];
 %}
 
