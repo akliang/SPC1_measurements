@@ -162,10 +162,11 @@ meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 %%{
 meas.MeasCond='Gen2PNC4Test'; multi.R22=0;
 multi.RMATRIX=[
-   %R1    R26   R27   R11    R13    R14
-    1     0     400    0      1      1
+   %R1    R26   R27   R11    R13    R14  R22
+    1     0     400    0      1      1   14
+    1     0     400    0      1      1   2
 %    1     0     400    0      2      2
-   100    0     200    0      1      1
+   100    0     200    0      1      1   2
 %   100    0     200    0      2      2
 ];
 %}
@@ -268,6 +269,7 @@ for mid=1:multi.nrofacq; multi.mid=mid;
    multi.R13=multi.RMATRIX(multi.mid,5);
    %multi.R13=1;%2
    multi.R14=multi.RMATRIX(multi.mid,6);
+   multi.R22=multi.RMATRIX(multi.mid,7);
    %multi.R14=1;%3
    multi.R26=multi.RMATRIX(multi.mid,2);
    multi.R27=multi.RMATRIX(multi.mid,3);
@@ -296,7 +298,7 @@ meas.BaseName=[ meas.DirName ...
  ...sprintf('_%05dR11', multi.R11)  ...
     sprintf('_%05dR13', multi.R13)  ...
     sprintf('_%05dR14', multi.R14)  ...
- ...sprintf('_%02dR22', multi.R22)  ...
+    sprintf('_%02dR22', multi.R22)  ...
     sprintf('_%02dR26', multi.R26)  ...
     sprintf('_%02dR27', multi.R27)  ...
    ];

@@ -87,7 +87,7 @@ setup.LOCATION='Argus Building, Electronics Lab';
 setup.HOSTNAME='simwork'; % hostname of computer running this script
 setup.G3_system='1of9-vanilla';
 setup.G3_interface='a6-V20-20080108'; % serial number - hardware version - bitfile version
-setup.G3_adcCards='m3-00-00-00-00-00-00-00'; % On G3 ADC Board, they are labeled ADC8-...-1
+setup.G3_adcCards='a3-00-00-00-00-00-00-00'; % On G3 ADC Board, they are labeled ADC8-...-1
 
 setup.POWER_G3='G3Power#1';
 setup.POWER_ADC='ArrayAndADCPower#5';
@@ -116,7 +116,7 @@ setup.ARRAYTYPE='Gen2_TAA';
 setup.WAFERCODE='29B1-3';
 setup.PLATFORM='PF-G2-11-4';
 setup.arrdefcnt=setup.arrdefcnt+1;
-setup.PF_dataCards='d1'; % first is the outermost, last is the innermost
+setup.PF_dataCards='ad'; % first is the outermost, last is the innermost
 setup.PF_dataCardDIPs='1111111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
 setup.PF_dataCardVref='3.70'; % nominal Vref, set by resistor divider
 setup.PF_dataBoardDIPs='00000000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
