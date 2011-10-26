@@ -29,6 +29,8 @@ echo $IDN
 sendscpi 1 'SYST:ERR?'
 sendscpi 1 '*CLS'
 
+[ "$IDN" == "BK,9130,005004156568001063,V1.69" ] && ans="y" # BK#4, 2011-10-25 on muon providing PNC power
+
 until  [ "$ans" == "y" ]; 
 do
         echo -n "Is the right device connected? y/n"
@@ -51,7 +53,7 @@ sendscpi $TO 'APP:VOLT 24,24,5.4'
 sendscpi $TO 'SYST:ERR?'
 sendscpi $TO '*CLS'
 #sendscpi $TO 'APP:CURR 0.2,0.2,0.2' 
-sendscpi $TO 'APP:CURR 0.2,0.2,1.5' 
+sendscpi $TO 'APP:CURR 0.5,0.5,1.5' 
 sendscpi $TO 'SYST:ERR?'
 sendscpi $TO '*CLS'
 sendscpi $TO 'APP:OUT 1,1,1'
