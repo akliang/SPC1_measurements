@@ -29,7 +29,8 @@ echo $IDN
 sendscpi 1 'SYST:ERR?'
 sendscpi 1 '*CLS'
 
-[ "$IDN" == "BK,9130,005004156568001063,V1.69" ] && ans="y" # BK#4, 2011-10-25 on muon providing PNC power
+[ "$IDN" == "BK,9130,005004156568001063,V1.69" ] && [ "$(hostname)" == "muon"    ] && ans="y" # BK#3, 2011-10-25 on muon providing PNC power
+[ "$IDN" == "BK,9130,005004156568001088,V1.69" ] && [ "$(hostname)" == "simwork" ] && ans="y" # BK#5, 2011-10-28 on simwork providing PNC power for actual array measurements
 
 until  [ "$ans" == "y" ]; 
 do
