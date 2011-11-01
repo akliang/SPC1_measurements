@@ -8,18 +8,25 @@ MDEV="/dev/ttyUSB1"
 NDEV="smu1.imager.umro"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
-DFILEPREFIX="test02_TAA-29B1-3_ch1=Von_ch2=Voff_ch3=Qinj_ch4=Vbias_ch5=Vreset_ch6=VccSF_ch7=PLHI_ch8=DLHI_$(hostname)_"
+DFILEPREFIX="test01_TAA-29B1-3_$(hostname)_"
 
-ch1="Von	-5 16 0.01"
-ch2="Voff	-5  5 0.01"
+ch1="Von	-5 16 0.005"
+ch2="Voff	-5  5 0.005"
 ch3="Qinj        0  3 0.001"
-ch4="Vbias      -4  4 0.001"
-ch5="Vreset	-2 10 0.001"
-ch6="VccSF	-2 10 0.01"
-ch7="PLHI	-2 16 0.001"
+#ch4="Vbias	-4  4 0.001" # TAA and TABcfg1
+ch4="VccCSA	-2 10 0.010" # TABcfg2
+#ch5="Vreset	-2 10 0.001" # TAA
+ch5="Vgnd	-2 10 0.010" # TAB
+ch6="VccSF	-2 10 0.010"
+#ch7="PLHI	-2 16 0.001" # TAA
+ch7="Val	-2 16 0.001" # TAB
 ch8="DLHI	-2 16 0.001"
 
+# TODO: add channel mapping to file name? or print to log?
+#ch1=Von_ch2=Voff_ch3=Qinj_ch4=Vbias_ch5=Vreset_ch6=VccSF_ch7=PLHI_ch8=DLHI_$(hostname)_"
+
 echo "$(date)" >> "$DDIR$DFILEPREFIX.log"
+svn stat "$0"  >> "$DDIR$DFILEPREFIX.log"
 svn diff "$0"  >> "$DDIR$DFILEPREFIX.log"
 
 SCPIFILE='commtemp/2636_command.scpi'
@@ -137,6 +144,9 @@ function get_chan_props() {
 N=0
 for SMU in $SMUS; do
 N=$(( $N + 1 ))
+#node[2].display.smua.measure.func=display.MEASURE_DCAMPS
+SMUdisp=$( echo "$SMU" | sed -e 's%\.%.display.%' )
+echo "Setting SMU: $SMU  DISPLAY: $SMUdisp"
 eval "get_chan_props \${ch$N}" 
 sendscpi 0.1 "
 $SMU.source.autorangei=$SMU.AUTORANGE_ON
@@ -155,6 +165,7 @@ v$N = function ( v ) if v<$limitvmin then return end if v>$limitvmax then return
 i$N = makesetter($SMU.source, 'leveli')
 $SMU.source.highc = $SMU.ENABLE
 $SMU.source.func=$SMU.OUTPUT_DCVOLTS
+$SMUdisp.measure.func=display.MEASURE_DCAMPS
 "
 check_error
 done
