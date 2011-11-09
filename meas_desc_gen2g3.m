@@ -179,7 +179,7 @@ env.V(end+1)=  0.00 ; id.Vgnd    =numel(env.V);  id.Vsfb_gnd =numel(env.V); % TA
 env.V(end+1)=  0.00 ; id.VbiasNO =numel(env.V);  id.VdlgndNO =numel(env.V); % TAA: Vsfb_gte=-2  %PSI3: Val=5.5;               % Vout13
 env.V(end+1)=  0.00 ; id.VdlcapNO=numel(env.V);  id.Vsfb_gtNO=numel(env.V); % TAA: Vsfb_gnd=0   %PSI3: Vgnd=1.0;              % Vout14
 
-env.V(end+1)=  0    ; id.DLrstGnd   =numel(env.V);                          % hard-wired to Analog Ground
+env.V(end+1)=  0    ; id.DLrstGnd=numel(env.V);                          % hard-wired to Analog Ground
 
 % SMU-specific mappings:
 smu.vid2ch(id.Von)    =1;

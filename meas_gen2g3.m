@@ -7,10 +7,11 @@ fclose('all');
    Matlab Controlled G3 Measurements
 
    Current Guiding Principles:
-    - a single (not anymore) MATLAB-script controls the acquisition
+    - a very small number of MATLAB-scripts control the acquisition
         - why script and not function? -> debugging easier. if a function bails out in production, all internal states are lost.
     - concise, compact, not convoluted
     - try to use all variables as part of a struct to clarify their scope
+    - people with basic matlab skills should be able to adopt this script to their needs
 %}
 
 % flag.dryrun true will neither create folders nor talk to jjam
