@@ -160,6 +160,7 @@ end
 %%% /THINGS TO CHECK BEFORE RUNNING EXP %%%%
 
 
+if false;
 % Common mapping of Vout1-16 on the PNC Boards:
 env.V=[];
 env.V(end+1)=  15.0 ; id.Von     =numel(env.V);                             % Gate Line HIGH                                  % Vout1
@@ -194,6 +195,24 @@ smu.vid2ch(id.VDatLHI)=8;
 smu.vid2ch(id.VDatLLO)=2;
 smu.vid2ch(id.Vsfb_gte)=2;
 %id.Val      = id.Voff; id.Vsfb_gte = id.Voff;
+end 
+
+% Get mapping from setup.cir:
+[status mapstring]=system('cat setup.cir | grep ^Vmap | sed -r -e ''s/.*Vout([0-9]+)\W+(.*)\W.*/id.\2 = \1;/''');
+eval(mapstring);
+disp('Voltage mapping loaded.');
+id.('VccCSA')
+
+% create map which voltages are changed together
+FN=fieldnames(id); env.vid2names={};
+for n=1:size(FN); env.vid2names{id.(FN{n})}{end+1}=FN{n}; end
+
+% reflect method of voltage chaning (SMU, G4, manual)
+
+% SMU mapping
+% Initial Voltage Values (from .cir file?)
+% Ensure/report on conflict freeness?
 
 meas.MFileDesc=[ mfilename() '.m' ];
+
 

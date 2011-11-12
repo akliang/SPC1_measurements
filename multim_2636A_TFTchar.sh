@@ -8,19 +8,13 @@ MDEV="/dev/ttyUSB1"
 NDEV="smu1.imager.umro"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
-DFILEPREFIX="test01_TAB-29B1-3_$(hostname)_"
+DFILEPREFIX="meas12_TFT-29B1-4_WP7_1-1-1_$(hostname)_"
+#DFILEPREFIX="restest02_Rgs1MO_Rds130kO_$(hostname)_"
+#DFILEPREFIX="test02_FET2N7000_inbox_$(hostname)_"
 
-ch1="Von	-5 16 0.005"
-ch2="Voff	-5  5 0.005"
-ch3="Qinj        0  3 0.001"
-#ch4="Vbias	-4  4 0.001" # TAA and TABcfg1
-ch4="VccCSA	-2 10 0.010" # TABcfg2
-#ch5="Vreset	-2 10 0.001" # TAA
-ch5="Vgnd	-2 10 0.010" # TAB
-ch6="VccSF	-2 10 0.010"
-#ch7="PLHI	-2 16 0.001" # TAA
-ch7="Val	-2 16 0.001" # TAB
-ch8="DLHI	-2 16 0.001"
+ch1="Vd	-2  10 0.0005"
+ch2="Vs	-2  10 0.0005"
+ch3="Vg	-15  15 0.0005"
 
 # TODO: add channel mapping to file name? or print to log?
 #ch1=Von_ch2=Voff_ch3=Qinj_ch4=Vbias_ch5=Vreset_ch6=VccSF_ch7=PLHI_ch8=DLHI_$(hostname)_"
@@ -116,11 +110,6 @@ SMUS="
 node[1].smua
 node[1].smub
 node[2].smua
-node[2].smub
-node[3].smua
-node[3].smub
-node[4].smua
-node[4].smub
 "
 
 # Showing all channels and resetting them
@@ -163,7 +152,7 @@ $SMU.measure.delay = $SMU.DELAY_OFF
 --v$N = makesetter($SMU.source, 'levelv')
 v$N = function ( v ) if v<$limitvmin then return end if v>$limitvmax then return end $SMU.source.levelv=v end
 i$N = makesetter($SMU.source, 'leveli')
-$SMU.source.highc = $SMU.ENABLE
+--$SMU.source.highc = $SMU.ENABLE
 $SMU.source.func=$SMU.OUTPUT_DCVOLTS
 $SMUdisp.measure.func=display.MEASURE_DCAMPS
 "
@@ -205,23 +194,20 @@ function MKmultiMeasure()
   node[1].smua.measure.overlappediv(node[1].smua.nvbuffer1,node[1].smua.nvbuffer2)
   node[1].smub.measure.overlappediv(node[1].smub.nvbuffer1,node[1].smub.nvbuffer2)
   node[2].smua.measure.overlappediv(node[2].smua.nvbuffer1,node[2].smua.nvbuffer2)
-  node[2].smub.measure.overlappediv(node[2].smub.nvbuffer1,node[2].smub.nvbuffer2)
-  node[3].smua.measure.overlappediv(node[3].smua.nvbuffer1,node[3].smua.nvbuffer2)
-  node[3].smub.measure.overlappediv(node[3].smub.nvbuffer1,node[3].smub.nvbuffer2)
-  node[4].smua.measure.overlappediv(node[4].smua.nvbuffer1,node[4].smua.nvbuffer2)
-  node[4].smub.measure.overlappediv(node[4].smub.nvbuffer1,node[4].smub.nvbuffer2)
+  --node[2].smub.measure.overlappediv(node[2].smub.nvbuffer1,node[2].smub.nvbuffer2)
+  --node[3].smua.measure.overlappediv(node[3].smua.nvbuffer1,node[3].smua.nvbuffer2)
+  --node[3].smub.measure.overlappediv(node[3].smub.nvbuffer1,node[3].smub.nvbuffer2)
+  --node[4].smua.measure.overlappediv(node[4].smua.nvbuffer1,node[4].smua.nvbuffer2)
+  --node[4].smub.measure.overlappediv(node[4].smub.nvbuffer1,node[4].smub.nvbuffer2)
 end
 
 function MKmultiPrint()
   waitcomplete(0)
-  print(node[1].smua.nvbuffer2[1],",",node[1].smua.nvbuffer1[1],",",
+  print(
+	node[1].smua.nvbuffer2[1],",",node[1].smua.nvbuffer1[1],",",
         node[1].smub.nvbuffer2[1],",",node[1].smub.nvbuffer1[1],",",
-        node[2].smua.nvbuffer2[1],",",node[2].smua.nvbuffer1[1],",",
-        node[2].smub.nvbuffer2[1],",",node[2].smub.nvbuffer1[1],",",
-        node[3].smua.nvbuffer2[1],",",node[3].smua.nvbuffer1[1],",",
-        node[3].smub.nvbuffer2[1],",",node[3].smub.nvbuffer1[1],",",
-        node[4].smua.nvbuffer2[1],",",node[4].smua.nvbuffer1[1],",",
-        node[4].smub.nvbuffer2[1],",",node[4].smub.nvbuffer1[1])
+	node[2].smua.nvbuffer2[1],",",node[2].smua.nvbuffer1[1],",",
+  "")
 end
 
 function MKcheckError()
