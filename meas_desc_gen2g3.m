@@ -87,7 +87,7 @@ setup.LOCATION='Argus Building, Electronics Lab';
 setup.HOSTNAME='simwork'; % hostname of computer running this script
 setup.G3_system='1of9-vanilla';
 setup.G3_interface='a6-V20-20080108'; % serial number - hardware version - bitfile version
-setup.G3_adcCards='a3-00-00-00-00-00-00-00'; % On G3 ADC Board, they are labeled ADC8-...-1
+setup.G3_adcCards='a3-u3-00-00-00-00-00-00'; % On G3 ADC Board, they are labeled ADC8-...-1
 
 setup.POWER_G3='G3Power#1';
 setup.POWER_ADC='ArrayAndADCPower#5';
@@ -111,7 +111,7 @@ setup.TEMPMEAS.ARRAY={ '/mnt/wos1/DATA/TH/Data/realtimelog.txt', 'text_env_tempw
 setup.arrdefcnt=0; % initialize counter which keeps track of how many arrays got defined
 
 
-%%{
+%{
 setup.ARRAYTYPE='Gen2_TAA';
 setup.WAFERCODE='29B1-3';
 setup.PLATFORM='PF-G2-11-4';
@@ -127,6 +127,66 @@ setup.PF_analogCard='PNCV1#04';
 setup.PF_arrayLogic='G3only';
 setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
 setup.special='_InitialTest';
+%}
+
+%{
+setup.ARRAYTYPE='Gen2_TAA';
+setup.WAFERCODE='29B1-3-plusmat';
+setup.PLATFORM='PF-G2-11-4';
+setup.arrdefcnt=setup.arrdefcnt+1;
+setup.PF_dataCards='ad'; % first is the outermost, last is the innermost
+setup.PF_dataCardDIPs='1111111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
+setup.PF_dataCardVref='3.70'; % nominal Vref, set by resistor divider
+setup.PF_dataBoardDIPs='00000000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
+setup.PF_dataBoardJumper='';
+setup.PF_gateCards='xx';
+setup.PF_gateCardDir='CW';
+setup.PF_analogCard='PNCV1#02';
+setup.PF_arrayLogic='G3only';
+setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
+setup.special='_PFNoiseTest';
+%}
+
+%%{
+setup.ARRAYTYPE='Gen2_TAB';
+setup.WAFERCODE='29B1-3';
+setup.PLATFORM='PF-G2-11-1';
+setup.arrdefcnt=setup.arrdefcnt+1;
+setup.PF_dataCards='ad'; % first is the outermost, last is the innermost
+setup.PF_dataCardDIPs='1111111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
+setup.PF_dataCardVref='3.70'; % nominal Vref, set by resistor divider
+setup.PF_dataBoardDIPs='00000000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
+setup.PF_dataBoardJumper='';
+setup.PF_gateCards='xx';
+setup.PF_gateCardDir='CW';
+setup.PF_analogCard='PNCV1#04';
+setup.PF_arrayLogic='G3only';
+setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
+setup.special='_PFNoiseTest';
+%}
+
+%{
+setup.ARRAYTYPE='Gen2_TAA';
+setup.WAFERCODE='DATA9shieldedplusmat';
+%setup.PLATFORM='PF-G1-11-1';
+setup.PLATFORM='PF-G2-11-0';
+setup.arrdefcnt=setup.arrdefcnt+1;
+setup.PF_dataCards='ad'; % first is the outermost, last is the innermost
+setup.PF_dataCardDIPs='1111111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
+setup.PF_dataCardVref='3.70'; % nominal Vref, set by resistor divider
+setup.PF_dataBoardDIPs='00000000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
+setup.PF_dataBoardJumper='';
+setup.PF_gateCards='xx';
+setup.PF_gateCardDir='CW';
+setup.PF_analogCard='PNCV1#01';
+%setup.PF_analogCard='V2N5';
+setup.PF_arrayLogic='G3only';
+setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
+
+%setup.PF_arrayLogic='V30-N1-PSI3-20100412'; %V10: CPLD, no DIPS  V20: CPLD, 12 DIPS, V30: FPGA, 12 DIPS
+%setup.PF_arrayLogicDIPs='000000000001'; % DIPs labelled 12 to 1
+
+setup.special='_NoiseTest';
 %}
 
 
@@ -160,7 +220,7 @@ end
 %%% /THINGS TO CHECK BEFORE RUNNING EXP %%%%
 
 
-if false;
+if true;
 % Common mapping of Vout1-16 on the PNC Boards:
 env.V=[];
 env.V(end+1)=  15.0 ; id.Von     =numel(env.V);                             % Gate Line HIGH                                  % Vout1
@@ -182,6 +242,7 @@ env.V(end+1)=  0.00 ; id.VdlcapNO=numel(env.V);  id.Vsfb_gtNO=numel(env.V); % TA
 
 env.V(end+1)=  0    ; id.DLrstGnd=numel(env.V);                          % hard-wired to Analog Ground
 
+if false;
 % SMU-specific mappings:
 smu.vid2ch(id.Von)    =1;
 smu.vid2ch(id.Voff)   =2;
@@ -195,7 +256,6 @@ smu.vid2ch(id.VDatLHI)=8;
 smu.vid2ch(id.VDatLLO)=2;
 smu.vid2ch(id.Vsfb_gte)=2;
 %id.Val      = id.Voff; id.Vsfb_gte = id.Voff;
-end 
 
 % Get mapping from setup.cir:
 [status mapstring]=system('cat setup.cir | grep ^Vmap | sed -r -e ''s/.*Vout([0-9]+)\W+(.*)\W.*/id.\2 = \1;/''');
@@ -206,12 +266,15 @@ id.('VccCSA')
 % create map which voltages are changed together
 FN=fieldnames(id); env.vid2names={};
 for n=1:size(FN); env.vid2names{id.(FN{n})}{end+1}=FN{n}; end
+end 
 
 % reflect method of voltage chaning (SMU, G4, manual)
 
 % SMU mapping
 % Initial Voltage Values (from .cir file?)
 % Ensure/report on conflict freeness?
+
+end
 
 meas.MFileDesc=[ mfilename() '.m' ];
 

@@ -167,7 +167,7 @@ function do_output() { # TFT output characteristic
   send_cmd "v1(0) v2(0) v3(0)"
   done
 }
-function do_diode() { # TFT diode characteristic
+function do_diode() { # TFT diode characteristic, not implemented yet!
   for VG in "-3.000" "-2.000" "-1.000" "0.000" "1.000" "2.000" "3.000" "5.000" "10.000" "15.000"; do
   VD="0.000"
   VS="0.000"
@@ -188,6 +188,8 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
   # Time between points?
   # Step size?
   MEASNR=1000
+  TO=1
+  do_transfer
 
   while true; do 
     read -t 0.1 N && break

@@ -55,6 +55,9 @@ end
 if strcmp(setup.ARRAYTYPE,'Gen2_TAA'); % TAA definitions for timing, more like psi-2
     ts=@(psi1_value,psi2_value,psi3_value) (psi2_value);
 end
+if strcmp(setup.ARRAYTYPE,'Gen2_TAB'); % TAB definitions for timing, more like psi-2
+    ts=@(psi1_value,psi2_value,psi3_value) (psi2_value);
+end
 
 %
 % Array- and Measurement-Type dependent settings
@@ -79,6 +82,12 @@ switch setup.ARRAYTYPE
     geo.G3GL=geo.GL-1; 
     geo.DL=64;
     geo.G3DL=ceil((geo.DL+1)/512)*512/2 -1;
+  case {'Gen2_TAB'}
+    geo.G3_SORTMODE=10;
+    geo.GL=32+geo.extra_gatelines;
+    geo.G3GL=geo.GL-1; 
+    geo.DL=64;
+    geo.G3DL=ceil((geo.DL+1)/512)*512/2 -1;
 end
 
 
@@ -97,7 +106,8 @@ multi.MMATRIX=[];
 
 %%{
 % Qinj sweep
-for VQinj=[0:0.5:2];
+%for VQinj=[0:1.0:2];
+for VQinj=[1.0];
     for VRst=[0];
 multi.MMATRIX(end+1,:)=[
    %VDatLHI %VRst %VQinj
@@ -134,6 +144,9 @@ env.V(id.VDatLHI) = multi.VDatLHI;
 env.V(id.VQinj) = multi.VQinj;
 
 % Communicate with multim_2636A_quad.sh :
+disp(sprintf('Please set Qinj to %.2f Volt!', multi.VQinj));
+pause
+if false;
 if ~flag.dryrun;
    % write voltfile, will be picked up by shell script controlling SMUs
    multi.VOLTFILE='./commtemp/2636_command.scpi';
@@ -153,6 +166,7 @@ if ~flag.dryrun;
    fclose(fid);
    system(sprintf('mv %s.tmp %s',multi.VOLTFILE,multi.VOLTFILE));
 end   
+end
 
 % 
 % Multi-Sequence-Setup
@@ -161,7 +175,8 @@ end
 meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 
 %%{
-meas.MeasCond='Gen2PNC4Test'; multi.R22=0;
+%meas.MeasCond='Gen2PNC4Test'; multi.R22=0;
+meas.MeasCond='Gen2UMBTest'; multi.R22=0;
 multi.RMATRIX=[
    %R1    R26   R27   R11    R13    R14  R22
     1     0     400    0      1      1   14
