@@ -44,6 +44,16 @@ function do_sweep() { # performs a defined sweep
   rm "$DATACTRLFILE"
   echo "Sweep completed."
 }
+function idchannels() { # Sets each channel to a small, charactetistic voltage
+  send_cmd "v1(0.011)"
+  send_cmd "v2(0.022)"
+  send_cmd "v3(0.033)"
+  send_cmd "v4(0.044)"
+  send_cmd "v5(0.055)"
+  send_cmd "v6(0.066)"
+  send_cmd "v7(0.077)"
+  send_cmd "v8(0.088)"
+}
 
 function extract_val() {
   shift $(( $1 + 1 ))

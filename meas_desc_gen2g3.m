@@ -220,7 +220,7 @@ end
 %%% /THINGS TO CHECK BEFORE RUNNING EXP %%%%
 
 
-if true;
+if false;
 % Common mapping of Vout1-16 on the PNC Boards:
 env.V=[];
 env.V(end+1)=  15.0 ; id.Von     =numel(env.V);                             % Gate Line HIGH                                  % Vout1
@@ -242,7 +242,6 @@ env.V(end+1)=  0.00 ; id.VdlcapNO=numel(env.V);  id.Vsfb_gtNO=numel(env.V); % TA
 
 env.V(end+1)=  0    ; id.DLrstGnd=numel(env.V);                          % hard-wired to Analog Ground
 
-if false;
 % SMU-specific mappings:
 smu.vid2ch(id.Von)    =1;
 smu.vid2ch(id.Voff)   =2;
@@ -256,6 +255,7 @@ smu.vid2ch(id.VDatLHI)=8;
 smu.vid2ch(id.VDatLLO)=2;
 smu.vid2ch(id.Vsfb_gte)=2;
 %id.Val      = id.Voff; id.Vsfb_gte = id.Voff;
+else
 
 % Get mapping from setup.cir:
 [status mapstring]=system('cat setup.cir | grep ^Vmap | sed -r -e ''s/.*Vout([0-9]+)\W+(.*)\W.*/id.\2 = \1;/''');
@@ -264,9 +264,22 @@ disp('Voltage mapping loaded.');
 id.('VccCSA')
 
 % create map which voltages are changed together
-FN=fieldnames(id); env.vid2names={};
+FN=fieldnames(id); env.vid2names=cell(max(struct2array(id)),1); %cell(size(FN,1),1) 
 for n=1:size(FN); env.vid2names{id.(FN{n})}{end+1}=FN{n}; end
-end 
+vid2names=@(vid) (sprintf('%s ',env.vid2names{vid}{:}));
+
+setup.powermode='smu'; % 'g4', 'manual'
+switch setup.powermode;
+case {'smu'}
+     % read smu mapping from setup.cir
+     % provide vid2channel mapping
+case {'g4'}
+     error('Powermode g4 not supported yet!');
+case {'manual'}
+     error('Powermode manual not supported yet!');
+default
+     error(sprintf('Unknown setup.powermode %s', setup.powermode));
+end
 
 % reflect method of voltage chaning (SMU, G4, manual)
 
