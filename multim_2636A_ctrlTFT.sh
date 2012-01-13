@@ -138,12 +138,27 @@ function do_noise() { # TFT noise at specific points
   done
 }
 function do_transfer() { # TFT transfer characteristic
-  for VD in "0.100" "0.200" "0.300"; do
+  for VD in $4; do
   VG="0.000"
   VS="0.000"
 
   SWEEP="Transfer$MEASNR"_"Vd=$VD"_"Vs=$VS"
-  VALS=$( octave --quiet --eval "for v=-6:0.1:12; disp(v); end" )
+  VALS=$( octave --quiet --eval "for v=$1:$2:$3; disp(v); end" )
+  [ "$TO" == "" ] && TO=5
+  CH="v3"
+  send_cmd "v1($VD) v2($VS) v3($VG)"
+  do_sweep yes
+
+  send_cmd "v1(0) v2(0) v3(0)"
+  done
+}
+function do_transfer_hivds() { # TFT transfer characteristics at higher Vds
+  for VD in "0.500" "1.000" "3.000" "5.000" "7.000" "9.000"; do
+  VG="0.000"
+  VS="0.000"
+
+  SWEEP="Transfer$MEASNR"_"Vd=$VD"_"Vs=$VS"
+  VALS=$( octave --quiet --eval "for v=-4:0.1:6; disp(v); end" )
   [ "$TO" == "" ] && TO=5
   CH="v3"
   send_cmd "v1($VD) v2($VS) v3($VG)"
@@ -153,7 +168,7 @@ function do_transfer() { # TFT transfer characteristic
   done
 }
 function do_output() { # TFT output characteristic
-  for VG in "-3.000" "-2.000" "-1.000" "0.000" "1.000" "2.000" "3.000" "5.000" "10.000" "15.000"; do
+  for VG in $1; do
   VD="0.000"
   VS="0.000"
 
@@ -189,15 +204,21 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
   # Step size?
   MEASNR=1000
   TO=1
-  do_transfer
+  VGSHI=12
+  VGSHI2=8
+  do_transfer -6 0.1 $VGSHI  "0.100 0.200 0.300 0.500"
+  do_transfer -4 0.1 $VGSHI2 "1.000 3.000 7.000 9.000"
 
   while true; do 
     read -t 0.1 N && break
     MEASNR=$(( $MEASNR + 1 ))
     TO=5
-    do_transfer
+    do_transfer -6 0.1 $VGSHI  "0.100 0.200 0.300 0.500"
+    do_transfer -4 0.1 $VGSHI2 "1.000 2.000 3.000 7.000 9.000"
+    VGSHI=$(( $VGSHI + 2 )); [ $VGSHI -ge 15 ] && VGSHI=15;
+    VGSHI2=$(( $VGSHI2 + 2 )); [ $VGSHI2 -ge 15 ] && VGSHI2=15;
     TO=2
-    do_output
+    do_output "-3.000 -2.000 -1.000 0.000 1.000 2.000 4.000 6.000 8.000 10.000 12.000 15.000"
     TO=300
     do_noise
     MEASNR=$(( $MEASNR + 1 ))
