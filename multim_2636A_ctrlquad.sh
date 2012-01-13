@@ -85,7 +85,7 @@ function do_sweep_getval() { # performs a defined sweep, retrieving values
 function help() {  # help currently displayed
   FUNCLIST="$( grep "^function " $0 | sed -e 's/[^ ]* /\t/' -e 's/[( ].*#/ \t#/' -e 's/[(].*$//' )"
   echo "Defined functions:"
-  echo "$FUNCLIST" | column -t -s "     ";
+  echo "$FUNCLIST" | column -t -s "	";
 }
 function quit() {  # exits this program
   exit
@@ -658,6 +658,16 @@ function sfchar_triple() { # Full SF characterization for 29B-1 TAA
 
   done # current vs. voltage
 }
+
+function ioraw() { # set digio bits on the SMUs, e.g. unset bit 4 on SMU2: ioraw 2 4 0
+  send_cmd "node[$1].digio.writebit($2,$3)"
+}
+
+function io() { # set digio bit by name, e.g. io SAFT 0
+  ioraw ${digio[$1]} $2
+}
+
+. parse_setup.sh source
 
 # main program loop
 while true; do

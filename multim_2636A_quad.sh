@@ -9,17 +9,18 @@ NDEV="smu1.imager.umro"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
 DFILEPREFIX="test01_TAB-29B1-3_$(hostname)_"
+DFILEPREFIX="digiotest1_TAA-29B1-6_$(hostname)_"
 
 ch1="Von	-5 16 0.005"
 ch2="Voff	-5  5 0.005"
 ch3="Qinj        0  3 0.001"
-#ch4="Vbias	-4  4 0.001" # TAA and TABcfg1
-ch4="VccCSA	-2 10 0.010" # TABcfg2
-#ch5="Vreset	-2 10 0.001" # TAA
-ch5="Vgnd	-2 10 0.010" # TAB
+ch4="Vbias	-4  4 0.001" # TAA and TABcfg1
+#ch4="VccCSA	-2 10 0.010" # TABcfg2
+ch5="Vreset	-2 10 0.001" # TAA
+#ch5="Vgnd	-2 10 0.010" # TAB
 ch6="VccSF	-2 10 0.010"
-#ch7="PLHI	-2 16 0.001" # TAA
-ch7="Val	-2 16 0.001" # TAB
+ch7="PLHI	-2 16 0.001" # TAA
+#ch7="Val	-2 16 0.001" # TAB
 ch8="DLHI	-2 16 0.001"
 
 # TODO: add channel mapping to file name? or print to log?
