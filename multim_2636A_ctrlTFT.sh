@@ -46,6 +46,27 @@ function do_sweep() { # performs a defined sweep
       read -t $TO N && break
   echo "Sweep completed."
 }
+function do_sweep_pulsed() { # performs a defined pulsed sweep
+  echo
+  echo "Sweep $SWEEP: CH=$CH, TON=$TON, TOFF=$TOFF, VALS=( " $VALS " )"
+  if [ "$1" == "" ]; then echo "Sweep info completed."; return; fi
+  V1=""
+  for V in $VALS; do
+      send_cmd "$CH($V)"
+      if [ "$V1" == "" ]; then 
+          V1=$V
+          echo $SWEEP >"$DATACTRLFILE"
+      fi
+      read -t $TON N && break
+      send_cmd "$CH($V1)"
+      read -t $TOFF N && break
+  done
+  rm "$DATACTRLFILE"
+  V=$V1
+  send_cmd "$CH($V)"
+      read -t $TO N && break
+  echo "Sweep completed."
+}
 
 function extract_val() {
   shift $(( $1 + 1 ))
@@ -77,7 +98,7 @@ function do_sweep_getval() { # performs a defined sweep, retrieving values
 function help() {  # help currently displayed
   FUNCLIST="$( grep "^function " $0 | sed -e 's/[^ ]* /\t/' -e 's/[( ].*#/ \t#/' -e 's/[(].*$//' )"
   echo "Defined functions:"
-  echo "$FUNCLIST" | column -t -s "     ";
+  echo "$FUNCLIST" | column -t -s "	";
 }
 function quit() {  # exits this program
   exit
@@ -137,7 +158,7 @@ function do_noise() { # TFT noise at specific points
   send_cmd "v1(0) v2(0) v3(0)"
   done
 }
-function do_transfer() { # TFT transfer characteristic
+function do_transfer() { # TFT transfer characteristic, do_transfer FROM STEP TO "VDS1 VDS2 VDS3..."
   for VD in $4; do
   VG="0.000"
   VS="0.000"
@@ -152,33 +173,36 @@ function do_transfer() { # TFT transfer characteristic
   send_cmd "v1(0) v2(0) v3(0)"
   done
 }
-function do_transfer_hivds() { # TFT transfer characteristics at higher Vds
-  for VD in "0.500" "1.000" "3.000" "5.000" "7.000" "9.000"; do
-  VG="0.000"
+function do_output() { # TFT output characteristic, do_output TO "VGS1 VGS2 VGS3..."
+  for VG in $2; do
+  VD="0.000"
   VS="0.000"
 
-  SWEEP="Transfer$MEASNR"_"Vd=$VD"_"Vs=$VS"
-  VALS=$( octave --quiet --eval "for v=-4:0.1:6; disp(v); end" )
-  [ "$TO" == "" ] && TO=5
-  CH="v3"
+  SWEEP="Output$MEASNR"_"Vs=$VS"_"Vg=$VG"
+  VALS=$( octave --quiet --eval "for v=[ 0:0.1:1.999 2:0.2:$1 ]; disp(v); end;" )
+  [ "$TO" == "" ] && TO=2
+  CH="v1"
   send_cmd "v1($VD) v2($VS) v3($VG)"
   do_sweep yes
 
   send_cmd "v1(0) v2(0) v3(0)"
   done
 }
-function do_output() { # TFT output characteristic
-  for VG in $1; do
+function do_output_pulsed() { # TFT output characteristic in pulsed mode, do_output TO "VGS1 VGS2 VGS3..."
+  for VG in $2; do
   VD="0.000"
   VS="0.000"
 
-  SWEEP="Output$MEASNR"_"Vd=$VD"_"Vs=$VS"_"Vg=$VG"
-  VALS=$( octave --quiet --eval "for v=[ 0:0.1:1.999 2:0.2:10 ]; disp(v); end;" )
+  SWEEP="OutputPulsed$MEASNR"_"Vs=$VS"_"Vg=$VG"
+  VALS=$( octave --quiet --eval "for v=[ 0:0.2:$1 ]; disp(v); end;" )
   [ "$TO" == "" ] && TO=2
   CH="v1"
   send_cmd "v1($VD) v2($VS) v3($VG)"
-  do_sweep yes
-
+  send_cmd "select_ilim_pulse_ch1()"
+  send_cmd "select_ilim_pulse_ch2()"
+  do_sweep_pulsed yes
+  send_cmd "select_ilim_default_ch2()"
+  send_cmd "select_ilim_default_ch1()"
   send_cmd "v1(0) v2(0) v3(0)"
   done
 }
@@ -204,23 +228,27 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
   # Step size?
   MEASNR=1000
   TO=1
-  VGSHI=12
-  VGSHI2=8
-  do_transfer -6 0.1 $VGSHI  "0.100 0.200 0.300 0.500"
-  do_transfer -4 0.1 $VGSHI2 "1.000 3.000 7.000 9.000"
+  VDSHI=9  VDSMAX=15
+  VGSHI=12 VGSMAX=20
+  # Initial, quick transfer chars to verify setup
+  do_transfer -6 0.2 $VGSHI  "0.100 0.500"
+  do_output $VDSHI "0.000 4.000"
+
 
   while true; do 
     read -t 0.1 N && break
     MEASNR=$(( $MEASNR + 1 ))
+    VGSHI=$(( $VGSHI + 3 )); [ $VGSHI -ge $VGSMAX ] && VGSHI=$VGSMAX;
+    VDSHI=$(( $VDSHI + 2 )); [ $VDSHI -ge $VDSMAX ] && VDSHI=$VDSMAX;
     TO=5
     do_transfer -6 0.1 $VGSHI  "0.100 0.200 0.300 0.500"
-    do_transfer -4 0.1 $VGSHI2 "1.000 2.000 3.000 7.000 9.000"
-    VGSHI=$(( $VGSHI + 2 )); [ $VGSHI -ge 15 ] && VGSHI=15;
-    VGSHI2=$(( $VGSHI2 + 2 )); [ $VGSHI2 -ge 15 ] && VGSHI2=15;
+    do_transfer -6 0.1 $VGSHI  "1.000 2.000 3.000 7.000 9.000"
     TO=2
-    do_output "-3.000 -2.000 -1.000 0.000 1.000 2.000 4.000 6.000 8.000 10.000 12.000 15.000"
+    do_output $VDSHI "-3.000 -2.000 -1.000 0.000 1.000 2.000 4.000 6.000 8.000 10.000 12.000 15.000"
+    TON=0.2 TOFF=3
+    do_output_pulsed $VDSHI "4.000 6.000 8.000 10.000 12.000 15.000"
     TO=300
-    do_noise
+    #do_noise
     MEASNR=$(( $MEASNR + 1 ))
     TO=$(( $MEASNR - 1000 ))
     do_transfer 

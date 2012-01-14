@@ -8,13 +8,14 @@ MDEV="/dev/ttyUSB1"
 NDEV="smu1.imager.umro"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
-DFILEPREFIX="meas14_TFT-29B1-4_WP7_1-1-2_$(hostname)_"
+DFILEPREFIX="meas18_TFT-29B1-4_WP7_1-1-2_$(hostname)_"
 #DFILEPREFIX="restest02_Rgs1MO_Rds130kO_$(hostname)_"
 #DFILEPREFIX="test02_FET2N7000_inbox_$(hostname)_"
 
-ch1="Vd	-2  10 0.0005"
-ch2="Vs	-2  10 0.0005"
-ch3="Vg	-15  15 0.0005"
+#   Name Vmin Vmax Imax Imax_pulse
+ch1="Vd	  -2   15  0.0005  0.010"
+ch2="Vs	  -2   15  0.0005  0.010"
+ch3="Vg	 -15   20  0.0005  0.010"
 
 # TODO: add channel mapping to file name? or print to log?
 #ch1=Von_ch2=Voff_ch3=Qinj_ch4=Vbias_ch5=Vreset_ch6=VccSF_ch7=PLHI_ch8=DLHI_$(hostname)_"
@@ -127,6 +128,7 @@ function get_chan_props() {
   limitvmin=$2
   limitvmax=$3
   limiti=$4
+  limiti_pulse=$5
 }
 
 # Building defaults for all channels
@@ -152,6 +154,8 @@ $SMU.measure.delay = $SMU.DELAY_OFF
 --v$N = makesetter($SMU.source, 'levelv')
 v$N = function ( v ) if v<$limitvmin then return end if v>$limitvmax then return end $SMU.source.levelv=v end
 i$N = makesetter($SMU.source, 'leveli')
+select_ilim_default_ch$N = function () $SMU.source.limiti=$limiti end
+select_ilim_pulse_ch$N = function () $SMU.source.limiti=$limiti_pulse end
 --$SMU.source.highc = $SMU.ENABLE
 $SMU.source.func=$SMU.OUTPUT_DCVOLTS
 $SMUdisp.measure.func=display.MEASURE_DCAMPS
