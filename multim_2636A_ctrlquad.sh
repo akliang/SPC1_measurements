@@ -667,6 +667,20 @@ function io() { # set digio bit by name, e.g. io SAFT 0
   ioraw ${digio[$1]} $2
 }
 
+function iodefault() { # sets digios to defaults for SMU-controls-PNC-scenario
+  io G4IO10 0
+  io G4IO9 0
+  io G4IO8 0
+  io G4IO7 0
+  io G4IO6 0
+  io G4IO5 0
+  io G4IO3 0
+  io G4IO3 0
+  io G4IO2 0
+  io G4IO1 0
+  io SAFT 0
+}
+
 . parse_setup.sh source
 
 # main program loop

@@ -9,7 +9,7 @@ NDEV="smu1.imager.umro"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
 DFILEPREFIX="test01_TAB-29B1-3_$(hostname)_"
-DFILEPREFIX="digiotest1_TAA-29B1-6_$(hostname)_"
+DFILEPREFIX="digiotest2_TAA-29B1-6_$(hostname)_"
 
 ch1="Von	-5 16 0.005"
 ch2="Voff	-5  5 0.005"
@@ -222,7 +222,8 @@ function MKmultiPrint()
         node[3].smua.nvbuffer2[1],",",node[3].smua.nvbuffer1[1],",",
         node[3].smub.nvbuffer2[1],",",node[3].smub.nvbuffer1[1],",",
         node[4].smua.nvbuffer2[1],",",node[4].smua.nvbuffer1[1],",",
-        node[4].smub.nvbuffer2[1],",",node[4].smub.nvbuffer1[1])
+        node[4].smub.nvbuffer2[1],",",node[4].smub.nvbuffer1[1],",",
+	string.format("%X,%X",node[1].digio.readport(),node[2].digio.readport()) )
 end
 
 function MKcheckError()
@@ -288,7 +289,8 @@ for SMU in $SMUS; do
 done
   STR="$STR$( 
   echo -e "\t\t\t\t\t\t----------"; 
-  echo -e "\t\t\t\t\t\t$CURSUM" )"
+  echo -e "\t\t\t\t\t\t$CURSUM" 
+  echo -e "\tdigio1: $1 digio2: $2" )"
   echo "$STR"
   echo
   echo

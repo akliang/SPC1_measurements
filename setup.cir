@@ -116,8 +116,8 @@ VVVGND   GND 0 0V
 
 Xu57ch3 G4IO5  Vout5  Vout11 Vbias      MAX333
 * DLread1 shorted to DLread2 on the PNC
-* Xu57ch1 SAFT   Vout15 Vout16 DLread1    MAX333
-Xu57ch1 G4IO1  Vout15 Vout16 DLread1    MAX333
+Xu57ch1 SAFT   Vout15 Vout16 DLread1    MAX333
+* Xu57ch1 G4IO1  Vout15 Vout16 DLread1    MAX333
 * Xu57ch2 DGDATA Vout13 Vout14 GlobRst    MAX333
 Xu57ch2 G4IO2  Vout13 Vout14 GlobRst    MAX333
 Xu57ch4	G4IO6  Vout13 Vout14 SelGain    MAX333
@@ -169,15 +169,15 @@ Vdigio2x4   SYS_RSTb  0   0V
 
 Vdigio2x5   G4IO10    0   0V
 Vdigio2x6   G4IO9     0   0V
-Vdigio2x7   G4IO8     0   0V
-Vdigio2x8   G4IO7     0   0V
-Vdigio2x9   G4IO1     0   0V
+Vdigio2x7   G4IO6     0   0V
+Vdigio2x8   G4IO5     0   0V
+Vdigio2x9   G4IO2     0   0V
 
 Vdigio2x10  G4IO3     0   0V
 Vdigio2x11  G4IO4     0   0V
-Vdigio2x12  G4IO6     0   0V
-Vdigio2x13  G4IO5     0   0V
-Vdigio2x14  G4IO2     0   0V
+Vdigio2x12  G4IO7     0   0V
+Vdigio2x13  G4IO8     0   0V
+Vdigio2x14  G4IO1     0   0V
 
 
 
