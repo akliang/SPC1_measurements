@@ -131,7 +131,7 @@ Xu56ch4 G4IO8  Vout9  Vout12 SFBgate    MAX333
 Vsmu1x1  Vsmu1  Vout1    0V
 
 Vsmu2x1  Vsmu2  Vout2    0V
-Vsmu2x2  Vsmu2  Vout9    0V
+* Vsmu2x2  Vsmu2  Vout9    0V
 Vsmu2x3  Vsmu2  Vout13   0V
 Vsmu2x4  Vsmu2  Vout15   0V
 
