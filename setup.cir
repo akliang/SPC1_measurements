@@ -132,12 +132,14 @@ Vsmu1x1  Vsmu1  Vout1    0V
 
 Vsmu2x1  Vsmu2  Vout2    0V
 * Vsmu2x2  Vsmu2  Vout9    0V
-Vsmu2x3  Vsmu2  Vout13   0V
-Vsmu2x4  Vsmu2  Vout15   0V
+* Vsmu2x3  Vsmu2  Vout13   0V
+* Vsmu2x4  Vsmu2  Vout15   0V
 
 Vsmu3x1  Vsmu3  Vout3    0V
 
 Vsmu4x1  Vsmu4  Vout5    0V
+Vsmu4x3  Vsmu4  Vout13   0V
+Vsmu4x4  Vsmu4  Vout15   0V
 
 Vsmu5x1  Vsmu5  Vout6    0V
 

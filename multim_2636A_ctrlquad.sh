@@ -667,18 +667,36 @@ function io() { # set digio bit by name, e.g. io SAFT 0
   ioraw ${digio[$1]} $2
 }
 
-function iodefault() { # sets digios to defaults for SMU-controls-PNC-scenario
+function iog4() { # sets digios to defaults for SMU-controlled-PNC-scenario
   io G4IO10 0
   io G4IO9 0
   io G4IO8 0
   io G4IO7 0
   io G4IO6 0
   io G4IO5 0
-  io G4IO3 0
+  io G4IO4 0
   io G4IO3 0
   io G4IO2 0
   io G4IO1 0
+}
+
+function iosmuonly() { # sets digios to defaults for SMU-controlled-PNC-scenario
   io SAFT 0
+  iog4
+}
+
+function iog3() { # sets all digio ports controlled by G3 to weak pullups, and all G4IOs low
+  ioreset
+  iog4
+}
+
+function ioreset() { # sets all digios to logic-high (i.e. weak pullup)
+  send_cmd "node[1].digio.writeport( 2^14-1 ) node[2].digio.writeport( 2^14-1 )"
+}
+
+function iocopy() { # reads the current digio state and sets the actual ports to that value
+  send_cmd "node[1].digio.writeport( node[1].digio.readport() )"
+  send_cmd "node[2].digio.writeport( node[2].digio.readport() )"
 }
 
 . parse_setup.sh source
