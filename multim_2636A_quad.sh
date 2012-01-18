@@ -10,12 +10,13 @@ DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
 DFILEPREFIX="test01_TAB-29B1-3_$(hostname)_"
 DFILEPREFIX="digiotest3_TAA-29B1-6_$(hostname)_"
-DFILEPREFIX="test02_TAA-29B1-6_$(hostname)_"
+DFILEPREFIX="test03_TAA-29B1-6_$(hostname)_"
 
 ch1="Von	-5 16 0.005"
 ch2="Voff	-5  5 0.005"
 ch3="Qinj        0  3 0.001"
-ch4="Vbias	-4  4 0.001" # TAA and TABcfg1
+#ch4="Vbias	-4  4 0.001" # TAA and TABcfg1
+ch4="DLLO	-4 16 0.001" # TAA special config for testing TFTro always open
 #ch4="VccCSA	-2 10 0.010" # TABcfg2
 ch5="Vreset	-2 10 0.001" # TAA
 #ch5="Vgnd	-2 10 0.010" # TAB
