@@ -699,6 +699,31 @@ function iocopy() { # reads the current digio state and sets the actual ports to
   send_cmd "node[2].digio.writeport( node[2].digio.readport() )"
 }
 
+function alloff() { # turn all smu channels off
+send_cmd "
+node[1].smua.source.output=node[1].smua.OUTPUT_OFF
+node[1].smub.source.output=node[1].smub.OUTPUT_OFF
+node[2].smua.source.output=node[2].smua.OUTPUT_OFF
+node[2].smub.source.output=node[2].smub.OUTPUT_OFF
+node[3].smua.source.output=node[3].smua.OUTPUT_OFF
+node[3].smub.source.output=node[3].smub.OUTPUT_OFF
+node[4].smua.source.output=node[4].smua.OUTPUT_OFF
+node[4].smub.source.output=node[4].smub.OUTPUT_OFF
+"
+}
+function allon() { # turn all smu channels on
+send_cmd "
+node[1].smua.source.output=node[1].smua.OUTPUT_ON
+node[1].smub.source.output=node[1].smub.OUTPUT_ON
+node[2].smua.source.output=node[2].smua.OUTPUT_ON
+node[2].smub.source.output=node[2].smub.OUTPUT_ON
+node[3].smua.source.output=node[3].smua.OUTPUT_ON
+node[3].smub.source.output=node[3].smub.OUTPUT_ON
+node[4].smua.source.output=node[4].smua.OUTPUT_ON
+node[4].smub.source.output=node[4].smub.OUTPUT_ON
+"
+}
+
 . parse_setup.sh source
 
 # main program loop
