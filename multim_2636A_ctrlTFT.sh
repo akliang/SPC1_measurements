@@ -144,12 +144,12 @@ function sweep_vcc() {
 }
 
 function do_noise() { # TFT noise at specific points
-  for VD in "0.100" "0.300"; do
+  for VD in "0.100" "1.000"; do
   VG="0.000"
   VS="0.000"
 
   SWEEP="TransNoise$MEASNR"_"Vd=$VD"_"Vs=$VS"
-  VALS=$( octave --quiet --eval "for v=[-3:1:3 5 10 15 ]; disp(v); end" )
+  VALS=$( octave --quiet --eval "for v=[ 1 3 5 10 ]; disp(v); end" )
   [ "$TO" == "" ] && TO=300
   CH="v3"
   send_cmd "v1($VD) v2($VS) v3($VG)"
@@ -247,8 +247,8 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
     do_output $VDSHI "-3.000 -2.000 -1.000 0.000 1.000 2.000 4.000 6.000 8.000 10.000 12.000 15.000"
     TON=0.2 TOFF=3
     do_output_pulsed $VDSHI "4.000 6.000 8.000 10.000 12.000 15.000"
-    TO=300
-    #do_noise
+    TO=5000
+    do_noise
     MEASNR=$(( $MEASNR + 1 ))
     TO=$(( $MEASNR - 1000 ))
     do_transfer 
