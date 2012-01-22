@@ -8,7 +8,7 @@ MDEV="/dev/ttyUSB1"
 NDEV="smu1.imager.umro"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
-DFILEPREFIX="meas19_TFT-29B1-4_WP7_1-1-2_$(hostname)_"
+DFILEPREFIX="meas20_TFT-29B1-4_WP7_1-1-2_$(hostname)_"
 #DFILEPREFIX="restest02_Rgs1MO_Rds130kO_$(hostname)_"
 #DFILEPREFIX="test02_FET2N7000_inbox_$(hostname)_"
 

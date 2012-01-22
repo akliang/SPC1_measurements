@@ -10,7 +10,7 @@ DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
 DFILEPREFIX="test01_TAB-29B1-3_$(hostname)_"
 DFILEPREFIX="digiotest3_TAA-29B1-6_$(hostname)_"
-DFILEPREFIX="test03_TAA-29B1-6_$(hostname)_"
+DFILEPREFIX="test04_TAA-29B1-6_$(hostname)_"
 
 ch1="Von	-5 16 0.010"
 ch2="Voff	-5  5 0.020"
