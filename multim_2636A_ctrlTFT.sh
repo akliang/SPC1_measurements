@@ -247,7 +247,7 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
     do_output $VDSHI "-3.000 -2.000 -1.000 0.000 1.000 2.000 4.000 6.000 8.000 10.000 12.000 15.000"
     TON=0.2 TOFF=3
     do_output_pulsed $VDSHI "4.000 6.000 8.000 10.000 12.000 15.000"
-    TO=5000
+    TO=4000
     do_noise
     MEASNR=$(( $MEASNR + 1 ))
     TO=$(( $MEASNR - 1000 ))
