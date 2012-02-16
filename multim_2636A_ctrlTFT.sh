@@ -150,6 +150,7 @@ function do_noise() { # TFT noise at specific points
 
   SWEEP="TransNoise$MEASNR"_"Vd=$VD"_"Vs=$VS"
   VALS=$( octave --quiet --eval "for v=[ 1 3 5 10 ]; disp(v); end" )
+  #VALS=$( octave --quiet --eval "for v=[ 1 2.5 2.9 3.9 10 ]; disp(v); end" )
   [ "$TO" == "" ] && TO=300
   CH="v3"
   send_cmd "v1($VD) v2($VS) v3($VG)"
@@ -229,7 +230,7 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
   MEASNR=1000
   TO=1
   VDSHI=9  VDSMAX=15
-  VGSHI=12 VGSMAX=20
+  VGSHI=11 VGSMAX=20
   # Initial, quick transfer chars to verify setup
   do_transfer -6 0.2 $VGSHI  "0.100 0.500"
   do_output $VDSHI "0.000 4.000"
