@@ -14,6 +14,19 @@ if [ "$MAINSMU" == "" ]; then
  echo "Important variables not set. Did you specify the settings file?"
  exit 5
 fi
+# check if file exist
+#if [ -e ${DFILEPREFIX}* ]; then
+# echo "File already exists, proceed anyway? [N/y]"
+# while read a; do
+#  if [ "$a" == "y" ]; then
+#   break
+#  else
+#   exit
+#  fi
+# done
+#fi
+#exit
+
 
 ch1="Vd	  -2   15  0.0005  0.010"
 ch2="Vs	  -2   15  0.0005  0.010"
