@@ -3,8 +3,15 @@
 # $HeadURL$
 # $Id$
 
-DATACTRLFILE='commtemp/2636_datactrl'
-SCPIFILE='commtemp/2636_command.scpi'
+#DATACTRLFILE='commtemp/2636_datactrl'
+#SCPIFILE='commtemp/2636_command.scpi'
+
+# source the settings file
+source "$1"
+if [ "$MAINSMU" == "" ]; then
+ echo "Important variables not set. Did you specify the settings file?"
+ exit 5
+fi
 
 rm "$SCPIFILE"
 

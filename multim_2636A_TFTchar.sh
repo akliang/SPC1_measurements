@@ -5,15 +5,16 @@
 # Started 2011-10-20, based on multim_2636A_triple, to operate Gen2 TAA 29B1-3 on Gen2 platform using PNC#4 with G3 and four SMUs
 
 MDEV="/dev/ttyUSB1"
-NDEV="smu1.imager.umro"
+#NDEV="smu1.imager.umro"
 DDIR='../measurements/environment/'
-DFILEPREFIX="meas_$(hostname)_"
-DFILEPREFIX="meas42_TFT-29B1-3_WP7_1-1-2_$(hostname)_"
-#DFILEPREFIX="meas22_SMUCHAR_10kOhm_$(hostname)_"
-#DFILEPREFIX="restest02_Rgs1MO_Rds130kO_$(hostname)_"
-#DFILEPREFIX="test02_FET2N7000_inbox_$(hostname)_"
 
-#   Name Vmin Vmax Imax Imax_pulse
+# source the settings file
+source "$1"
+if [ "$MAINSMU" == "" ]; then
+ echo "Important variables not set. Did you specify the settings file?"
+ exit 5
+fi
+
 ch1="Vd	  -2   15  0.0005  0.010"
 ch2="Vs	  -2   15  0.0005  0.010"
 ch3="Vg	 -15   20  0.0005  0.010"
@@ -24,11 +25,6 @@ ch3="Vg	 -15   20  0.0005  0.010"
 echo "$(date)" >> "$DDIR$DFILEPREFIX.log"
 svn stat "$0"  >> "$DDIR$DFILEPREFIX.log"
 svn diff "$0"  >> "$DDIR$DFILEPREFIX.log"
-
-SCPIFILE='commtemp/2636_command.scpi'
-# BASH code for live interaction:
-# while true; do read N; echo "$N" >>commtemp/2636_command.scpi; done
-DATACTRLFILE='commtemp/2636_datactrl'
 
 if false; then
   # Code for USB communication - somewhat faulty
@@ -108,12 +104,6 @@ fi
 sendscpi 6 'tsplink.reset() print(tsplink.state)' "" wait4onelineonly
 check_error
 
-SMUS="
-node[1].smua
-node[1].smub
-node[2].smua
-"
-
 # Showing all channels and resetting them
 MSG=""
 for SMU in $SMUS; do
@@ -192,26 +182,26 @@ done
 
 check_error
 
+STR_MEAS=""
+STR_PRNT=""
+for SMU in $SMUS; do
+STR_MEAS="$STR_MEAS
+$SMU.measure.overlappediv($SMU.nvbuffer1,$SMU.nvbuffer2)"
+STR_PRNT="$STR_PRNT
+$SMU.nvbuffer2[1],',',$SMU.nvbuffer1[1],',',"
+done
+
 sendscpi 1 '
 loadandrunscript MKmultiMonitor
 
 function MKmultiMeasure()
-  node[1].smua.measure.overlappediv(node[1].smua.nvbuffer1,node[1].smua.nvbuffer2)
-  node[1].smub.measure.overlappediv(node[1].smub.nvbuffer1,node[1].smub.nvbuffer2)
-  node[2].smua.measure.overlappediv(node[2].smua.nvbuffer1,node[2].smua.nvbuffer2)
-  --node[2].smub.measure.overlappediv(node[2].smub.nvbuffer1,node[2].smub.nvbuffer2)
-  --node[3].smua.measure.overlappediv(node[3].smua.nvbuffer1,node[3].smua.nvbuffer2)
-  --node[3].smub.measure.overlappediv(node[3].smub.nvbuffer1,node[3].smub.nvbuffer2)
-  --node[4].smua.measure.overlappediv(node[4].smua.nvbuffer1,node[4].smua.nvbuffer2)
-  --node[4].smub.measure.overlappediv(node[4].smub.nvbuffer1,node[4].smub.nvbuffer2)
+'"$STR_MEAS"'
 end
 
 function MKmultiPrint()
   waitcomplete(0)
   print(
-	node[1].smua.nvbuffer2[1],",",node[1].smua.nvbuffer1[1],",",
-        node[1].smub.nvbuffer2[1],",",node[1].smub.nvbuffer1[1],",",
-	node[2].smua.nvbuffer2[1],",",node[2].smua.nvbuffer1[1],",",
+'"$STR_PRNT"'
   "")
 end
 
