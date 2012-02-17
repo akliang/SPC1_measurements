@@ -13,6 +13,13 @@ if [ "$MAINSMU" == "" ]; then
  exit 5
 fi
 
+N=0
+for SMU in $SMUS; do
+N=$(( $N + 1 ))
+SMUdisp[$N]=$( echo "$SMU" | sed -e 's%\.%.display.%' )
+SMUchan[$N]=$SMU
+done
+
 rm "$SCPIFILE"
 
 function send_cmd() { # sends command to scpi file
