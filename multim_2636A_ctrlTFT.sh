@@ -81,6 +81,28 @@ function do_sweep_pulsed() { # performs a defined pulsed sweep
       read -t $TO N && break
   echo "Sweep completed."
 }
+function do_sweep_fixrange() { # performs a defined sweep, fixing channel current ranges after a settling time
+  echo
+  echo "Sweep $SWEEP: CH=$CH, TSET=$TSET, TO=$TO, VALS=( " $VALS " )"
+  if [ "$1" == "" ]; then echo "Sweep info completed."; return; fi
+  V1=""
+  for V in $VALS; do
+      send_cmd "$CH($V)"
+      if [ "$V1" == "" ]; then 
+          V1=$V
+          echo $SWEEP >"$DATACTRLFILE"
+      fi
+      read -t $TSET N && break
+      send_cmd "ar1=autorangei1(smua.AUTORANGE_OFF) ar2=autorangei2(smua.AUTORANGE_OFF) ar3=autorangei3(smua.AUTORANGE_OFF)"
+      read -t $TO N && break
+      send_cmd "autorangei1(ar1) autorangei2(ar2) autorangei3(ar3)"
+  done
+  rm "$DATACTRLFILE"
+  V=$V1
+  send_cmd "$CH($V)"
+      read -t $TO N && break
+  echo "Sweep completed."
+}
 
 function extract_val() {
   shift $(( $1 + 1 ))
@@ -165,10 +187,11 @@ function do_noise() { # TFT noise at specific points
   SWEEP="TransNoise$MEASNR"_"Vd=$VD"_"Vs=$VS"
   VALS=$( octave --quiet --eval "for v=[ 1 3 5 10 ]; disp(v*$PNTYPE); end" )
   #VALS=$( octave --quiet --eval "for v=[ 1 2.5 2.9 3.9 10 ]; disp(v); end" )
-  [ "$TO" == "" ] && TO=300
+  [ "$TO" == "" ] && TO=20
+  [ "$TSET" == "" ] && TSET=10
   CH="v3"
   send_cmd "v1($VD) v2($VS) v3($VG)"
-  do_sweep yes
+  do_sweep_fixrange yes
 
   send_cmd "v1(0) v2(0) v3(0)"
   done

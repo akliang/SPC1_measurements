@@ -160,6 +160,7 @@ v$N = function ( v ) if v<$limitvmin then return end if v>$limitvmax then return
 i$N = makesetter($SMU.source, 'leveli')
 select_ilim_default_ch$N = function () $SMU.source.limiti=$limiti end
 select_ilim_pulse_ch$N = function () $SMU.source.limiti=$limiti_pulse end
+autorangei$N = function ( ar ) arold = $SMU.measure.autorangei $SMU.measure.autorangei=ar return(arold)  end
 --$SMU.source.highc = $SMU.ENABLE
 $SMU.source.func=$SMU.OUTPUT_DCVOLTS
 $SMUdisp.measure.func=display.MEASURE_DCAMPS
