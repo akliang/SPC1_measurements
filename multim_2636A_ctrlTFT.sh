@@ -281,7 +281,7 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
     VDSHI=$(( $VDSHI + 2 )); [ $VDSHI -ge $VDSMAX ] && VDSHI=$VDSMAX;
     TO=5
     do_transfer -6 0.1 $VGSHI  "0.100 0.200 0.300 0.500"
-    do_transfer -6 0.1 $VGSHI  "1.000 2.000 3.000 7.000 9.000"
+    do_transfer -6 0.1 $VGSHI  "1.000 2.000 3.000 5.000 7.000 9.000"
     TO=2
     do_output $VDSHI "-3.000 -2.000 -1.000 0.000 1.000 2.000 4.000 6.000 8.000 10.000 12.000 15.000"
     TON=0.2 TOFF=3
