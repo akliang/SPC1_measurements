@@ -103,6 +103,34 @@ function do_sweep_fixrange() { # performs a defined sweep, fixing channel curren
       read -t $TO N && break
   echo "Sweep completed."
 }
+function do_sweep_manypulsed_fixed() { # performs a defined, repeated pulse sweeps at fixing current ranges in first ON time
+  echo
+  echo "Sweep $SWEEP: CH=$CH, TON=$TON, TOFF=$TOFF, REPS=$REPS, VALS=( " $VALS " )"
+  if [ "$1" == "" ]; then echo "Sweep info completed."; return; fi
+  V1=""
+  for V in $VALS; do
+      if [ "$V1" == "" ]; then 
+          V1=$V
+          echo $SWEEP >"$DATACTRLFILE"
+      fi
+
+      R=0
+      while [[ $R -lt $REPS ]]; do
+        send_cmd "$CH($V)"
+        read -t $TON N && break
+        [[ $R -eq 0 ]] && send_cmd "ar1=autorangei1(smua.AUTORANGE_OFF) ar2=autorangei2(smua.AUTORANGE_OFF) ar3=autorangei3(smua.AUTORANGE_OFF)"
+        send_cmd "$CH($V1)"
+        read -t $TOFF N && break
+        R=$(( $R + 1 ))
+      done
+      send_cmd "autorangei1(ar1) autorangei2(ar2) autorangei3(ar3)"
+  done
+  rm "$DATACTRLFILE"
+  V=$V1
+  send_cmd "$CH($V)"
+      read -t $TO N && break
+  echo "Sweep completed."
+}
 
 function extract_val() {
   shift $(( $1 + 1 ))
@@ -196,6 +224,23 @@ function do_noise() { # TFT noise at specific points
   send_cmd "v1(0) v2(0) v3(0)"
   done
 }
+function do_noise_pulsed() { # TFT noise at specific points
+  for VD in "1.000" "5.000"; do
+  VG="0.000"
+  VS="0.000"
+
+  SWEEP="PulsedNoise$MEASNR"_"Vd=$VD"_"Vs=$VS"
+  VALS=$( octave --quiet --eval "for v=[ 0 5 10 ]; disp(v*$PNTYPE); end" )
+  [ "$TON" == "" ]  && TON=2
+  [ "$TOFF" == "" ] && TOFF=2
+  [ "$REPS" == "" ] && REPS=10 #1000
+  CH="v3"
+  send_cmd "v1($VD) v2($VS) v3($VG)"
+  do_sweep_manypulsed_fixed yes
+
+  send_cmd "v1(0) v2(0) v3(0)"
+  done
+}
 function do_transfer() { # TFT transfer characteristic, do_transfer FROM STEP TO "VDS1 VDS2 VDS3..."
   for VD in $4; do
   VG="0.000"
@@ -280,17 +325,18 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
     VGSHI=$(( $VGSHI + 3 )); [ $VGSHI -ge $VGSMAX ] && VGSHI=$VGSMAX;
     VDSHI=$(( $VDSHI + 2 )); [ $VDSHI -ge $VDSMAX ] && VDSHI=$VDSMAX;
     TO=5
-    do_transfer -6 0.1 $VGSHI  "0.100 0.200 0.300 0.500"
-    do_transfer -6 0.1 $VGSHI  "1.000 2.000 3.000 5.000 7.000 9.000"
+    do_transfer -6 0.1 $VGSHI  "0.100 0.200 0.300 0.500 0.101"
+    do_transfer -6 0.1 $VGSHI  "1.000 2.000 3.000 5.000 7.000 9.000 0.102"
     TO=2
     do_output $VDSHI "-3.000 -2.000 -1.000 0.000 1.000 2.000 4.000 6.000 8.000 10.000 12.000 15.000"
     TON=0.2 TOFF=3
     do_output_pulsed $VDSHI "4.000 6.000 8.000 10.000 12.000 15.000"
     TO=4000
     do_noise
+    do_noise_pulsed
     MEASNR=$(( $MEASNR + 1 ))
-    TO=$(( $MEASNR - 1000 ))
-    do_transfer 
+    #TO=$(( $MEASNR - 1000 ))
+    #do_transfer 
   done
 }
 
