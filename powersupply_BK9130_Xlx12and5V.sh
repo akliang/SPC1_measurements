@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# $HeadURL$
+# $Id$
+
+#MDEV="/dev/ttyUSB4"
 MDEV="/dev/ttyUSB1"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
@@ -28,8 +32,11 @@ echo $IDN
 sendscpi 1 'SYST:ERR?'
 sendscpi 1 '*CLS'
 
-#[ "$IDN" == "BK,9130,005004156568001016,V1.69" ] && [ "$(hostname)" == "muon" ] && ans="y" # BK#4, 2011-10-26 on muon providing Xilinx powers
-[ "$IDN" == "BK,9130,005004156568001013,V1.69" ] && [ "$(hostname)" == "simwork" ] && ans="y" # BK#X, 2012-01-21 on simwork providing Xilinx powers
+# uncomment the configuration you intend to use on this computer:
+#[ "$IDN" == "BK,9130,005004156568001016,V1.69" ] && [ "$(hostname)" == "exciton" ] && ans="y" # BK#4, 2012-02-15 on exciton providing Xilinx powers
+#[ "$IDN" == "BK,9130,005004156568001016,V1.69" ] && [ "$(hostname)" == "muon"    ] && ans="y" # BK#4, 2011-10-26 on muon providing Xilinx powers
+#[ "$IDN" == "BK,9130,005004156568001013,V1.69" ] && [ "$(hostname)" == "muon"    ] && ans="y" # BK#6, 2012-02-24 on muon providing Xilinx powers
+#[ "$IDN" == "BK,9130,005004156568001013,V1.69" ] && [ "$(hostname)" == "simwork" ] && ans="y" # BK#6, 2012-01-21 on simwork providing Xilinx powers
 
 until  [ "$ans" == "y" ]; 
 do
@@ -53,7 +60,7 @@ sendscpi $TO 'APP:VOLT 0,12,5.0'
 sendscpi $TO 'SYST:ERR?'
 sendscpi $TO '*CLS'
 #sendscpi $TO 'APP:CURR 0.2,0.2,0.2' 
-sendscpi $TO 'APP:CURR 0.0,1.5,1.0' 
+sendscpi $TO 'APP:CURR 0.0,3.5,1.0' 
 sendscpi $TO 'SYST:ERR?'
 sendscpi $TO '*CLS'
 sendscpi $TO 'APP:OUT 0,1,1'
