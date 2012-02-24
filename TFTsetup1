@@ -2,7 +2,7 @@
 MAINSMU="smu1"
 NDEV="$MAINSMU.imager.umro"
 DFILEPREFIX="meas_$(hostname)_"
-DFILEPREFIX="meas50_TFT-29B1-3_WP6_1-1-2_$(hostname)_"
+DFILEPREFIX="meas56_TFT-29B1-3_WP6_1-2-2_$(hostname)_"
 PNTYPE=1
 #DFILEPREFIX="smutest_$(hostname)_"
 #DFILEPREFIX="meas22_SMUCHAR_10kOhm_$(hostname)_"
