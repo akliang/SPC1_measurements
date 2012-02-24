@@ -9,6 +9,7 @@ PNTYPE=1
 
 SCPIFILE="commtemp/2636_command.scpi.$MAINSMU"
 DATACTRLFILE="commtemp/2636_datactrl.$MAINSMU"
+PIDFILE="commtemp/2636_pid.$MAINSMU"
 
 SMUS="
 node[1].smua

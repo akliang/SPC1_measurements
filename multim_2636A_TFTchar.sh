@@ -4,6 +4,15 @@
 # $Id$
 # Started 2011-10-20, based on multim_2636A_triple, to operate Gen2 TAA 29B1-3 on Gen2 platform using PNC#4 with G3 and four SMUs
 
+if [ "$2" == "loop" ]; then
+  while true; do
+    "$0" "$1"
+    echo "$0 returned, short sleep before restarting again"
+    read -t 30 N && exit
+  done
+  exit
+fi
+
 MDEV="/dev/ttyUSB1"
 #NDEV="smu1.imager.umro"
 DDIR='../measurements/environment/'
@@ -28,9 +37,9 @@ fi
 #exit
 
 
-ch1="Vd	  -2   15  0.0005  0.010"
-ch2="Vs	  -2   15  0.0005  0.010"
-ch3="Vg	 -15   20  0.0005  0.010"
+ch1="Vd	 -15   15  0.0005  0.010"
+ch2="Vs	 -15   15  0.0005  0.010"
+ch3="Vg	 -20   20  0.0005  0.010"
 
 # TODO: add channel mapping to file name? or print to log?
 #ch1=Von_ch2=Voff_ch3=Qinj_ch4=Vbias_ch5=Vreset_ch6=VccSF_ch7=PLHI_ch8=DLHI_$(hostname)_"
@@ -55,7 +64,8 @@ else
   nc $NDEV 5025 <"$TD/p5" >"$TD/p6" &
   NCPID=$!
   rm "$TD/p5" "$TD/p6" # actual delete will only occur once files are no longer accessed
-  trap "nc $NDEV 1030; kill $NCPID; rmdir '$TD'; exit" EXIT
+  trap "nc $NDEV 1030; kill $NCPID; rmdir '$TD'; rm '$PIDFILE'; exit" EXIT
+  echo $$ > "$PIDFILE"
 fi
 
 function sendscpi() { # send commands to the device (not only SCPI)
