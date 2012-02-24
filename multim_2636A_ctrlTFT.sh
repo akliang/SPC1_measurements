@@ -213,6 +213,7 @@ function do_noise() { # TFT noise at specific points
   for VD in "0.100" "1.000" "5.000"; do
   VG="0.000"
   VS="0.000"
+  VD=$( echo $VD $PNTYPE | gawk '{ printf("%.3f", $1*$2) }' )
 
   SWEEP="TransNoise$MEASNR"_"Vd=$VD"_"Vs=$VS"
   VALS=$( octave --quiet --eval "for v=[ 1 3 5 10 ]; disp(v*$PNTYPE); end" )
@@ -230,6 +231,7 @@ function do_noise_pulsed() { # TFT noise at specific points
   for VD in "1.000" "5.000"; do
   VG="0.000"
   VS="0.000"
+  VD=$( echo $VD $PNTYPE | gawk '{ printf("%.3f", $1*$2) }' )
 
   SWEEP="PulsedNoise$MEASNR"_"Vd=$VD"_"Vs=$VS"
   VALS=$( octave --quiet --eval "for v=[ 0 5 10 ]; disp(v*$PNTYPE); end" )
@@ -247,6 +249,7 @@ function do_transfer() { # TFT transfer characteristic, do_transfer FROM STEP TO
   for VD in $4; do
   VG="0.000"
   VS="0.000"
+  VD=$( echo $VD $PNTYPE | gawk '{ printf("%.3f", $1*$2) }' )
 
   SWEEP="Transfer$MEASNR"_"Vd=$VD"_"Vs=$VS"
   VALS=$( octave --quiet --eval "for v=$1:$2:$3; disp(v*$PNTYPE); end" )
@@ -265,7 +268,7 @@ function do_output() { # TFT output characteristic, do_output TO "VGS1 VGS2 VGS3
   VG=$( echo $VG $PNTYPE | gawk '{ printf("%.3f", $1*$2) }' )
 
   SWEEP="Output$MEASNR"_"Vs=$VS"_"Vg=$VG"
-  VALS=$( octave --quiet --eval "for v=[ 0:0.1:1.999 2:0.2:$1 ]; disp(v); end;" )
+  VALS=$( octave --quiet --eval "for v=[ 0:0.1:1.999 2:0.2:$1 ]; disp(v*$PNTYPE); end;" )
   [ "$TO" == "" ] && TO=2
   CH="v1"
   send_cmd "v1($VD) v2($VS) v3($VG)"
@@ -278,9 +281,10 @@ function do_output_pulsed() { # TFT output characteristic in pulsed mode, do_out
   for VG in $2; do
   VD="0.000"
   VS="0.000"
+  VG=$( echo $VG $PNTYPE | gawk '{ printf("%.3f", $1*$2) }' )
 
   SWEEP="OutputPulsed$MEASNR"_"Vs=$VS"_"Vg=$VG"
-  VALS=$( octave --quiet --eval "for v=[ 0:0.2:$1 ]; disp(v); end;" )
+  VALS=$( octave --quiet --eval "for v=[ 0:0.2:$1 ]; disp(v*$PNTYPE); end;" )
   [ "$TO" == "" ] && TO=2
   CH="v1"
   send_cmd "v1($VD) v2($VS) v3($VG)"
