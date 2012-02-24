@@ -53,9 +53,8 @@ else
   exec 5<>"$TD/p5"
   exec 6<>"$TD/p6"
   nc $NDEV 5025 <"$TD/p5" >"$TD/p6" &
-  rm "$TD/p5" "$TD/p6" # actual delete will only occur once files are no longer accessed
   NCPID=$!
-  #trap "nc 192.168.0.226 1030; rmdir '$TD'; exit" EXIT
+  rm "$TD/p5" "$TD/p6" # actual delete will only occur once files are no longer accessed
   trap "nc $NDEV 1030; kill $NCPID; rmdir '$TD'; exit" EXIT
 fi
 
@@ -313,7 +312,9 @@ until read -t $T1 K; do
   	echo "$RESLINE" >>"$DDIR$DFILEPREFIX.$DATAEXT"
 	echo "$RESLINE" >"$SCPIFILE.result"
   fi
+  echo "Waiting for $PRPID to finish..."
   [ "$PRPID" != "" ] && wait $PRPID
+  echo "...$PRPID finished!"
   print_result $RESLINE &
   PRPID=$!
 done
