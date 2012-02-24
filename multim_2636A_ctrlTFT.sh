@@ -28,7 +28,9 @@ function send_cmd() { # sends command to scpi file
     exit 3
   fi
   echo -n 'SEND>>   '
-  echo "$*" | tee -a "$SCPIFILE"
+  echo "$*" 
+  echo "$*" > "$SCPIFILE.pre"
+  mv "$SCPIFILE.pre" "$SCPIFILE"
   while [ -e "$SCPIFILE" ]; do
       read -t 0.1 N && break
   done
@@ -315,7 +317,7 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
   VDSHI=9  VDSMAX=15
   VGSHI=11 VGSMAX=20
   # Initial, quick transfer chars to verify setup
-  do_transfer -6 0.2 $VGSHI  "0.100 0.500"
+  do_transfer -6 0.2 $VGSHI  "0.100 0.000 0.500"
   do_output $VDSHI "0.000 4.000"
 
 
@@ -325,7 +327,7 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
     VGSHI=$(( $VGSHI + 3 )); [ $VGSHI -ge $VGSMAX ] && VGSHI=$VGSMAX;
     VDSHI=$(( $VDSHI + 2 )); [ $VDSHI -ge $VDSMAX ] && VDSHI=$VDSMAX;
     TO=5
-    do_transfer -6 0.1 $VGSHI  "0.100 0.200 0.300 0.500 0.101"
+    do_transfer -6 0.1 $VGSHI  "0.100 0.000 0.200 0.300 0.500 0.101"
     do_transfer -6 0.1 $VGSHI  "1.000 2.000 3.000 5.000 7.000 9.000 0.102"
     TO=2
     do_output $VDSHI "-3.000 -2.000 -1.000 0.000 1.000 2.000 4.000 6.000 8.000 10.000 12.000 15.000"
