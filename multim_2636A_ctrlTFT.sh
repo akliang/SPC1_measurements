@@ -338,8 +338,12 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
     TON=0.2 TOFF=3
     do_output_pulsed $VDSHI "4.000 6.000 8.000 10.000 12.000 15.000"
     
-    kill $(<$PIDFILE); sleep 60
-    kill -9 $(<$PIDFILE); sleep 60
+    kill $(<$PIDFILE); sleep 15
+    if [ -e $PIDFILE ]; then
+       kill -9 $(<$PIDFILE)
+    fi
+    sleep 60
+    
     TO=4000
     do_noise
     do_noise_pulsed
