@@ -321,7 +321,14 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
   VDSHI=9  VDSMAX=15
   VGSHI=11 VGSMAX=20
   # Initial, quick transfer chars to verify setup
-  do_transfer -6 0.2 $VGSHI  "0.100 0.500"
+
+  #do_transfer -6 0.2 $VGSHI  "0.100 0.500"
+
+  do_transfer 0 -0.2 -6  "0.100 0.500 5.000"
+  do_transfer 0 0.2 $VGSHI  "0.100 0.500 5.000"
+  
+  #do_transfer $VGSHI -0.2 -6  "0.100 0.500 5.000"
+
   do_output $VDSHI "0.000 4.000"
 
 
