@@ -43,6 +43,7 @@ function send_cmd() { # sends command to scpi file
   fi
 }
 
+TOFINAL=1
 function do_sweep() { # performs a defined sweep
   echo
   echo "Sweep $SWEEP: CH=$CH, TO=$TO, VALS=( " $VALS " )"
@@ -59,7 +60,7 @@ function do_sweep() { # performs a defined sweep
   rm "$DATACTRLFILE"
   V=$V1
   send_cmd "$CH($V)"
-      read -t $TO N && break
+      read -t $TOFINAL N && break
   echo "Sweep completed."
 }
 function do_sweep_pulsed() { # performs a defined pulsed sweep
@@ -80,7 +81,7 @@ function do_sweep_pulsed() { # performs a defined pulsed sweep
   rm "$DATACTRLFILE"
   V=$V1
   send_cmd "$CH($V)"
-      read -t $TO N && break
+      read -t $TOFINAL N && break
   echo "Sweep completed."
 }
 function do_sweep_fixrange() { # performs a defined sweep, fixing channel current ranges after a settling time
@@ -102,7 +103,7 @@ function do_sweep_fixrange() { # performs a defined sweep, fixing channel curren
   rm "$DATACTRLFILE"
   V=$V1
   send_cmd "$CH($V)"
-      read -t $TO N && break
+      read -t $TOFINAL N && break
   echo "Sweep completed."
 }
 function do_sweep_manypulsed_fixed() { # performs a defined, repeated pulse sweeps at fixing current ranges in first ON time
@@ -130,7 +131,7 @@ function do_sweep_manypulsed_fixed() { # performs a defined, repeated pulse swee
   rm "$DATACTRLFILE"
   V=$V1
   send_cmd "$CH($V)"
-      read -t $TO N && break
+      read -t $TOFINAL N && break
   echo "Sweep completed."
 }
 
@@ -321,11 +322,10 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
   VDSHI=9  VDSMAX=15
   VGSHI=11 VGSMAX=20
   # Initial, quick transfer chars to verify setup
+  do_transfer -6 0.2 $VGSHI  "0.100 0.500"
 
-  #do_transfer -6 0.2 $VGSHI  "0.100 0.500"
-
-  do_transfer 0 -0.2 -6  "0.100 0.500 5.000"
-  do_transfer 0 0.2 $VGSHI  "0.100 0.500 5.000"
+  #do_transfer 0 -0.2 -6  "0.100 0.500 5.000"
+  #do_transfer 0 0.2 $VGSHI  "0.100 0.500 5.000"
   
   #do_transfer $VGSHI -0.2 -6  "0.100 0.500 5.000"
 
@@ -353,6 +353,7 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
     
     TO=4000
     do_noise
+    TON=2 TOFF=0.2 REPS=1500
     do_noise_pulsed
     MEASNR=$(( $MEASNR + 1 ))
     #TO=$(( $MEASNR - 1000 ))
