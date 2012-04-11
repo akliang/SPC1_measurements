@@ -1,0 +1,28 @@
+
+MAINSMU="smu1"
+NDEV="$MAINSMU.imager.umro"
+
+DFILEPREFIX="meas_smu_$(hostname)_"
+#PNTYPE=-1
+
+SCPIFILE="commtemp/2636_command.scpi.$MAINSMU"
+DATACTRLFILE="commtemp/2636_datactrl.$MAINSMU"
+PIDFILE="commtemp/2636_pid.$MAINSMU"
+
+SMUS="
+node[1].smua
+node[1].smub
+node[2].smua
+node[2].smub
+"
+
+#CH name Vmin Vmax Imax    Imaxpulse  HIGHC
+ch1="V1  -20   20  0.2000  1.000      false"
+ch2="V2  -20   20  0.2000  1.000      false"
+ch3="V3  -20   20  0.2000  1.000      false"
+ch4="V4  -20   20  0.2000  1.000      false"
+
+DIGIOS="
+node[1]
+node[2]
+"
