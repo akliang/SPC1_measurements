@@ -36,11 +36,6 @@ fi
 #fi
 #exit
 
-
-ch1="Vd	 -15   15  0.0005  0.010"
-ch2="Vs	 -15   15  0.0005  0.010"
-ch3="Vg	 -20   20  0.0005  0.010"
-
 # TODO: add channel mapping to file name? or print to log?
 #ch1=Von_ch2=Voff_ch3=Qinj_ch4=Vbias_ch5=Vreset_ch6=VccSF_ch7=PLHI_ch8=DLHI_$(hostname)_"
 
@@ -142,6 +137,7 @@ function get_chan_props() {
   limitvmax=$3
   limiti=$4
   limiti_pulse=$5
+  highc=$6
 }
 
 # Building defaults for all channels
@@ -170,7 +166,7 @@ i$N = makesetter($SMU.source, 'leveli')
 select_ilim_default_ch$N = function () $SMU.source.limiti=$limiti end
 select_ilim_pulse_ch$N = function () $SMU.source.limiti=$limiti_pulse end
 autorangei$N = function ( ar ) arold = $SMU.measure.autorangei $SMU.measure.autorangei=ar return(arold)  end
---$SMU.source.highc = $SMU.ENABLE
+if ($highc) then $SMU.source.highc = $SMU.ENABLE else $SMU.source.highc = $SMU.DISABLE end
 $SMU.source.func=$SMU.OUTPUT_DCVOLTS
 $SMUdisp.measure.func=display.MEASURE_DCAMPS
 "
@@ -208,11 +204,18 @@ check_error
 STR_MEAS=""
 STR_PRNT=""
 for SMU in $SMUS; do
-STR_MEAS="$STR_MEAS
-$SMU.measure.overlappediv($SMU.nvbuffer1,$SMU.nvbuffer2)"
-STR_PRNT="$STR_PRNT
-$SMU.nvbuffer2[1],',',$SMU.nvbuffer1[1],',',"
+  STR_MEAS="$STR_MEAS
+  $SMU.measure.overlappediv($SMU.nvbuffer1,$SMU.nvbuffer2)"
+  STR_PRNT="$STR_PRNT
+  $SMU.nvbuffer2[1],',',$SMU.nvbuffer1[1],',',"
 done
+# add digio sampling if desired
+# string.format("%04X,%04X",node[1].digio.readport(),node[2].digio.readport()) 
+for DIGIO in $DIGIOS; do
+  STR_PRNT="$STR_PRNT
+  string.format(\"%04X,\", $DIGIO.digio.readport()),"
+done
+
 
 sendscpi 1 '
 loadandrunscript MKmultiMonitor
@@ -291,7 +294,14 @@ for SMU in $SMUS; do
 done
   STR="$STR$( 
   echo -e "\t\t\t\t\t\t----------"; 
-  echo -e "\t\t\t\t\t\t$CURSUM" )"
+  echo -e "\t\t\t\t\t\t$CURSUM" 
+  echo -n -e "\t" )"
+N=0
+for DIGIO in $DIGIOS; do
+  N=$(( $N + 1 ))
+  STR="$STR digio$N: $1 "
+  shift 1
+done
   echo "$STR"
   echo
   echo

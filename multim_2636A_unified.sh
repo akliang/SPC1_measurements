@@ -138,13 +138,13 @@ function get_chan_props() {
   limiti=$4
   limiti_pulse=$5
   highc=$6
+  sourcecurrent=$7
 }
 
 # Building defaults for all channels
 N=0
 for SMU in $SMUS; do
 N=$(( $N + 1 ))
-#node[2].display.smua.measure.func=display.MEASURE_DCAMPS
 SMUdisp=$( echo "$SMU" | sed -e 's%\.%.display.%' )
 echo "Setting SMU: $SMU  DISPLAY: $SMUdisp"
 eval "get_chan_props \${ch$N}" 
@@ -167,8 +167,13 @@ select_ilim_default_ch$N = function () $SMU.source.limiti=$limiti end
 select_ilim_pulse_ch$N = function () $SMU.source.limiti=$limiti_pulse end
 autorangei$N = function ( ar ) arold = $SMU.measure.autorangei $SMU.measure.autorangei=ar return(arold)  end
 if ($highc) then $SMU.source.highc = $SMU.ENABLE else $SMU.source.highc = $SMU.DISABLE end
+if ($sourcecurrent) then
 $SMU.source.func=$SMU.OUTPUT_DCVOLTS
 $SMUdisp.measure.func=display.MEASURE_DCAMPS
+else
+$SMU.source.func=$SMU.OUTPUT_DCAMPS
+$SMUdisp.measure.func=display.MEASURE_DCVOLTS
+end
 "
 check_error
 done
