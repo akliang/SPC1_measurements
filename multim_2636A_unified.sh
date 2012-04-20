@@ -167,13 +167,11 @@ select_ilim_default_ch$N = function () $SMU.source.limiti=$limiti end
 select_ilim_pulse_ch$N = function () $SMU.source.limiti=$limiti_pulse end
 autorangei$N = function ( ar ) arold = $SMU.measure.autorangei $SMU.measure.autorangei=ar return(arold)  end
 if ($highc) then $SMU.source.highc = $SMU.ENABLE else $SMU.source.highc = $SMU.DISABLE end
-if ($sourcecurrent) then
-$SMU.source.func=$SMU.OUTPUT_DCVOLTS
-$SMUdisp.measure.func=display.MEASURE_DCAMPS
-else
-$SMU.source.func=$SMU.OUTPUT_DCAMPS
-$SMUdisp.measure.func=display.MEASURE_DCVOLTS
-end
+--for now this ugly sequence of ifs, because if needs to be completed in a single line in interactive mode
+if (not $sourcecurrent) then $SMU.source.func=$SMU.OUTPUT_DCVOLTS          end
+if (not $sourcecurrent) then $SMUdisp.measure.func=display.MEASURE_DCAMPS  end
+if (    $sourcecurrent) then $SMU.source.func=$SMU.OUTPUT_DCAMPS           end
+if (    $sourcecurrent) then $SMUdisp.measure.func=display.MEASURE_DCVOLTS end
 "
 check_error
 done
@@ -307,17 +305,23 @@ for DIGIO in $DIGIOS; do
   STR="$STR digio$N: $1 "
   shift 1
 done
-  echo "$STR"
+  IND=$( echo $LCNT | gawk '{ if ($1 % 2) { print "+"; } else { print "o"; } }' )
+  echo "$IND $STR"
   echo
   echo
 }
 
 {
 
-T1=0.1 # use full integers for some older BASH shells
+T1=0.2 # use full integers for some older BASH shells
 T2=5  # Maximum time to wait for results and after error messages
+LCNT=0 # Loop counter
 
-until read -t $T1 K; do
+#until read -t $T1 K; do
+until read -t 0.01 K; do
+  LCNT=$(( LCNT + 1 ))
+  sleep $T1 &
+  SLPID=$!
   if [ -e "$SCPIFILE" ]; then
 	mv "$SCPIFILE" "$SCPIFILE.tmp"
 	sendscpi 0 "$(<"$SCPIFILE.tmp")" >&2
@@ -337,11 +341,17 @@ until read -t $T1 K; do
   	echo "$RESLINE" >>"$DDIR$DFILEPREFIX.$DATAEXT"
 	echo "$RESLINE" >"$SCPIFILE.result"
   fi
-  echo "Waiting for $PRPID to finish..."
-  [ "$PRPID" != "" ] && wait $PRPID
-  echo "...$PRPID finished!"
+  if [ -e "$DATASAMPFILE" ]; then
+	echo "Serving data sample to: '$DATASAMPFILE.result'" >&2
+	echo "$RESLINE" >"$DATASAMPFILE.result"
+	rm "$DATASAMPFILE"
+  fi
+  #echo "Waiting for $PRPID to finish..."
+  #[ "$PRPID" != "" ] && wait $PRPID
+  #echo "...$PRPID finished!"
   print_result $RESLINE &
   PRPID=$!
+  wait $SLPID
 done
 
   [ "$PRPID" != "" ] && wait $PRPID

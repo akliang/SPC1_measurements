@@ -3,9 +3,9 @@ MAINSMU="smu1"
 NDEV="$MAINSMU.imager.umro"
 DFILEPREFIX="meas_$(hostname)_"
 #DFILEPREFIX="meas112_TFT-29B1-3_WP15_2-1-2_$(hostname)_"
-DFILEPREFIX="meas190_JMi_TFT-29B1-6_WP15_2-2-3_$(hostname)_"
-DFILEPREFIX="meas_unified_test_$(hostname)_"
-PNTYPE=-1
+DFILEPREFIX="meas230_JMi_TFT-29B1-1_WP7_1-1-3_$(hostname)_"
+#DFILEPREFIX="meas_unified_test_$(hostname)_"
+PNTYPE=1
 #DFILEPREFIX="smutest_$(hostname)_"
 #DFILEPREFIX="meas22_SMUCHAR_10kOhm_$(hostname)_"
 
