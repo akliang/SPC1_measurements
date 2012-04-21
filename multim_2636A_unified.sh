@@ -176,31 +176,8 @@ if (    $sourcecurrent) then $SMUdisp.measure.func=display.MEASURE_DCVOLTS end
 check_error
 done
 
-
-#Wire Setup:
-#All     : Non-Floating, Current measurement (source X volts, measure amps)
-#settable using vN(volts), where N is the smu channel as in the order of $SMUS
-
-# Current sourcing:
-#sendscpi .1 '
-#node[1].smua.source.func=smua.OUTPUT_DCAMPS
-#node[1].DISPLAY.SMUA.MEASURE.FUNc=display.MEASURE_DCVOLTS
-#'
-
-# Special config: optimize channel to drive small capacitive loads, but read small currents very accurate
-#sendscpi .1 '
-#node[1].smub.source.func=smub.OUTPUT_DCAMPS
-#node[1].display.smub.measure.func=display.MEASURE_DCVOLTS
-#node[1].smub.source.highc=smub.DISABLE
-#'
-
 # Special config: optimize channel for current sinking
-#sendscpi .1 '
-#node[2].smua.source.func=smua.OUTPUT_DCVOLTS
-#node[2].display.smua.measure.func=display.MEASURE_DCAMPS
 #node[2].smua.source.sink=smua.ENABLE
-#node[2].smua.source.limitv=10
-#'
 
 check_error
 
@@ -213,7 +190,6 @@ for SMU in $SMUS; do
   $SMU.nvbuffer2[1],',',$SMU.nvbuffer1[1],',',"
 done
 # add digio sampling if desired
-# string.format("%04X,%04X",node[1].digio.readport(),node[2].digio.readport()) 
 for DIGIO in $DIGIOS; do
   STR_PRNT="$STR_PRNT
   string.format(\"%04X,\", $DIGIO.digio.readport()),"
@@ -247,21 +223,6 @@ end
 endscript
 '
 check_error
-#sendscpi 1 ' errorcode, message, severity, errnode = errorqueue.next() print(errorcode, message, severity, errnode) '
-#sendscpi 2 ' errorcode, message, severity, errnode = errorqueue.next() print(string.format("%d %s %d",errorcode, message, severity), errnode) '
-
-
-#sendscpi 2 '*TRG'
-
-#sendscpi 2 '
-#print(triggered)
-#print(node[1].smua.nvbuffer1[1], node[1].smua.nvbuffer2[1])
-#print(node[2].smua.nvbuffer1[1], node[2].smua.nvbuffer2[1])
-#'
-
-#sendscpi 2 ' errorcode, message, severity, errnode = errorqueue.next() print(errorcode, message, severity, errnode) '
-
-#'printbuffer(1,1,node[1].smua.nvbuffer1)'
 
 
 MSG=""
