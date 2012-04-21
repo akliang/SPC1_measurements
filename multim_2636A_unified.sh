@@ -267,8 +267,8 @@ for DIGIO in $DIGIOS; do
   shift 1
 done
   IND=$( echo $LCNT | gawk '{ if ($1 % 2) { print "+"; } else { print "o"; } }' )
-  echo "$IND $STR"
   echo
+  echo "$IND $STR"
   echo
 }
 
@@ -298,12 +298,12 @@ until read -t 0.01 K; do
   sendscpi_cond 0.1 '-- reading errors' "" "" $T2 >&2
   if [ -e "$DATACTRLFILE" ]; then
 	DATAEXT="$(<"$DATACTRLFILE")"
-	echo "Data mirror extension active: '$DATAEXT'" >&2
+	echo -n "  >> Data mirror extension: '$DATAEXT'" >&2
   	echo "$RESLINE" >>"$DDIR$DFILEPREFIX.$DATAEXT"
 	echo "$RESLINE" >"$SCPIFILE.result"
   fi
   if [ -e "$DATASAMPFILE" ]; then
-	echo "Serving data sample to: '$DATASAMPFILE.result'" >&2
+	echo -n "  >> Serving data sample to: '$DATASAMPFILE.result'" >&2
 	echo "$RESLINE" >"$DATASAMPFILE.result"
 	rm "$DATASAMPFILE"
   fi

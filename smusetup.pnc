@@ -2,7 +2,7 @@
 MAINSMU="smu1"
 NDEV="$MAINSMU.imager.umro"
 
-DFILEPREFIX="meas_smu_$(hostname)_"
+DFILEPREFIX="meas_smutest_$(hostname)_"
 #PNTYPE=-1
 
 SCPIFILE="commtemp/2636_command.scpi.$MAINSMU"
