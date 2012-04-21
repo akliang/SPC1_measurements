@@ -3,7 +3,7 @@ MAINSMU="smu1"
 NDEV="$MAINSMU.imager.umro"
 DFILEPREFIX="meas_$(hostname)_"
 #DFILEPREFIX="meas112_TFT-29B1-3_WP15_2-1-2_$(hostname)_"
-DFILEPREFIX="meas230_JMi_TFT-29B1-1_WP7_1-1-3_$(hostname)_"
+DFILEPREFIX="meas234_JMi_TFT-29B1-1_WP7_1-2-3_$(hostname)_"
 #DFILEPREFIX="meas_unified_test_$(hostname)_"
 PNTYPE=1
 #DFILEPREFIX="smutest_$(hostname)_"
@@ -11,6 +11,7 @@ PNTYPE=1
 
 SCPIFILE="commtemp/2636_command.scpi.$MAINSMU"
 DATACTRLFILE="commtemp/2636_datactrl.$MAINSMU"
+DATASAMPFILE="commtemp/datasample.$MAINSMU"
 PIDFILE="commtemp/2636_pid.$MAINSMU"
 
 SMUS="
@@ -18,11 +19,10 @@ node[1].smua
 node[1].smub
 node[2].smua
 "
-
-#CH name Vmin Vmax Imax    Imaxpulse  HIGHC
-ch1="Vd	 -15   15  0.0005  0.010      false"
-ch2="Vs	 -15   15  0.0005  0.010      false"
-ch3="Vg	 -20   20  0.0005  0.010      false"
+#CH name Vmin Vmax Imax    Imaxpulse  HIGHC  SourceCurrent
+ch1="Vd	 -15   15  0.0005  0.010      false    false"
+ch2="Vs	 -15   15  0.0005  0.010      false    false"
+ch3="Vg	 -20   20  0.0005  0.010      false    false"
 
 DIGIOS=""
 
