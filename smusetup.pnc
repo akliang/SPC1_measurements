@@ -2,13 +2,16 @@
 MAINSMU="smu1"
 NDEV="$MAINSMU.imager.umro"
 
+DDIR='../measurements/environment/'
 DFILEPREFIX="meas_smutest_$(hostname)_"
-#PNTYPE=-1
+#PNTYPE=-1  #PNTYPE only applies to ctrlTFT script
 
-SCPIFILE="commtemp/2636_command.scpi.$MAINSMU"
-DATACTRLFILE="commtemp/2636_datactrl.$MAINSMU"
-DATASAMPFILE="/home/user/WorkProj/g4_ml605_project/pcsoft/tmp/smurequest"
-PIDFILE="commtemp/2636_pid.$MAINSMU"
+# file-based inter-process communication
+DIRIPC="/dev/shm/ipc_2636.$MAINSMU"
+SCPIFILE="$DIRIPC/2636_command.scpi.$MAINSMU"
+DATACTRLFILE="$DIRIPC/2636_datactrl.$MAINSMU"
+PIDFILE="/dev/shm/pid_2636.$MAINSMU"
+DATASAMPFILE="/dev/shm/g4tmp/smurequest"
 
 SMUS="
 node[1].smua

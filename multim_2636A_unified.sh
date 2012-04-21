@@ -13,28 +13,36 @@ if [ "$2" == "loop" ]; then
   exit
 fi
 
-MDEV="/dev/ttyUSB1"
-#NDEV="smu1.imager.umro"
-DDIR='../measurements/environment/'
-
 # source the settings file
 source "$1"
 if [ "$MAINSMU" == "" ]; then
  echo "Important variables not set. Did you specify the settings file?"
  exit 5
 fi
-# check if file exist
-#if [ -e ${DFILEPREFIX}* ]; then
-# echo "File already exists, proceed anyway? [N/y]"
-# while read a; do
-#  if [ "$a" == "y" ]; then
-#   break
-#  else
-#   exit
-#  fi
-# done
-#fi
-#exit
+if [ "$DIRIPC" == "" ]; then
+ echo "DIRIPC variable not set. Is your settings file up-to-date?"
+ exit 6
+fi
+if [ ! -d "$DDIR" ]; then
+ echo "DDIR '$DDIR' not set or does not exist. Is your settings file up-to-date?"
+ exit 7
+fi
+# check if output file already exist
+FLIST= #$( ls -1 $DDIR${DFILEPREFIX}* 2>/dev/null )
+if [ "$FLIST" != "" ]; then
+ echo -e "File(s) already exist:\n$FLIST\nProceed anyway? [N/y]"
+ read a || exit 8
+ [ "$a" != "y" ] && exit 9
+fi
+# check if inter-process-comm-files already exist...
+FLIST=$( ls -1 $DIRIPC/* 2>/dev/null )
+if [ "$FLIST" != "" ]; then
+ echo -e "Inter-process-comm directory $DIRIPC already contains:\n$FLIST\nProceed anyway? [N/y]"
+ read a || exit 10
+ [ "$a" != "y" ] && exit 9
+fi
+mkdir -p "$DIRIPC" || { echo -e "Cannot create Inter-process-comm directory $DIRIPC"; exit 10; }
+SLOCK="$DIRIPC/sleep.lock"
 
 # TODO: add channel mapping to file name? or print to log?
 #ch1=Von_ch2=Voff_ch3=Qinj_ch4=Vbias_ch5=Vreset_ch6=VccSF_ch7=PLHI_ch8=DLHI_$(hostname)_"
@@ -43,8 +51,9 @@ echo "$(date)" >> "$DDIR$DFILEPREFIX.log"
 svn stat "$0"  >> "$DDIR$DFILEPREFIX.log"
 svn diff "$0"  >> "$DDIR$DFILEPREFIX.log"
 
+
 if false; then
-  # Code for USB communication - somewhat faulty
+  # Code for USB communication - somewhat faulty and needs updating
   #stty -F $MDEV 9600 -parenb -parodd cs8 -hupcl -cstopb cread clocal -crtscts -ixon -echo
   stty -F $MDEV 9600 -parenb -parodd cs8 hupcl -cstopb cread clocal -crtscts -ixon -echo
   exec 5<>$MDEV
@@ -52,14 +61,15 @@ if false; then
 else
   # Code for Ethernet communication
   nc $NDEV 1030 
-  TD=$( mktemp -d )
+  #TD=$( mktemp -d )
+  TD="$DIRIPC"
   mkfifo "$TD/p5" "$TD/p6"
   exec 5<>"$TD/p5"
   exec 6<>"$TD/p6"
   nc $NDEV 5025 <"$TD/p5" >"$TD/p6" &
   NCPID=$!
   rm "$TD/p5" "$TD/p6" # actual delete will only occur once files are no longer accessed
-  trap "nc $NDEV 1030; kill $NCPID; rmdir '$TD'; rm '$PIDFILE'; exit" EXIT
+  trap "nc $NDEV 1030; kill $NCPID; rm '$SLOCK'; rmdir '$TD'; rm '$PIDFILE'; exit" EXIT
   echo $$ > "$PIDFILE"
 fi
 
@@ -281,7 +291,8 @@ LCNT=0 # Loop counter
 #until read -t $T1 K; do
 until read -t 0.01 K; do
   LCNT=$(( LCNT + 1 ))
-  sleep $T1 &
+  touch "$SLOCK"
+  { sleep $T1; rm "$SLOCK"; } &
   SLPID=$!
   if [ -e "$SCPIFILE" ]; then
 	mv "$SCPIFILE" "$SCPIFILE.tmp"
@@ -312,7 +323,8 @@ until read -t 0.01 K; do
   #echo "...$PRPID finished!"
   print_result $RESLINE &
   PRPID=$!
-  wait $SLPID
+  #wait $SLPID
+  while [ -e "$SLOCK" ]; do sleep 0.01; done
 done
 
   [ "$PRPID" != "" ] && wait $PRPID
