@@ -140,6 +140,7 @@ function extract_val() {
   echo $1
 }
 function do_sweep_getval() { # performs a defined sweep, retrieving values
+  echo "Currently not supported. Needs upgrade to newer SAMPLE REQUEST features."; exit 78
   echo
   echo "Sweep_getval $SWEEP: CH=$CH, TO=$TO, VALS=( " $VALS " )"
   GETVALS=""
@@ -344,12 +345,14 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
     do_output $VDSHI "-3.000 -2.000 -1.000 0.000 1.000 2.000 4.000 6.000 8.000 10.000 12.000 15.000"
     TON=0.2 TOFF=3
     do_output_pulsed $VDSHI "4.000 6.000 8.000 10.000 12.000 15.000"
-    
+   
+    if false; then 
     kill $(<$PIDFILE); sleep 15
     if [ -e $PIDFILE ]; then
        kill -9 $(<$PIDFILE)
     fi
     sleep 60
+    fi
     
     TO=4000
     do_noise

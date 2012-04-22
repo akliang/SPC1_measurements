@@ -5,6 +5,7 @@
 # Started 2011-10-20, based on multim_2636A_triple, to operate Gen2 TAA 29B1-3 on Gen2 platform using PNC#4 with G3 and four SMUs
 
 if [ "$2" == "loop" ]; then
+  echo "loop should not be necessary anymore. Aborting."; exit 77
   while true; do
     "$0" "$1"
     echo "$0 returned, short sleep before restarting again"
@@ -69,7 +70,7 @@ else
   nc $NDEV 5025 <"$TD/p5" >"$TD/p6" &
   NCPID=$!
   rm "$TD/p5" "$TD/p6" # actual delete will only occur once files are no longer accessed
-  trap "nc $NDEV 1030; kill $NCPID; rm '$SLOCK'; rmdir '$TD'; rm '$PIDFILE'; exit" EXIT
+  trap "nc $NDEV 1030; kill $NCPID; rm '$SLOCK' '$SCIPFILE'; rmdir '$TD'; rm '$PIDFILE'; exit" EXIT
   echo $$ > "$PIDFILE"
 fi
 
@@ -293,13 +294,15 @@ until read -t 0.01 K; do
   LCNT=$(( LCNT + 1 ))
   touch "$SLOCK"
   { sleep $T1; rm "$SLOCK"; } &
-  SLPID=$!
+  #echo # to clear echo -n from below?
   if [ -e "$SCPIFILE" ]; then
 	mv "$SCPIFILE" "$SCPIFILE.tmp"
 	sendscpi 0 "$(<"$SCPIFILE.tmp")" >&2
 	rm "$SCPIFILE.tmp"
 	#check_error
         #[ "$RESULT" != "" ] && echo "$RESULT" >> "$SCPIFILE.error"
+  #else
+	# echo # to maintain same linecount even if nothing sent?
   fi
   sendscpi $T2 'MKmultiMeasure() MKmultiPrint() MKcheckError()' silent singleline
   RESLINE="$(
@@ -311,7 +314,6 @@ until read -t 0.01 K; do
 	DATAEXT="$(<"$DATACTRLFILE")"
 	echo -n "  >> Data mirror extension: '$DATAEXT'" >&2
   	echo "$RESLINE" >>"$DDIR$DFILEPREFIX.$DATAEXT"
-	echo "$RESLINE" >"$SCPIFILE.result"
   fi
   if [ -e "$DATASAMPFILE" ]; then
 	echo -n "  >> Serving data sample to: '$DATASAMPFILE.result'" >&2
@@ -323,7 +325,6 @@ until read -t 0.01 K; do
   #echo "...$PRPID finished!"
   print_result $RESLINE &
   PRPID=$!
-  #wait $SLPID
   while [ -e "$SLOCK" ]; do sleep 0.01; done
 done
 
