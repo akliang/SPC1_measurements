@@ -8,7 +8,8 @@ DFILEPREFIX="meas_smutest_$(hostname)_"
 
 # file-based inter-process communication
 DIRIPC="/dev/shm/ipc_2636.$MAINSMU"
-SCPIFILE="$DIRIPC/2636_command.scpi.$MAINSMU"
+#SCPIFILE="$DIRIPC/2636_command.scpi.$MAINSMU"
+SCPIFILE="/dev/shm/g4tmp/2636_command.scpi"
 DATACTRLFILE="$DIRIPC/2636_datactrl.$MAINSMU"
 PIDFILE="/dev/shm/pid_2636.$MAINSMU"
 DATASAMPFILE="/dev/shm/g4tmp/smurequest"
