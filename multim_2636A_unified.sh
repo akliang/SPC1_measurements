@@ -70,7 +70,7 @@ else
   nc $NDEV 5025 <"$TD/p5" >"$TD/p6" &
   NCPID=$!
   rm "$TD/p5" "$TD/p6" # actual delete will only occur once files are no longer accessed
-  trap "nc $NDEV 1030; kill $NCPID; rm '$SLOCK' '$SCIPFILE'; rmdir '$TD'; rm '$PIDFILE'; exit" EXIT
+  trap "nc $NDEV 1030; kill $NCPID; rm '$SLOCK' '$SCPIFILE'; rmdir '$TD'; rm '$PIDFILE'; exit" EXIT
   echo $$ > "$PIDFILE"
 fi
 
