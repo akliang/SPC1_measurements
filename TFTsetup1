@@ -5,9 +5,9 @@ NDEV="$MAINSMU.imager.umro"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
 #DFILEPREFIX="meas112_TFT-29B1-3_WP15_2-1-2_$(hostname)_"
-DFILEPREFIX="meas236_JMi_TFT-29B1-1_WP7_1-2-3_$(hostname)_"
+DFILEPREFIX="meas238_JMi_TFT-29B1-1_WP7_2-1-1_$(hostname)_"
 #DFILEPREFIX="meas_unified_test_$(hostname)_"
-PNTYPE=1
+PNTYPE=-1
 #DFILEPREFIX="smutest_$(hostname)_"
 #DFILEPREFIX="meas22_SMUCHAR_10kOhm_$(hostname)_"
 
