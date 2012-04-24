@@ -3,9 +3,6 @@
 # $HeadURL$
 # $Id$
 
-#DATACTRLFILE='commtemp/2636_datactrl'
-#SCPIFILE='commtemp/2636_command.scpi'
-
 # source the settings file
 source "$1"
 if [ "$MAINSMU" == "" ]; then
@@ -13,14 +10,8 @@ if [ "$MAINSMU" == "" ]; then
  exit 5
 fi
 
-N=0
-for SMU in $SMUS; do
-N=$(( $N + 1 ))
-SMUdisp[$N]=$( echo "$SMU" | sed -e 's%\.%.display.%' )
-SMUchan[$N]=$SMU
-done
-
-rm "$SCPIFILE"
+[ -e "$SCPIFILE" ] && rm "$SCPIFILE"
+trap "rm '$SCPIFILE' '$DATACTRLFILE'; exit" EXIT
 
 function send_cmd() { # sends command to scpi file
   if [ -e "$SCPIFILE" ]; then
