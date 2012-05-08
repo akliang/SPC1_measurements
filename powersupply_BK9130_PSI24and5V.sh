@@ -8,15 +8,35 @@ MDEV="/dev/ttyUSB0"
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
 
-stty -F $MDEV 9600 -parenb -parodd cs8 hupcl -cstopb cread clocal -crtscts -ixon -echo
+NDEV="192.168.0.36 4097" # Port2 on Star1
+DIRIPC="/dev/shm/ipc_bk9130_PSI24and5"
+mkdir -p "$DIRIPC" || { echo -e "Cannot create Inter-process-comm directory $DIRIPC"; exit 10; }
+PIDFILE="/dev/shm/pid_bk9130_PSI24and5"
 
-
-exec 5<>$MDEV
+if false; then
+  # Code for USB communication - somewhat faulty and needs updating
+  #stty -F $MDEV 9600 -parenb -parodd cs8 -hupcl -cstopb cread clocal -crtscts -ixon -echo
+  stty -F $MDEV 9600 -parenb -parodd cs8 hupcl -cstopb cread clocal -crtscts -ixon -echo
+  exec 5<>$MDEV
+  exec 6<>$MDEV
+else
+  # Code for Ethernet communication
+  #TD=$( mktemp -d )
+  TD="$DIRIPC"
+  mkfifo "$TD/p5" "$TD/p6"
+  exec 5<>"$TD/p5"
+  exec 6<>"$TD/p6"
+  nc $NDEV <"$TD/p5" >"$TD/p6" &
+  NCPID=$!
+  rm "$TD/p5" "$TD/p6" # actual delete will only occur once files are no longer accessed
+  trap "kill $NCPID; rmdir '$TD'; rm '$PIDFILE'; exit" EXIT
+  echo $$ > "$PIDFILE"
+fi
 
 function sendscpi() {
 	echo "SENDING>>>: $2"
 	echo -e -n "$2\n" >&5
-	read -t $1 RESULT <&5
+	read -t $1 RESULT <&6
 	if [ "$RESULT" != "" ]; then
 		echo "RESPONSE<<: $RESULT"
 	fi
@@ -74,17 +94,19 @@ echo "Starting recording currents and voltages to $DDIR$DFILE..."
 {
 
 while true; do 
-read -t .1 RESULTFLUSH <&5
+read -t .1 RESULTFLUSH <&6
 echo -e -n "MEAS:VOLT:ALL?\n" >&5
 echo -e -n "MEAS:CURR:ALL?\n" >&5
-read -t 2 RESULTVOLT <&5
-read -t 2 RESULTCURR <&5
+read -t 2 RESULTVOLT <&6
+read -t 2 RESULTCURR <&6
 echo "$(date +"%Y-%m-%d %H:%M:%S,%s"),VOLT:,$RESULTVOLT,CURR:,$RESULTCURR" | sed -e 's/,/\t/g'
 read -t 1 K && break
 done 
 
 } | tee -a $DDIR$DFILE
 
+sendscpi $TO 'APP:OUT 0,0,0'
+sendscpi $TO 'SYST:ERR?'
 #sendscpi 2 'SYST:BEEP'
 sendscpi 2 'SYST:LOC'
 
