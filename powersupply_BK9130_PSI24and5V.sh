@@ -10,16 +10,16 @@ DFILEPREFIX="meas_$(hostname)_"
 
 NDEV="192.168.0.36 4097" # Port2 on Star1
 DIRIPC="/dev/shm/ipc_bk9130_PSI24and5"
-mkdir -p "$DIRIPC" || { echo -e "Cannot create Inter-process-comm directory $DIRIPC"; exit 10; }
 PIDFILE="/dev/shm/pid_bk9130_PSI24and5"
 
-if false; then
+if true; then
   # Code for USB communication - somewhat faulty and needs updating
   #stty -F $MDEV 9600 -parenb -parodd cs8 -hupcl -cstopb cread clocal -crtscts -ixon -echo
   stty -F $MDEV 9600 -parenb -parodd cs8 hupcl -cstopb cread clocal -crtscts -ixon -echo
   exec 5<>$MDEV
   exec 6<>$MDEV
 else
+  mkdir -p "$DIRIPC" || { echo -e "Cannot create Inter-process-comm directory $DIRIPC"; exit 10; }
   # Code for Ethernet communication
   #TD=$( mktemp -d )
   TD="$DIRIPC"
@@ -57,7 +57,7 @@ sendscpi 1 '*CLS'
 #[ "$IDN" == "BK,9130,005004156568001063,V1.69" ] && [ "$(hostname)" == "muon"    ] && ans="y" # BK#3, 2011-10-25 on muon providing PNC power
 #[ "$IDN" == "BK,9130,005004156568001088,V1.69" ] && [ "$(hostname)" == "muon"    ] && ans="y" # BK#5, 2012-02-24 on muon providing PNC power
 #[ "$IDN" == "BK,9130,005004156568001088,V1.69" ] && [ "$(hostname)" == "simwork" ] && ans="y" # BK#5, 2011-10-28 on simwork providing PNC power for actual array measurements
-#[ "$IDN" == "BK,9130,005004156568001055,V1.69" ] && [ "$(hostname)" == "kaon" ] && ans="y" # BK#5, 2011-10-28 on simwork providing PNC power for actual array measurements
+[ "$IDN" == "BK,9130,005004156568001055,V1.69" ] && [ "$(hostname)" == "kaon" ] && ans="y" # BK#5, 2011-10-28 on simwork providing PNC power for actual array measurements
 
 until  [ "$ans" == "y" ]; 
 do

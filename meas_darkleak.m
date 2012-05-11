@@ -112,42 +112,67 @@ env.G3ExtClock=0; env.UseExtClock=0;
 
 meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 
-meas.MeasCond='LED'; multi.R22=0; % setting: PG4
-%meas.MeasCond='Qinj'; multi.R22=0; % setting: PG4
+meas.MeasCond='DarkLeak'; multi.R22=0; % setting: PG4
+%meas.MeasCond='Drift'; multi.R22=0; % setting: PG4
 
 % technically, not only R's can be changed in multi-sequence mode - 
 % is RMATRIX an inappropriate name?
 
-multi.RMATRIX=[
-   %R1    R25   R26    R27 
-   0        0  1000    400
-   0       25   000    400
-   0       50   000    400
-   0       75   000    400
-   0      100   000    400
-   0      125   000    400
-   0      150   000    400
-   0      175   000    400
-   0      200   000    400
-];
+multi.RMATRIX=[ % overnight long run noise measurement
+   %R1      R25   R26  R27  
+       1     0     0   500    % act as 500 ignore cycles, but recorded
+       1     0     0    500
+     %  2     0     0    500   % not necessary for PSI-2
+     %  5     0     0    500   % not necessary for PSI-2
+     % 10     0     0    200   % not necessary for PSI-2
+      20     0     0    200
+      50     0     0    200
+      100    0     0    200
+      200    0     0    200
+      400    0     0    200
+      1000   0     0    100
+      2000   0     0    100
+      4000   0     0    100 
+      2000   0     0    100
+      1000   0     0    100
+      400    0     0    200
+      200    0     0    200
+      100    0     0    200
+      50     0     0    200
+      20     0     0    200
+     % 10     0     0    200   % not necessary for PSI-2
+     %  5     0     0    500   % not necessary for PSI-2
+     %  2     0     0    500   % not necessary for PSI-2
+       1     0     0    500
+       1     0     0    500
+     %  2     0     0    500   % not necessary for PSI-2
+     %  5     0     0    500   % not necessary for PSI-2
+     % 10     0     0    200   % not necessary for PSI-2
+      20     0     0    200
+      50     0     0    200
+      100    0     0    200
+      200    0     0    200
+      400    0     0    200
+      1000   0     0    100
+      2000   0     0    100
+      4000   0     0    100 
+      6000   0     0    50
+      8900   0     0    50
+      11900  0     0    50
+      15700  0     0    50
+      19550  0     0    50    
+      40000  0     0    50 %added 2010-04-27, mk
+      60000  0     0    50 %added 2010-04-27, mk
+ ];
 %{
-multi.RMATRIX=[
-   %R1    R25   R26    R27 
-   0        0   000   1000
-   0       50   000   1000
-   0       50   000   1000
-   0       50   000   1000
-   0       50   000   1000
-   0       50   000   1000
-   0       50   000   1000
-   0       50   000   1000
-   0       50   000   1000
-   0       50   000   1000
-   0       50   000   1000
-   0       50   000   1000
-   0       50   000   1000
-];
-%}
+multi.RMATRIX=[ % overnight long run noise measurement
+   %R1      R25   R26  R27  
+ 1000     0     0   5000  
+ 1000     0     0   5000  
+ 1000     0     0   5000  
+ 1000     0     0   5000  
+       ];
+ %}
 
 %multi.RMATRIX=repmat(multi.RMATRIX,[1 1]);
 
@@ -155,7 +180,7 @@ multi.nrofacq=size(multi.RMATRIX,1);%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %multi.mid=1;
 %pause;
 %if strcmp(meas.MeasCond(1:5),'First'); multi.nrofacq=1; end
-if strcmp(meas.MeasCond(1:3),'Qin' ); multi.nrofacq=1; end
+%if strcmp(meas.MeasCond(1:4),'Qinj' ); multi.nrofacq=1; end
 
 meas.MeasDetails=[ sprintf('%s', meas.MeasCond) ...
     sprintf( '_Vbias%s', volt2str(env.V(id.Vbias)) ) ... not needed for PSI-2/3
@@ -177,7 +202,7 @@ meas.MeasDetails=[ sprintf('%s', meas.MeasCond) ...
 
 
 meas.MeasID=datestr(now(),30);
-meas.DirName=[ '../measurements/' meas.DUT '/' meas.MeasID '_' meas.MeasDetails '/' ]
+meas.DirName=[ '../measurements/' meas.DUT '/' meas.MeasID '_' meas.MeasDetails '/' ];
 meas.MFile=[ mfilename() '.m' ];
 if ~flag.dryrun;
     mkdir(meas.DirName);    
@@ -241,7 +266,7 @@ meas.MatFile=[ meas.BaseName sprintf('.%03d',multi.mid) '.settings.mat' ];
 meas.R=[
  %value PSI-1 PSI-2 PSI-3   %name  bits  (default)units        Description
         multi.R1            %R1    16    (512)us   (F9==0)  Tau_1:   Primary Delay between Readouts. R1*512Mhz/tau1_clk ; tau1_clk=(F9==0)?1Mhz:extclock
-        49472               %R2    16      (8)us  (F10==0)  Tau_2: Secondary Delay between Readouts, e.g. for LED-Flashing, starts after Tau_1, R2*8/tau2_clk ; tau2_clk=(F10==0)?1Mhz:extclock
+        0 %49472               %R2    16      (8)us  (F10==0)  Tau_2: Secondary Delay between Readouts, e.g. for LED-Flashing, starts after Tau_1, R2*8/tau2_clk ; tau2_clk=(F10==0)?1Mhz:extclock
         0                   %R3    16      (8)us  (F11==0)  Tau_3: Delay between Gate Line Groups. R3*8Mhz/tau3_clk ; tau3_clk=(F11==0)?1Mhz:extclock
         1200                %R4    14      50 ns            Tau_4: preamp integration time (SAFT): R4*50ns ; starts 1.75us after Tau_21 [?? Tint=3.9+0.05(R21+R4-R5) in us]
         400                 %R5    12      50 ns            Tau_5: Gate Hold-off, i.e. delay before Gate-On, 0.05us*R5, for non-multiplexed arrays larger than 2.15us+0.05us*R21+1.75us
@@ -267,8 +292,8 @@ meas.R=[
         multi.R25           %R25   12    flashes (F12==1)   # of LED flashes per acquisition cycle (0: really no LED flash)
         multi.R26           %R26   16    cycles             # of Ignore Cycles
         multi.R27           %R27   16    cycles             # of  Data  Cycles (continous if R26==0&&R27==0)
-        200 %250 %20        %R28   12    cycles  (F12==1)   Initial Cycle to start LED flashes, zero-indexed (0: start at first cycle)
-        100 %500            %R29   12    cycles  (F12==1)   # of Data Cycles with LED flashes (R29==0&R28==0: always flashing! R29==0&&R28>0: really no cycle with LED flashes, but still Tau_8,Tau_9&Tau10 Timing during Tau_2?)
+        0 % 250 %20             %R28   12    cycles  (F12==1)   Initial Cycle to start LED flashes, zero-indexed (0: start at first cycle)
+        0 % 500                 %R29   12    cycles  (F12==1)   # of Data Cycles with LED flashes (R29==0&R28==0: always flashing! R29==0&&R28>0: really no cycle with LED flashes, but still Tau_8,Tau_9&Tau10 Timing during Tau_2?)
         15                  %R30                            FIX # ADC bits -1, fixed to 15. internally a 4-bit register
         0                   %R31         N/I
         0                   %R32         N/I
@@ -285,7 +310,7 @@ meas.R=[
         env.UseExtClock %F9 Tau_1 clock source         (0: internal, 1: External)
         0       %F10   Tau_2 & Tau_8 clock source (0: internal, 1: External)
         0       %F11   Tau_3 clock source         (0: internal, 1: External)
-        1       %F12   Master LED Flashing control (see R8,R9,R10,R25,R28,R29,F13)
+        0 %1    %F12   Master LED Flashing control (see R8,R9,R10,R25,R28,R29,F13)
         0       %F13   Flash LED during ignore cycles (needs F12 as well to be active!)
         0       %F14        N/I
         0       %F15        UNCOMMON Offset Substraction Control
