@@ -75,14 +75,14 @@ Vmap5x1  Vout5  VbiasNC  0V
 Vmap6x1  Vout6  Vreset   0V
 Vmap7x1  Vout7  VccCSA   0V
 Vmap8x1  Vout8  VccSF    0V
-Vmap9x1  Vout9  ValBgate PixLHI   0V
-Vmap10x1 Vout10 VgndBgnd PixLLO   0V
-Vmap11x1 Vout11 Spec1    DatLHI   0V
-Vmap12x1 Vout12 Spec2    DatLLO   0V
-Vmap13x1 Vout13 PixLLO   ValBgate 0V
-Vmap14x1 Vout14 PixLHI   VgndBgnd 0V
-Vmap15x1 Vout15 DatLLO   Spec1    0V
-Vmap16x1 Vout16 DatLHI   Spec2    0V
+Vmap9x1  Vout9  ValBgate 0V
+Vmap10x1 Vout10 VgndBgnd 0V
+Vmap11x1 Vout11 Spec1    0V
+Vmap12x1 Vout12 Spec2    0V
+Vmap13x1 Vout13 PixLLO   0V
+Vmap14x1 Vout14 PixLHI   0V
+Vmap15x1 Vout15 DatLLO   0V
+Vmap16x1 Vout16 DatLHI   0V
 
 * Additional mappings provided on PNC patchfield
 
@@ -127,17 +127,23 @@ Xu56ch2 G4IO4  Vout15 Vout16 DLrst2     MAX333
 Xu56ch3 G4IO7  Vout11 Vout12 DLcap      MAX333
 Xu56ch4 G4IO8  Vout9  Vout12 SFBgate    MAX333
 
-* SMU mapping for TAA
+* SMU mapping for Gen2 PSI-1
 Vsmu1x1  Vsmu1  Vout1    0V
-
 Vsmu2x1  Vsmu2  Vout2    0V
-Vsmu2x5  Vsmu2  Vout5    0V
-Vsmu2x11 Vsmu2  Vout6    0V
-Vsmu2x7  Vsmu2  Vout10   0V
-Vsmu2x8  Vsmu2  Vout11   0V
-Vsmu2x9  Vsmu2  Vout12   0V
-Vsmu2x3  Vsmu2  Vout13   0V
-Vsmu2x4  Vsmu2  Vout15   0V
+Vsmu3x1  Vsmu3  Vout3    0V
+Vsmu4x1  Vsmu4  Vout4    0V
+
+* SMU mapping for TAA
+**Vsmu1x1  Vsmu1  Vout1    0V
+
+**Vsmu2x1  Vsmu2  Vout2    0V
+**Vsmu2x5  Vsmu2  Vout5    0V
+**Vsmu2x11 Vsmu2  Vout6    0V
+**Vsmu2x7  Vsmu2  Vout10   0V
+**Vsmu2x8  Vsmu2  Vout11   0V
+**Vsmu2x9  Vsmu2  Vout12   0V
+**Vsmu2x3  Vsmu2  Vout13   0V
+**Vsmu2x4  Vsmu2  Vout15   0V
 * Vsmu2x2  Vsmu2  Vout9    0V
 * Vsmu2x6  Vsmu2  Vout7   0V
 * Vsmu2x10 Vsmu2  Vout4   0V
@@ -148,20 +154,20 @@ Vsmu3x1  Vsmu3  Vout3    0V
 * Vsmu4x3  Vsmu4  Vout13   0V
 * Vsmu4x4  Vsmu4  Vout15   0V
 * Vsmu4x4  Vsmu4  Vout10   0V
-Vsmu4x5  Vsmu4  Vout9    0V
+**Vsmu4x5  Vsmu4  Vout9    0V
 
 * Vsmu5x1  Vsmu5  Vout6    0V
 * Vsmu5x2  Vsmu5  Vout5    0V
-Vsmu5x3  Vsmu5  Vout4    0V
+**Vsmu5x3  Vsmu5  Vout4    0V
 
-Vsmu6x1  Vsmu6  Vout8    0V
-Vsmu6x3  Vsmu6  Vout7    0V
+**Vsmu6x1  Vsmu6  Vout8    0V
+**Vsmu6x3  Vsmu6  Vout7    0V
 * Vsmu6x2  Vsmu6  Vout10   0V
 
-Vsmu7x1  Vsmu7  Vout14   0V
+**Vsmu7x1  Vsmu7  Vout14   0V
 * Vsmu7x2  Vsmu7  Vout9    0V
 
-Vsmu8x1  Vsmu8  Vout16   0V
+**Vsmu8x1  Vsmu8  Vout16   0V
 
 * SMU digio mapping
 Vdigio1x1   CTRL10    0   0V
@@ -195,8 +201,3 @@ Vdigio2x12  G4IO7     0   0V
 Vdigio2x13  G4IO8     0   0V
 Vdigio2x14  G4IO1     0   0V
 
-
-
-
-
- 

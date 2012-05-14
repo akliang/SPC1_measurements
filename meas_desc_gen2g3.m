@@ -84,13 +84,13 @@ setup.TEMPMEAS.ARRAY={ 'TEMP_hellboy_RMS300A_N1', 'text_env_tempwos1', 'sensor1'
 
 %%{
 setup.LOCATION='Argus Building, Electronics Lab';
-setup.HOSTNAME='simwork'; % hostname of computer running this script
+setup.HOSTNAME='axion'; % hostname of computer running this script
 setup.G3_system='1of9-vanilla';
 setup.G3_interface='a6-V20-20080108'; % serial number - hardware version - bitfile version
-setup.G3_adcCards='a3-u3-00-00-00-00-00-00'; % On G3 ADC Board, they are labeled ADC8-...-1
+setup.G3_adcCards='m4-m5-u3-x3-00-00-00-00'; % On G3 ADC Board, they are labeled ADC8-...-1
 
 setup.POWER_G3='G3Power#1';
-setup.POWER_ADC='ArrayAndADCPower#5';
+setup.POWER_ADC='ArrayAndADCPower#4';
 setup.POWER_ARRAY=[ setup.HOSTNAME '_BK_9130_005004156568001088_V1.69' ];
 setup.POWER_PSI = [ setup.HOSTNAME '_BK_9130_005004156568001088_V1.69' ];
 setup.POWERMEAS.V.V24m={setup.POWER_PSI,'text_env1',5};   % Power Measurements: file or db descriptor, file format, data channel
@@ -147,7 +147,7 @@ setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
 setup.special='_PFNoiseTest';
 %}
 
-%%{
+%{
 setup.ARRAYTYPE='Gen2_TAB';
 setup.WAFERCODE='29B1-3';
 setup.PLATFORM='PF-G2-11-1';
@@ -189,6 +189,23 @@ setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
 setup.special='_NoiseTest';
 %}
 
+%%{
+setup.ARRAYTYPE='Gen2_PSI-1';
+setup.WAFERCODE='29B1-3';
+setup.PLATFORM='PF-G2-11-6';
+setup.arrdefcnt=setup.arrdefcnt+1;
+setup.PF_dataCards='ag-ad-ae'; % first is the outermost, last is the innermost
+setup.PF_dataCardDIPs='1111111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
+setup.PF_dataCardVref='0.83'; % nominal Vref, set by resistor divider
+setup.PF_dataBoardDIPs='00000000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
+setup.PF_dataBoardJumper='';
+setup.PF_gateCards='s1-a4';
+setup.PF_gateCardDir='CCW';
+setup.PF_analogCard='PNCV1#04';
+setup.PF_arrayLogic='G3only';
+setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
+setup.special='';
+%}
 
 if (setup.arrdefcnt~=1);
 	error('Multiple or no array selected!');

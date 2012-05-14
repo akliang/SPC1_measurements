@@ -27,6 +27,8 @@ flag.dryrun=false;
 % Setup descriptions in external file now
 % (too many arrays, and too many different measurement scripts made this necessary)
 
+meas_desc_gen2g3
+%{
 setup.LOCATION='Argus Building, RF Lab';
 setup.G3_system='5of9-vanilla';
 setup.G3_interface='a4-V20-20100408'; % serial number - hardware version - bitfile version
@@ -53,7 +55,7 @@ setup.PF_arrayLogic='none';
 setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
 setup.PF_CrossCable='normal';
 setup.special='';
-
+%}
 
 env.V=[];
 env.V(end+1)= -4.0  ; id.AVoff   =numel(env.V);                             % Test Point near to Gate Card

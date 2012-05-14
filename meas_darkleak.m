@@ -27,6 +27,8 @@ flag.dryrun=false;
 % Setup descriptions in external file now
 % (too many arrays, and too many different measurement scripts made this necessary)
 
+meas_desc_gen2g3
+%{
 setup.LOCATION='Argus Building, RF Lab';
 setup.G3_system='5of9-vanilla';
 setup.G3_interface='a4-V20-20100408'; % serial number - hardware version - bitfile version
@@ -53,7 +55,7 @@ setup.PF_arrayLogic='none';
 setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
 setup.PF_CrossCable='normal';
 setup.special='';
-
+%}
 
 env.V=[];
 env.V(end+1)= -4.0  ; id.AVoff   =numel(env.V);                             % Test Point near to Gate Card
@@ -80,8 +82,6 @@ env.I.V24p=0.000;  % Current in amperes on the BK PRECISION +24V power supply
 meas.MFileDesc=[ mfilename() '.m' ];
 
 
-
-
 %
 % Experimental Environment Description, part 2:
 %   heavily measurement-type dependent settings
@@ -99,6 +99,7 @@ env.G3ExtClock=0; env.UseExtClock=0;
 % Gen2 PSI-1 array on Gen
     geo.G3_SORTMODE=10;
     geo.GL=128;
+    geo.GL=256; % For Gen2 PSI-1 on Gen2 UMB 1.0 platform
     geo.G3GL=geo.GL-1;
     geo.DL=512;
     geo.G3DL=floor((geo.DL+1)/512)*512/2 -1;
@@ -112,15 +113,18 @@ env.G3ExtClock=0; env.UseExtClock=0;
 
 meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 
-meas.MeasCond='DarkLeak'; multi.R22=0; % setting: PG4
-%meas.MeasCond='Drift'; multi.R22=0; % setting: PG4
+%meas.MeasCond='FirstDark'; multi.R22=4; % setting: PG4
+%meas.MeasCond='DarkLeak'; multi.R22=14; % setting: PG4
+%meas.MeasCond='Qinj'; multi.R22=14; % setting: PG4
+meas.MeasCond='Drift'; multi.R22=14; % setting: PG4
 
 % technically, not only R's can be changed in multi-sequence mode - 
 % is RMATRIX an inappropriate name?
 
 multi.RMATRIX=[ % overnight long run noise measurement
    %R1      R25   R26  R27  
-       1     0    1000  500    % act as 500 ignore cycles, but recorded - at least partially
+       1     0    100   10     % act as 500 ignore cycles, but recorded - at least partially
+       1     0    2000  500    % act as 500 ignore cycles, but recorded - at least partially
        1     0     0    500
      %  2     0     0    500   % not necessary for PSI-2
      %  5     0     0    500   % not necessary for PSI-2
@@ -164,8 +168,8 @@ multi.RMATRIX=[ % overnight long run noise measurement
       40000  0     0    50 %added 2010-04-27, mk
       60000  0     0    50 %added 2010-04-27, mk
  ];
-%{
-meas.MeasCond='MTFDataLine'; multi.R22=0; % setting: PG4
+%%{
+meas.MeasCond='Drift'; multi.R22=14; % setting: PG4, MTFDataLine
 multi.RMATRIX=[ % overnight long run noise measurement
    %R1      R25   R26  R27  
  1000     0     0   5000  
@@ -180,8 +184,8 @@ multi.RMATRIX=[ % overnight long run noise measurement
 multi.nrofacq=size(multi.RMATRIX,1);%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%RBC
 %multi.mid=1;
 %pause;
-%if strcmp(meas.MeasCond(1:5),'First'); multi.nrofacq=1; end
-%if strcmp(meas.MeasCond(1:4),'Qinj' ); multi.nrofacq=1; end
+if strcmp(meas.MeasCond(1:3),'Fir'); multi.nrofacq=1; end
+if strcmp(meas.MeasCond(1:3),'Qin'); multi.nrofacq=1; end
 
 meas.MeasDetails=[ sprintf('%s', meas.MeasCond) ...
     sprintf( '_Vbias%s', volt2str(env.V(id.Vbias)) ) ... not needed for PSI-2/3
