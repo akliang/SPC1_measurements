@@ -120,7 +120,7 @@ meas.MeasCond='DarkLeak'; multi.R22=0; % setting: PG4
 
 multi.RMATRIX=[ % overnight long run noise measurement
    %R1      R25   R26  R27  
-       1     0     0   500    % act as 500 ignore cycles, but recorded
+       1     0    1000  500    % act as 500 ignore cycles, but recorded - at least partially
        1     0     0    500
      %  2     0     0    500   % not necessary for PSI-2
      %  5     0     0    500   % not necessary for PSI-2
@@ -165,6 +165,7 @@ multi.RMATRIX=[ % overnight long run noise measurement
       60000  0     0    50 %added 2010-04-27, mk
  ];
 %{
+meas.MeasCond='MTFDataLine'; multi.R22=0; % setting: PG4
 multi.RMATRIX=[ % overnight long run noise measurement
    %R1      R25   R26  R27  
  1000     0     0   5000  
@@ -172,7 +173,7 @@ multi.RMATRIX=[ % overnight long run noise measurement
  1000     0     0   5000  
  1000     0     0   5000  
        ];
- %}
+%}
 
 %multi.RMATRIX=repmat(multi.RMATRIX,[1 1]);
 
