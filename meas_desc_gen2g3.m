@@ -40,7 +40,7 @@ setup.POWERMEAS.I.V5p ={setup.POWER_ARRAY,'text_env1',11};
 %}
 
 
-%{
+%%{
 setup.LOCATION='Argus Building, RF Lab';
 setup.HOSTNAME='Driftwood'; % hostname of computer running this script
 setup.G3_system='5of9-vanilla';
@@ -82,7 +82,7 @@ setup.TEMPMEAS.ARRAY={ 'TEMP_hellboy_RMS300A_N1', 'text_env_tempwos1', 'sensor1'
 %}
 
 
-%%{
+%{
 setup.LOCATION='Argus Building, Electronics Lab';
 setup.HOSTNAME='axion'; % hostname of computer running this script
 setup.G3_system='1of9-vanilla';
@@ -189,7 +189,7 @@ setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
 setup.special='_NoiseTest';
 %}
 
-%%{
+%{
 setup.ARRAYTYPE='Gen2_PSI-1';
 setup.WAFERCODE='29B1-3';
 setup.PLATFORM='PF-G2-11-6';
@@ -206,6 +206,47 @@ setup.PF_arrayLogic='G3only';
 setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
 setup.special='';
 %}
+
+%{
+setup.ARRAYTYPE='PSI-1';
+setup.WAFERCODE='29A32-5';
+setup.PLATFORM='PF-G1-10-1';
+setup.arrdefcnt=setup.arrdefcnt+1;
+setup.PF_dataCards='af-a2-aa'; % first is the outermost, last is the innermost
+setup.PF_dataCardDIPs='1111111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
+setup.PF_dataCardVref='0.86'; % nominal Vref, set by resistor divider
+setup.PF_dataBoardDIPs='01000000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
+setup.PF_dataBoardJumper='JP1=Vbias1';
+setup.PF_gateCards='a6-a8';
+setup.PF_gateCardDir='CW';
+setup.PF_analogCard='V1N1';
+setup.PF_arrayLogic='none';
+setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
+setup.PF_CrossCable='normal';
+%setup.PF_CrossCable='Vbias1 open, Vbias1 left floating';
+setup.special='';
+%}
+
+%%{
+setup.ARRAYTYPE='Gen2_PSI-1';
+setup.WAFERCODE='29B3-2';
+setup.PLATFORM='PF-G1-10-10';
+setup.arrdefcnt=setup.arrdefcnt+1;
+setup.PF_dataCards='af-a2-aa'; % first is the outermost, last is the innermost
+setup.PF_dataCardDIPs='1111111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
+setup.PF_dataCardVref='0.86'; % nominal Vref, set by resistor divider
+setup.PF_dataBoardDIPs='01000000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
+setup.PF_dataBoardJumper='JP1=Vbias1';
+setup.PF_gateCards='xx-a8';
+setup.PF_gateCardDir='CCW';
+setup.PF_analogCard='V1N1';
+setup.PF_arrayLogic='none';
+setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
+setup.PF_CrossCable='normal';
+%setup.PF_CrossCable='Vbias1 open, Vbias1 left floating';
+setup.special='';
+%}
+
 
 if (setup.arrdefcnt~=1);
 	error('Multiple or no array selected!');

@@ -63,7 +63,7 @@ env.V(end+1)=  15.0 ; id.Von     =numel(env.V);                             % Te
 env.V(end+1)=  0.0  ; id.Vout10  =numel(env.V);   id.RevBias =numel(env.V); % Vn.Vout10=0.0;  %PSI3: Vn.RevBias=-2.5;         % Vout10
 env.V(end+1)=  0.0  ; id.Vout9   =numel(env.V);   id.Vreset  =numel(env.V); % Vn.Vout9=0.0;   %PSI3: Vn.Vreset=15.0;          % Vout9
 env.V(end+1)=  0.0  ; id.Vout8   =numel(env.V);   id.Vcc     =numel(env.V); % Vn.Vout8=0.0;   %PSI3: Vn.Vcc=8;                % Vout8
-env.V(end+1)=  0.0  ; id.Vguard2 =numel(env.V);   id.Tbias   =numel(env.V); % Vn.Vguard2=0.0; %PSI3: Vn.Tbias=5.5;            % Vout7
+env.V(end+1)= -1.0  ; id.Vguard2 =numel(env.V);   id.Tbias   =numel(env.V); % Vn.Vguard2=0.0; %PSI3: Vn.Tbias=5.5;            % Vout7
 env.V(end+1)=  0.0  ; id.Vguard1 =numel(env.V);   id.Vgnd    =numel(env.V); % Vn.Vguard1=0.0; %PSI3: Vn.Vgnd=1.0;             % Vout6
 env.V(end+1)=  0.0  ; id.Vbias2  =numel(env.V);   id.MuxHigh =numel(env.V); % Vn.Vbias2=0.0 ; %PSI3: Vn.Mux_High=15.0;        % Vout5
 env.V(end+1)= -2.0  ; id.Vbias   =numel(env.V);                   % Vn.Vbias=-3.0;   env.V(end+1)=env.V(id.Vgnd)   env.V(id.Vreset)  % Vout4
@@ -82,8 +82,6 @@ env.I.V24p=0.000;  % Current in amperes on the BK PRECISION +24V power supply
 meas.MFileDesc=[ mfilename() '.m' ];
 
 
-
-
 %
 % Experimental Environment Description, part 2:
 %   heavily measurement-type dependent settings
@@ -100,7 +98,9 @@ env.G3ExtClock=0; env.UseExtClock=0;
 
 % Gen2 PSI-1 array on Gen
     geo.G3_SORTMODE=10;
-    geo.GL=128;
+    geo.GL=128; % For Gen2 PSI-1 on Gen1 platform, CCW
+    %geo.GL=256; % For Gen2 PSI-1 on Gen2 UMB 1.0 platform
+    %geo.GL=256; % For Gen1 PSI-1 on Gen1 platform
     geo.G3GL=geo.GL-1;
     geo.DL=512;
     geo.G3DL=floor((geo.DL+1)/512)*512/2 -1;
@@ -114,7 +114,7 @@ env.G3ExtClock=0; env.UseExtClock=0;
 
 meas.DUT=[ setup.ARRAYTYPE '_' setup.WAFERCODE ];
 
-meas.MeasCond='LED'; multi.R22=0; % setting: PG4
+meas.MeasCond='LED'; multi.R22=14; % setting: PG4
 %meas.MeasCond='Qinj'; multi.R22=0; % setting: PG4
 
 % technically, not only R's can be changed in multi-sequence mode - 
