@@ -1,12 +1,13 @@
 
 MAINSMU="smu3"
+MAINSMU="smu7" # dont forget to update SMU block below
 NDEV="$MAINSMU.imager.umro"
 
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
-DFILEPREFIX="meas201_TFT-29B1-1_WP18UL_2-1-3_$(hostname)_"
+DFILEPREFIX="meas353_TFT-29B3-2_WP18UL_1-4-4_$(hostname)_"
 #DFILEPREFIX="meas177_TFT-29B1-6_WP18LL_1-1-1_$(hostname)_"
-PNTYPE=-1
+PNTYPE=1
 #DFILEPREFIX="meas45_TFT-29AY-Z_1-1-2_$(hostname)_"
 #DFILEPREFIX="meas22_SMUCHAR_10kOhm_$(hostname)_"
 #DFILEPREFIX="restest02_Rgs1MO_Rds130kO_$(hostname)_"
@@ -21,9 +22,9 @@ PIDFILE="/dev/shm/pid_2636.$MAINSMU"
 DATASAMPFILE="$DIRIPC/smurequest"  # currently not used by ctrlTFT
 
 SMUS="
-node[3].smua
-node[3].smub
-node[4].smua
+node[7].smua
+node[7].smub
+node[8].smua
 "
 #CH name Vmin Vmax Imax    Imaxpulse  HIGHC  SourceCurrent
 ch1="Vd  -15   15  0.0005  0.010      false    false"

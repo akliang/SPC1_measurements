@@ -54,6 +54,25 @@ function do_sweep() { # performs a defined sweep
       read -t $TOFINAL N && break
   echo "Sweep completed."
 }
+function do_sweep_dual() { # performs a defined sweep on two channels
+  echo
+  echo "Sweep $SWEEP: CHX=$CHX, CHY=$CHY, TO=$TO, VALS=( " $VALS " )"
+  if [ "$1" == "" ]; then echo "Sweep info completed."; return; fi
+  V1=""
+  for V in $VALS; do
+      send_cmd "$CHX($V) $CHY($V)"
+      if [ "$V1" == "" ]; then 
+          V1=$V
+          echo $SWEEP >"$DATACTRLFILE"
+      fi
+      read -t $TO N && break
+  done
+  rm "$DATACTRLFILE"
+  V=$V1
+  send_cmd "$CHX($V) $CHY($V)"
+      read -t $TOFINAL N && break
+  echo "Sweep completed."
+}
 function do_sweep_pulsed() { # performs a defined pulsed sweep
   echo
   echo "Sweep $SWEEP: CH=$CH, TON=$TON, TOFF=$TOFF, VALS=( " $VALS " )"
@@ -270,6 +289,45 @@ function do_output() { # TFT output characteristic, do_output TO "VGS1 VGS2 VGS3
   send_cmd "v1(0) v2(0) v3(0)"
   done
 }
+function do_sensor_reverse() { # Sensor output characteristic, reverse bias
+  VN1="0.000"
+  VP1="0.000"
+  VN2="0.000"
+  VP2="0.000"
+
+  SCANDIR=$1
+
+  SWEEP="reverse$SCANDIR$MEASNR"_"Vn1=$VN1"_"Vn2=$VN2"
+  if [ "$SCANDIR" == "ltoh" ]; then
+    VALS=$( octave --quiet --eval "for v=[  0:-.5:-6 ]; disp(v); end;" )
+  else
+    VALS=$( octave --quiet --eval "for v=[ -6:.5:0   ]; disp(v); end;" )
+  fi
+  [ "$TO" == "" ] && TO=2
+  CHX="v1"
+  CHY="v3"
+  send_cmd "v1($VN1) v2($VP1) v3($VN1) v4($VP2)"
+  do_sweep_dual yes
+
+  send_cmd "v1(0) v2(0) v3(0) v4(0)"
+}
+function do_sensor_forward() { # Sensor output characteristic, forward bias
+  VN1="0.000"
+  VP1="0.000"
+  VN2="0.000"
+  VP2="0.000"
+
+  SWEEP="forward$MEASNR"_"Vn1=$VN1"_"Vn2=$VN2"
+  VALS=$( octave --quiet --eval "for v=[ 0:.1:1.2 ]; disp(v); end;" )
+  [ "$TO" == "" ] && TO=2
+  CHX="v1"
+  CHY="v3"
+
+  send_cmd "v1($VN1) v2($VP1) v3($VN1) v4($VP2)"
+  do_sweep_dual yes
+
+  send_cmd "v1(0) v2(0) v3(0) v4(0)"
+}
 function do_output_pulsed() { # TFT output characteristic in pulsed mode, do_output TO "VGS1 VGS2 VGS3..."
   for VG in $2; do
   VD="0.000"
@@ -279,7 +337,7 @@ function do_output_pulsed() { # TFT output characteristic in pulsed mode, do_out
   SWEEP="OutputPulsed$MEASNR"_"Vs=$VS"_"Vg=$VG"
   VALS=$( octave --quiet --eval "for v=[ 0:0.2:$1 ]; disp(v*$PNTYPE); end;" )
   [ "$TO" == "" ] && TO=2
-  CH="v1"
+  CH="v3"
   send_cmd "v1($VD) v2($VS) v3($VG)"
   send_cmd "select_ilim_pulse_ch1()"
   send_cmd "select_ilim_pulse_ch2()"
@@ -353,6 +411,20 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
     #TO=$(( $MEASNR - 1000 ))
     #do_transfer 
   done
+}
+
+function do_sensorloop() { # PD sensor sweeps and noise characteristics
+  MEASNR=1000
+  # Initial, quick transfer chars to verify setup
+  
+  TO=60
+  do_sensor_forward  
+  TO=600
+  do_sensor_reverse ltoh
+  TO=600
+  do_sensor_reverse htol
+
+  #MEASNR=$(( $MEASNR + 1 ))
 }
 
 # Noise operating points of interest:

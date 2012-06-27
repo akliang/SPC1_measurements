@@ -1,13 +1,18 @@
 
 MAINSMU="smu1"
+MAINSMU="smu6"  # dont forget to update SMUs block down below
 NDEV="$MAINSMU.imager.umro"
 
 DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
 #DFILEPREFIX="meas112_TFT-29B1-3_WP15_2-1-2_$(hostname)_"
-DFILEPREFIX="meas238_JMi_TFT-29B1-1_WP7_2-1-1_$(hostname)_"
+DFILEPREFIX="meas352_JMi_TFT-29B3-1_WP1_1-4-2_$(hostname)_"
+#DFILEPREFIX="meas346_JMi_Resistor_500M_$(hostname)_"
+#DFILEPREFIX="sens006_JMi_29B3-1_WP1T_L1_$(hostname)_"
+#DFILEPREFIX="sens003_JMi_29B3-1_WP1L_opixleft_$(hostname)_"
+#DFILEPREFIX="sens002_JMi_29B1-6_WP6_opixleft_$(hostname)_"
 #DFILEPREFIX="meas_unified_test_$(hostname)_"
-PNTYPE=-1
+PNTYPE=1
 #DFILEPREFIX="smutest_$(hostname)_"
 #DFILEPREFIX="meas22_SMUCHAR_10kOhm_$(hostname)_"
 
@@ -19,9 +24,9 @@ PIDFILE="/dev/shm/pid_2636.$MAINSMU"
 DATASAMPFILE="$DIRIPC/smurequest"  # currently not used by ctrlTFT
 
 SMUS="
-node[1].smua
-node[1].smub
-node[2].smua
+node[5].smua
+node[5].smub
+node[6].smua
 "
 #CH name Vmin Vmax Imax    Imaxpulse  HIGHC  SourceCurrent
 ch1="Vd	 -15   15  0.0005  0.010      false    false"
