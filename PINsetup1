@@ -3,7 +3,8 @@ MAINSMU="smu6"  # dont forget to update SMUs block down below
 NDEV="$MAINSMU.imager.umro"
 
 DDIR='../measurements/pinsensors/'
-DFILEPREFIX="sens014_JMi_29B3-1_WP1T_L1and2_$(hostname)_"
+
+DFILEPREFIX="sens015_JMi_29B3-1_WP1T_2+1_$(hostname)_"
 
 PNTYPE=1
 

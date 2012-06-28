@@ -416,15 +416,20 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
 function do_sensorloop() { # PD sensor sweeps and noise characteristics
   MEASNR=1000
   # Initial, quick transfer chars to verify setup
-  
+
+  while true; do  
   TO=60
   do_sensor_forward  
   TO=600
   do_sensor_reverse ltoh
-  TO=600
   do_sensor_reverse htol
 
-  #MEASNR=$(( $MEASNR + 1 ))
+  MEASNR=$(( $MEASNR + 1 ))
+  TO=600
+  do_sensor_reverse ltoh
+  do_sensor_reverse htol
+  MEASNR=$(( $MEASNR + 1 ))
+  done
 }
 
 # Noise operating points of interest:
