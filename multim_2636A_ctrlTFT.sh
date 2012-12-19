@@ -222,7 +222,8 @@ function sweep_vcc() {
 }
 
 function do_noise() { # TFT noise at specific points
-  for VD in "0.100" "1.000" "5.000"; do
+  #for VD in "0.100" "1.000" "5.000"; do
+  for VD in "0.000" "0.010" "0.050" "0.100" "0.200" "0.500" "1.000" "5.000"; do
   VG="0.000"
   VS="0.000"
   VD=$( echo $VD $PNTYPE | gawk '{ printf("%.3f", $1*$2) }' )
@@ -392,8 +393,8 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
     do_transfer -6 0.1 $VGSHI  "1.000 2.000 3.000 5.000 7.000 9.000 0.102"
     TO=2
     do_output $VDSHI "-3.000 -2.000 -1.000 0.000 1.000 2.000 4.000 6.000 8.000 10.000 12.000 15.000"
-    TON=0.2 TOFF=3
-    do_output_pulsed $VDSHI "4.000 6.000 8.000 10.000 12.000 15.000"
+    #TON=0.2 TOFF=3
+    #do_output_pulsed $VDSHI "4.000 6.000 8.000 10.000 12.000 15.000"
    
     if false; then 
     kill $(<$PIDFILE); sleep 15
