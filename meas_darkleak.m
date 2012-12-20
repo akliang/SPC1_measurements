@@ -168,7 +168,7 @@ multi.RMATRIX=[ % overnight long run noise measurement
       40000  0     0    50 %added 2010-04-27, mk
       60000  0     0    50 %added 2010-04-27, mk
  ];
-%%{
+%{
 meas.MeasCond='Drift'; multi.R22=14; % setting: PG4, MTFDataLine
 multi.RMATRIX=[ % overnight long run noise measurement
    %R1      R25   R26  R27  

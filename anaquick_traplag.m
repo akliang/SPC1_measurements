@@ -43,26 +43,27 @@ GLS=128;
 foffs=5;
 
 %{
-F='../measurements/PSI-1_29A32-5/20120515T092213_LED_Vbias-2V0_Von15V0_Voff-4V0_VQinj1V0/20120515T092213_LED_Vbias-2V0_Voff-4V0';
+F='../measurements/PSI-1_29A32-5/20120515T092213_LED_Vbias-2V0_Von15V0_Voff-4V0_VQinj1V0/20120515T092213_LED_Vbias-2V0_Voff-4V0'; sigsat=3.91945; Vbias=-2;
 pCperADC=(1*paFB) / 3400 * 1E12; % pC per ADC
 FL=200; LL=300;
 DLroi=25+(0:10);
 GLroi=115+(0:10);
 DLS=384;
 GLS=256;
-foffs=0;
+foffs=1;
 %}
 
 %%{
-F='../measurements/Gen2_PSI-1_29B3-2/20120521T163701_LED_Vbias-2V0_Von15V0_Voff-4V0_VQinj1V0/20120521T163701_LED_Vbias-2V0_Voff-4V0'; sigsat=2.793614;
-%F='../measurements/Gen2_PSI-1_29B3-2/20120521T192146_LED_Vbias-1V0_Von15V0_Voff-4V0_VQinj1V0/20120521T192146_LED_Vbias-1V0_Voff-4V0'; sigsat=1.779589;
+%F='../measurements/Gen2_PSI-1_29B3-2/20120523T125644_LED_Vbias-3V0_Von15V0_Voff-4V0_VQinj1V0/20120523T125644_LED_Vbias-3V0_Voff-4V0'; sigsat=3.60835; Vbias=-3; DLroi= 165+(-5:5); GLroi=40+(-5:5); % center of LED 
+F='../measurements/Gen2_PSI-1_29B3-2/20120521T163701_LED_Vbias-2V0_Von15V0_Voff-4V0_VQinj1V0/20120521T163701_LED_Vbias-2V0_Voff-4V0'; sigsat=2.793614; Vbias=-2;
+%F='../measurements/Gen2_PSI-1_29B3-2/20120521T192146_LED_Vbias-1V0_Von15V0_Voff-4V0_VQinj1V0/20120521T192146_LED_Vbias-1V0_Voff-4V0'; sigsat=1.779589; Vbias=-1;
 %F='../measurements/Gen2_PSI-1_29B3-2/20120521T212647_LED_Vbias0V0_Von15V0_Voff-4V0_VQinj1V0/20120521T212647_LED_Vbias0V0_Voff-4V0';
-
 pCperADC=(1*paFB) / 9597 * 1E12; % pC per ADC
 FL=200; LL=300;
-DLroi= 24+(-5:5); GLroi=73+(-5:5); % center of LED
+DLroi= 24+(-5:5); GLroi=73+(-5:5); % center of LED 
+%DLroi= 50+(-5:5); GLroi=73+(-5:5); % somewhat off LED
 %DLroi=140+(-5:5); GLroi=32+(-5:5); % far away from LED
-foffs=1;
+foffs=8;
 %}
 
 
@@ -143,14 +144,16 @@ ylabel('Signal (pC)');
 legend(legstr,'location','southeast');
 
 %sigsat=sigflu; % assuming we reach saturation
-figure(7+foffs); hold off;
-legstr={};
-plot((cdata(2:end,4)/sigsat)*100,(1-cdata(2:end,3)./cdata(2:end,4))*100,'rx-'); hold on; legstr{end+1}='Trapping';
-plot((cdata(2:end,4)/sigsat)*100,(  cdata(2:end,5)./cdata(2:end,4))*100,'bx-'); hold on; legstr{end+1}='Lag1';
-plot((cdata(2:end,4)/sigsat)*100,(  cdata(2:end,6)./cdata(2:end,4))*100,'gx-'); hold on; legstr{end+1}='Lag2';
+figure(7+foffs);
+hold off; legstrTL={}; sym='-'; 
+plot((cdata(2:end,4)/sigsat)*100,(1-cdata(2:end,3)./cdata(2:end,4))*100,[ 'rx' sym ]); hold on; legstrTL{end+1}=sprintf('Trapping, Vbias %.1f', Vbias);
+plot((cdata(2:end,4)/sigsat)*100,(  cdata(2:end,5)./cdata(2:end,4))*100,[ 'bx' sym ]); hold on; legstrTL{end+1}=sprintf('FirstLag, Vbias %.1f', Vbias);
+%plot((cdata(2:end,4)/sigsat)*100,(  cdata(2:end,6)./cdata(2:end,4))*100,[ 'gx' sym ]); hold on; legstrTL{end+1}='Lag2';
 xlabel('Signal (% of pixel saturation)');
 ylabel('Trap/Lag (% of fluoroscopic equilibrium)');
-legend(legstr,'location','northwest');
+legend(legstrTL,'location','northwest');
+title([ F sprintf('\n') 'Trapping and Lag, at around 2 frames per second' ], 'Interpreter', 'none' );
+sym='--';
 
 
 

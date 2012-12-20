@@ -40,12 +40,15 @@ pCperADC=(1*paFB) / 9000 * 1E12; % pC per ADC
 %}
 
 %%{
-S.F='../measurements/Gen2_PSI-1_29B3-2/20120521T144815_DarkLeak_Vbias-2V0_Von15V0_Voff-4V0_VQinj1V0/20120521T144815_DarkLeak_Vbias-2V0_Voff-4V0';
+S.DLroi=50:70; S.GLroi=50:70;
 S.pCperADC=(1*S.paFB) / 9597 * 1E12; % pC per ADC
 S.ppitch=150*1E-6 * 0.65; % PD area (pitch * FF)
 %S.coffs=-0.12;
-S.DLroi=50:70; S.GLroi=50:70;
+S.F='../measurements/Gen2_PSI-1_29B3-2/20120523T112730_DarkLeak_Vbias-3V0_Von15V0_Voff-4V0_VQinj1V0/20120523T112730_DarkLeak_Vbias-3V0_Voff-4V0';
+Fs{end+1}=S;
 
+%S.F='../measurements/Gen2_PSI-1_29B3-2/20120521T144815_DarkLeak_Vbias-2V0_Von15V0_Voff-4V0_VQinj1V0/20120521T144815_DarkLeak_Vbias-2V0_Voff-4V0';
+S.F='../measurements/Gen2_PSI-1_29B3-2/20120522T112435_DarkLeak_Vbias-2V0_Von15V0_Voff-4V0_VQinj1V0/20120522T112435_DarkLeak_Vbias-2V0_Voff-4V0';
 Fs{end+1}=S;
 
 S.F='../measurements/Gen2_PSI-1_29B3-2/20120521T195319_DarkLeak_Vbias-1V0_Von15V0_Voff-4V0_VQinj1V0/20120521T195319_DarkLeak_Vbias-1V0_Voff-4V0';
@@ -140,7 +143,7 @@ ileak=(data(pid(2:end),2)-data(pid(1:end-1),2)) ./ (data(pid(2:end),1)-data(pid(
 plot(data(pid(2:end),1), ileak*S.pCperADC/(S.ppitch*1000)^2,[ S.colors{fsid} '*-' ]); hold on;
 figs{gcf}.legstr{fsid}=leglabel;
 %ylim( [ min(ileak), min(abs(ileak))*10 ] );
-ylim( [ -3 2 ] );
+ylim( [ -3 3 ] );
 title(S.F,'Interpreter','none')
 xlabel('Frame time (s)')
 ylabel('Idark (pA/mm^2)')
@@ -164,3 +167,4 @@ xlabel('VQinj');
 ylabel('ADCs');
 legend(figs{gcf}.legstr,'location','northwest');
 end
+
