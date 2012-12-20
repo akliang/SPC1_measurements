@@ -1,0 +1,33 @@
+
+MAINSMU="smu1"
+NDEV="$MAINSMU.imager.umro"
+
+DDIR='../measurements/environment/'
+DFILEPREFIX="meas_psi1_$(hostname)_"
+#PNTYPE=-1  #PNTYPE only applies to ctrlTFT script
+
+# file-based inter-process communication
+DIRIPC="/dev/shm/ipc_2636.$MAINSMU"
+SCPIFILE="$DIRIPC/2636_command.scpi.$MAINSMU"
+#SCPIFILE="/dev/shm/g4tmp/2636_command.scpi"
+DATACTRLFILE="$DIRIPC/2636_datactrl.$MAINSMU"
+PIDFILE="/dev/shm/pid_2636.$MAINSMU"
+DATASAMPFILE="/dev/shm/g4tmp/smurequest"
+
+SMUS="
+node[1].smua
+node[1].smub
+node[2].smua
+node[2].smub
+"
+
+#CH name Vmin Vmax Imax    Imaxpulse  HIGHC  SourceCurrent
+ch1="V1  -20   20  0.2000  1.000      true     false"
+ch2="V2  -20   20  0.2000  1.000      true     false"
+ch3="V3  -20   20  0.2000  1.000      true     false"
+ch4="V4  -20   20  0.2000  1.000      true     false"
+
+DIGIOS="
+node[1]
+node[2]
+"
