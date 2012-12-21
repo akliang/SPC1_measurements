@@ -28,37 +28,10 @@ flag.dryrun=false;
 % (too many arrays, and too many different measurement scripts made this necessary)
 
 meas_desc_gen2g3
+
 %{
-setup.LOCATION='Argus Building, RF Lab';
-setup.G3_system='5of9-vanilla';
-setup.G3_interface='a4-V20-20100408'; % serial number - hardware version - bitfile version
-setup.G3_adcCards='b1-b2-b3-b4-00-00-00-00';
-
-setup.POWER_G3='ArrayAndADCPower#2';
-setup.POWER_ADC='ArrayAndADCPower#2';
-setup.POWER_ARRAY='BK9130#1';
-
-
-setup.ARRAYTYPE='Gen2_PSI1';
-setup.WAFERCODE='29B1-6';
-setup.PLATFORM='PG-G1-10-11';
-%setup.WAFERCODE='29B1-1';
-%setup.PLATFORM='PG-G1-10-10';
-setup.PF_dataCards='a5-a6-a8'; % first is the outermost, last is the innermost
-setup.PF_dataCardDIPs='1111111100'; % [ ~PG1 ~PG2 ~PG3 ~PG4 ~PG5 ~PG6 BW2-HI BW1-HI 16CH UP ]
-setup.PF_dataCardVref='0.86'; % nominal Vref, set by resistor divider
-setup.PF_dataBoardDIPs='01000000'; % [ PG3 PG4 PG5 CTRL9 CTRL10 CTRL12 CTRL11 ?? ]
-%setup.PF_dataBoardJumper='JP1=Vbias1';
-setup.PF_gateCards='00-xx';
-setup.PF_analogCard='V1N1';
-setup.PF_arrayLogic='none';
-setup.PF_arrayLogicDIPs='0'; % no array logic, i.e. no dips
-setup.PF_CrossCable='normal';
-setup.special='';
-%}
-
 env.V=[];
-env.V(end+1)= -4.0  ; id.AVoff   =numel(env.V);                             % Test Point near to Gate Card
+env.V(end+1)= -4.0  ; id.Voff    =numel(env.V);                             % Test Point near to Gate Card
 env.V(end+1)=  15.0 ; id.Von     =numel(env.V);                             % Test Point near to Gate Card
 env.V(end+1)=  0.0  ; id.Vout10  =numel(env.V);   id.RevBias =numel(env.V); % Vn.Vout10=0.0;  %PSI3: Vn.RevBias=-2.5;         % Vout10
 env.V(end+1)=  0.0  ; id.Vout9   =numel(env.V);   id.Vreset  =numel(env.V); % Vn.Vout9=0.0;   %PSI3: Vn.Vreset=15.0;          % Vout9
@@ -78,8 +51,8 @@ env.V(end+1)=  0    ; id.dummy2   =numel(env.V);
 
 env.I.V24m=0.000;  % Current in amperes on the BK PRECISION -24V power supply
 env.I.V24p=0.000;  % Current in amperes on the BK PRECISION +24V power supply
-
 meas.MFileDesc=[ mfilename() '.m' ];
+%}
 
 
 %
@@ -98,8 +71,8 @@ env.G3ExtClock=0; env.UseExtClock=0;
 
 % Gen2 PSI-1 array on Gen
     geo.G3_SORTMODE=10;
-    geo.GL=128; % For Gen2 PSI-1 on Gen1 platform, CCW
-    %geo.GL=256; % For Gen2 PSI-1 on Gen2 UMB 1.0 platform
+    geo.GL=128; % For Gen2 PSI-1 on Gen1 platform, CCW and Gen2 PSI-1 on UMB1.1/1.2 with new Gatecards
+    %geo.GL=256; % For Gen2 PSI-1 on Gen2 UMB 1.0 platform with old, interposed gatecards
     %geo.GL=256; % For Gen1 PSI-1 on Gen1 platform
     geo.G3GL=geo.GL-1;
     geo.DL=512;
@@ -191,11 +164,11 @@ meas.MeasDetails=[ sprintf('%s', meas.MeasCond) ...
     sprintf( '_Vbias%s', volt2str(env.V(id.Vbias)) ) ... not needed for PSI-2/3
     ...sprintf( '_Vrst%s', volt2str(env.V(id.Vreset)) ) ... for AP pixels 
     sprintf( '_Von%s', volt2str(env.V(id.Von)) ) ... not needed for PSI-2/3
-    sprintf( '_Voff%s', volt2str(env.V(id.AVoff)) ) ... not needed for PSI-2/3
+    sprintf( '_Voff%s', volt2str(env.V(id.Voff)) ) ... not needed for PSI-2/3
     ...sprintf( '_Vgnd%s', volt2str(env.V(id.Vgnd)) ) ...
     ...sprintf( '_Tbias%s', volt2str(env.V(id.Tbias)) ) ...
     ...sprintf( '_Vcc%s', volt2str(env.V(id.Vcc)) ) ...  for AP pixels 
-    ...sprintf( '_Voff%s',  volt2str(env.V(id.AVoff)) ) ...    
+    ...sprintf( '_Voff%s',  volt2str(env.V(id.Voff)) ) ...    
     sprintf( '_VQinj%s', volt2str(env.V(id.VQinj)) ) ...
     ...sprintf( '_%02dR22', multi.R22                 ) ...
     ...sprintf( '_RST%s',    setup.PF_globalReset     ) ...
@@ -238,7 +211,7 @@ for mid=1:multi.nrofacq; multi.mid=mid;
 meas.BaseName=[ meas.DirName ...
     meas.MeasID '_' meas.MeasCond ... '_' meas.DUT   ...
     sprintf( '_Vbias%s', volt2str(env.V(id.Vbias)) )...
-    sprintf( '_Voff%s', volt2str(env.V(id.AVoff)) ) ... 
+    sprintf( '_Voff%s', volt2str(env.V(id.Voff)) ) ... 
  ...%sprintf('_Acq%03d', multi.mid) ...
  ...'_' meas.MeasDetails ...    
  ...sprintf('_%05dR1' , multi.R1)   ...

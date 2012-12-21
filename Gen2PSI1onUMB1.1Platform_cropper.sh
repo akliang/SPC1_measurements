@@ -27,15 +27,15 @@ echo "
   %dcount=512; gcount=256; % dimensions as saved by G3
   %DLS=[ 128+1:128+64   224+1:224+64   320+1:320+64 ];
   %GLS=1:gcount;
-  dcount=512; gcount=256; % dimensions as saved by G3
+  dcount=512; gcount=128; % dimensions as saved by G3
   DLS=[ 64+(1:64)   192+(1:64) 320+(1:64) ];
-  GLS=[ 0+(1:64)  128+(1:64) ]; % Gate-line sorting matrix
+  GLS=[ 0+(1:64)  64+(1:64) ]; % Gate-line sorting matrix
   %quadswap=[ 4:4:64 ; 3:4:64 ; 2:4:64 ; 1:4:64 ]
-  quadswap= [ 4:4:64 ; 2:4:64 ; 3:4:64 ; 1:4:64 ]
-  quadswapG=[ 2:4:64 ; 4:4:64 ; 1:4:64 ; 3:4:64 ]
-  quadswapD=[ 4:4:64 ; 2:4:64 ; 3:4:64 ; 1:4:64 ]
-  GLS=GLS( [ quadswap(:) 64+quadswapG(:) ] );
-  DLS=DLS( [ quadswapD(:) 64+quadswapD(:) 128+quadswapD(:) ] );
+  %quadswap= [ 4:4:64 ; 2:4:64 ; 3:4:64 ; 1:4:64 ]
+  %quadswapG=[ 2:4:64 ; 4:4:64 ; 1:4:64 ; 3:4:64 ]
+  %quadswapD=[ 4:4:64 ; 2:4:64 ; 3:4:64 ; 1:4:64 ]
+  %GLS=GLS( [ quadswap(:) 64+quadswapG(:) ] );
+  %DLS=DLS( [ quadswapD(:) 64+quadswapD(:) 128+quadswapD(:) ] );
   F='$F'
   frd=fopen(F,'r');
   fwr=fopen([F '.cropped'],'w');

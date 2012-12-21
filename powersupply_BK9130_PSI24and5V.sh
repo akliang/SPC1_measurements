@@ -56,9 +56,10 @@ sendscpi 1 '*CLS'
 #[ "$IDN" == "BK,9130,005004156568001063,V1.69" ] && [ "$(hostname)" == "exciton" ] && ans="y" # BK#3, 2012-02-15 on exciton providing PNC power
 #[ "$IDN" == "BK,9130,005004156568001063,V1.69" ] && [ "$(hostname)" == "muon"    ] && ans="y" # BK#3, 2011-10-25 on muon providing PNC power
 #[ "$IDN" == "BK,9130,005004156568001088,V1.69" ] && [ "$(hostname)" == "muon"    ] && ans="y" # BK#5, 2012-02-24 on muon providing PNC power
-[ "$IDN" == "BK,9130,005004156568001088,V1.69" ] && [ "$(hostname)" == "axion"   ] && ans="y" # BK#5, 2012-02-24 on muon providing PNC power
+#[ "$IDN" == "BK,9130,005004156568001088,V1.69" ] && [ "$(hostname)" == "axion"   ] && ans="y" # BK#5, 2012-02-24 on muon providing PNC power
 #[ "$IDN" == "BK,9130,005004156568001088,V1.69" ] && [ "$(hostname)" == "simwork" ] && ans="y" # BK#5, 2011-10-28 on simwork providing PNC power for actual array measurements
-[ "$IDN" == "BK,9130,005004156568001055,V1.69" ] && [ "$(hostname)" == "kaon" ] && ans="y" # BK#5, 2011-10-28 on simwork providing PNC power for actual array measurements
+#[ "$IDN" == "BK,9130,005004156568001055,V1.69" ] && [ "$(hostname)" == "kaon" ] && ans="y" # BK#5, 2011-10-28 on simwork providing PNC power for actual array measurements
+[ "$IDN" == "BK,9130,005004156568001055,V1.69" ] && [ "$(hostname)" == "axion" ] && ans="y" # BK#5, 2012-12-20 on axion providing PNC power for PSI1 array measurements
 
 until  [ "$ans" == "y" ]; 
 do
@@ -78,11 +79,11 @@ sendscpi $TO 'APP:OUT 0,0,0'
 sendscpi $TO 'SYST:ERR?'
 sendscpi $TO '*CLS'
 #sendscpi $TO 'APP:VOLT 24,24,3.3'
-sendscpi $TO 'APP:VOLT 24,24,5.4'
+sendscpi $TO 'APP:VOLT 24,24,5.25'
 sendscpi $TO 'SYST:ERR?'
 sendscpi $TO '*CLS'
 #sendscpi $TO 'APP:CURR 0.2,0.2,0.2' 
-sendscpi $TO 'APP:CURR 0.5,0.5,1.5' 
+sendscpi $TO 'APP:CURR 0.3,0.3,0.9' 
 sendscpi $TO 'SYST:ERR?'
 sendscpi $TO '*CLS'
 sendscpi $TO 'APP:OUT 1,1,1'
