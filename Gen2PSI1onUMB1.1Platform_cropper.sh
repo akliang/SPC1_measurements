@@ -33,9 +33,9 @@ echo "
   %quadswap=[ 4:4:64 ; 3:4:64 ; 2:4:64 ; 1:4:64 ]
   %quadswap= [ 4:4:64 ; 2:4:64 ; 3:4:64 ; 1:4:64 ]
   %quadswapG=[ 2:4:64 ; 4:4:64 ; 1:4:64 ; 3:4:64 ]
-  %quadswapD=[ 4:4:64 ; 2:4:64 ; 3:4:64 ; 1:4:64 ]
+  quadswapD=[ 4:4:64 ; 2:4:64 ; 3:4:64 ; 1:4:64 ]
   %GLS=GLS( [ quadswap(:) 64+quadswapG(:) ] );
-  %DLS=DLS( [ quadswapD(:) 64+quadswapD(:) 128+quadswapD(:) ] );
+  DLS=DLS( [ quadswapD(:) 64+quadswapD(:) 128+quadswapD(:) ] );
   F='$F'
   frd=fopen(F,'r');
   fwr=fopen([F '.cropped'],'w');
