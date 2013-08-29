@@ -4,7 +4,7 @@ NDEV="$MAINSMU.imager.umro"
 
 DDIR='../measurements/pinsensors/'
 
-DFILEPREFIX="sens123_JMi_29B4-2_WP15_via6+5_$(hostname)_"
+DFILEPREFIX="sens205_JMi_29C2-3_WP15_L3_$(hostname)_"
 
 PNTYPE=1
 

@@ -421,13 +421,15 @@ function do_sensorloop() { # PD sensor sweeps and noise characteristics
   while true; do  
   TO=60
   do_sensor_forward  
-  TO=600
+  TO=1200
   do_sensor_reverse ltoh
+  TO=30
   do_sensor_reverse htol
 
   MEASNR=$(( $MEASNR + 1 ))
-  TO=600
+  TO=1200
   do_sensor_reverse ltoh
+  TO=30
   do_sensor_reverse htol
   MEASNR=$(( $MEASNR + 1 ))
   done
