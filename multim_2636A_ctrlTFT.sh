@@ -221,6 +221,26 @@ function sweep_vcc() {
   do_sweep
 }
 
+function do_noise_res() { # Resistor noise at specific points
+  #for VD in "0.100" "1.000" "5.000"; do
+  for VD in "0.000" "0.010" "0.050" "0.100" "0.200" "0.500" "1.000" "5.000"; do
+  VG="0.000"
+  VS="0.000"
+  VD=$( echo $VD $PNTYPE | gawk '{ printf("%.3f", $1*$2) }' )
+
+  SWEEP="TransNoise$MEASNR"_"Vd=$VD"_"Vs=$VS"
+  VALS=$( octave --quiet --eval "for v=[ 1 ]; disp(v*$PNTYPE); end" )
+  #VALS=$( octave --quiet --eval "for v=[ 1 3 5 10 ]; disp(v*$PNTYPE); end" )
+  #VALS=$( octave --quiet --eval "for v=[ 1 2.5 2.9 3.9 10 ]; disp(v); end" )
+  [ "$TO" == "" ] && TO=20
+  [ "$TSET" == "" ] && TSET=10
+  CH="v3"
+  send_cmd "v1($VD) v2($VS) v3($VG)"
+  do_sweep_fixrange yes
+
+  send_cmd "v1(0) v2(0) v3(0)"
+  done
+}
 function do_noise() { # TFT noise at specific points
   #for VD in "0.100" "1.000" "5.000"; do
   for VD in "0.000" "0.010" "0.050" "0.100" "0.200" "0.500" "1.000" "5.000"; do
@@ -375,13 +395,7 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
   # Initial, quick transfer chars to verify setup
   do_transfer -6 0.2 $VGSHI  "0.100 0.500"
 
-  #do_transfer 0 -0.2 -6  "0.100 0.500 5.000"
-  #do_transfer 0 0.2 $VGSHI  "0.100 0.500 5.000"
-  
-  #do_transfer $VGSHI -0.2 -6  "0.100 0.500 5.000"
-
   do_output $VDSHI "0.000 4.000"
-
 
   while true; do 
     read -t 0.1 N && break
@@ -408,6 +422,47 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
     do_noise
     TON=2 TOFF=0.2 REPS=1500
     do_noise_pulsed
+    MEASNR=$(( $MEASNR + 1 ))
+    #TO=$(( $MEASNR - 1000 ))
+    #do_transfer 
+  done
+}
+
+function do_resloop() { # Resistor transfer, output and noise characteristics
+  MEASNR=1000
+  TO=1
+  VDSHI=9  VDSMAX=15
+  VGSHI=11 VGSMAX=20
+  # Initial, quick transfer chars to verify setup
+  do_transfer -6 0.2 $VGSHI  "0.100 0.500"
+
+  do_output $VDSHI "0.000 4.000"
+
+  while true; do 
+    read -t 0.1 N && break
+    MEASNR=$(( $MEASNR + 1 ))
+    VGSHI=$(( $VGSHI + 3 )); [ $VGSHI -ge $VGSMAX ] && VGSHI=$VGSMAX;
+    VDSHI=$(( $VDSHI + 2 )); [ $VDSHI -ge $VDSMAX ] && VDSHI=$VDSMAX;
+    TO=5
+    do_transfer -6 0.1 $VGSHI  "0.100 0.000 0.010 0.050 0.200 0.300 0.500 0.101"
+    do_transfer -6 0.1 $VGSHI  "1.000 2.000 3.000 5.000 7.000 9.000 0.102"
+    TO=2
+    do_output $VDSHI "-3.000 -2.000 -1.000 0.000 1.000 2.000 3.000 4.000 5.000 6.000 8.000 10.000 12.000 15.000"
+    #TON=0.2 TOFF=3
+    #do_output_pulsed $VDSHI "4.000 6.000 8.000 10.000 12.000 15.000"
+   
+    if false; then 
+    kill $(<$PIDFILE); sleep 15
+    if [ -e $PIDFILE ]; then
+       kill -9 $(<$PIDFILE)
+    fi
+    sleep 60
+    fi
+    
+    TO=4000
+    do_noise_res
+    TON=2 TOFF=0.2 REPS=1500
+    #do_noise_pulsed
     MEASNR=$(( $MEASNR + 1 ))
     #TO=$(( $MEASNR - 1000 ))
     #do_transfer 
