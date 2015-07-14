@@ -243,7 +243,8 @@ function do_noise_res() { # Resistor noise at specific points
 }
 function do_noise() { # TFT noise at specific points
   #for VD in "0.100" "1.000" "5.000"; do
-  for VD in "0.000" "0.010" "0.050" "0.100" "0.200" "0.500" "1.000" "5.000"; do
+  #for VD in "0.000" "0.010" "0.050" "0.100" "0.200" "0.500" "1.000" "5.000"; do
+  for VD in "0.100" "0.500" "1.000" "5.000"; do
   VG="0.000"
   VS="0.000"
   VD=$( echo $VD $PNTYPE | gawk '{ printf("%.3f", $1*$2) }' )
