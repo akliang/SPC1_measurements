@@ -7,7 +7,9 @@ DDIR='../measurements/environment/'
 DFILEPREFIX="meas_$(hostname)_"
 #DFILEPREFIX="meas112_TFT-29B1-3_WP15_2-1-2_$(hostname)_"
 #DFILEPREFIX="meas462_JMi_TFT-29C2-2_WP1_2-4-2_$(hostname)_"
-DFILEPREFIX="meas514_JMi_TFT-29A25-5_WP1_1-1-1_$(hostname)_"
+#DFILEPREFIX="meas514_JMi_TFT-29A25-5_WP1_1-1-1_$(hostname)_"
+#DFILEPREFIX="meas520_JMi_Resistor_10k_$(hostname)_"
+DFILEPREFIX="meas524_JMi_Resistor_MS1_10k_$(hostname)_"
 #DFILEPREFIX="meas346_JMi_Resistor_500M_$(hostname)_"
 #DFILEPREFIX="sens006_JMi_29B3-1_WP1T_L1_$(hostname)_"
 #DFILEPREFIX="sens003_JMi_29B3-1_WP1L_opixleft_$(hostname)_"
@@ -25,14 +27,15 @@ PIDFILE="/dev/shm/pid_2636.$MAINSMU"
 DATASAMPFILE="$DIRIPC/smurequest"  # currently not used by ctrlTFT
 
 SMUS="
-node[5].smua
-node[5].smub
 node[6].smua
+node[6].smub
+node[5].smua
 "
 #CH name Vmin Vmax Imax    Imaxpulse  HIGHC  SourceCurrent
-ch1="Vd	 -15   15  0.0005  0.010      false    false"
-ch2="Vs	 -15   15  0.0005  0.010      false    false"
-ch3="Vg	 -20   20  0.0005  0.010      false    false"
+ch1="Vd  -15   15  0.0015  0.010      false    false"
+ch2="Vs  -15   15  0.0015  0.010      false    false"
+ch3="Vg  -20   20  0.0015  0.010      false    false"
 
 DIGIOS=""
+
 
