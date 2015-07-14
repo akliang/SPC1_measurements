@@ -1,0 +1,39 @@
+
+MAINSMU="smu3"
+MAINSMU="smu7" # dont forget to update SMU block below
+NDEV="$MAINSMU.imager.umro"
+
+DDIR='../measurements/environment/'
+DFILEPREFIX="meas_$(hostname)_"
+#DFILEPREFIX="meas513_JM2pc_TFT-29B1-6_WP18UR_1-4-2_$(hostname)_"
+DFILEPREFIX="meas525_JM2_RES-29D1-8_WP5_3-13-2_$(hostname)_"
+#DFILEPREFIX="meas177_TFT-29B1-6_WP18LL_1-1-1_$(hostname)_"
+PNTYPE=1
+#DFILEPREFIX="meas45_TFT-29AY-Z_1-1-2_$(hostname)_"
+#DFILEPREFIX="meas22_SMUCHAR_10kOhm_$(hostname)_"
+#DFILEPREFIX="restest02_Rgs1MO_Rds130kO_$(hostname)_"
+#DFILEPREFIX="test02_FET2N7000_inbox_$(hostname)_"
+
+
+# file-based inter-process communication
+DIRIPC="/dev/shm/ipc_2636.$MAINSMU"
+SCPIFILE="$DIRIPC/2636_command.scpi.$MAINSMU"
+DATACTRLFILE="$DIRIPC/2636_datactrl.$MAINSMU"
+PIDFILE="/dev/shm/pid_2636.$MAINSMU"
+DATASAMPFILE="$DIRIPC/smurequest"  # currently not used by ctrlTFT
+
+SMUS="
+node[7].smua
+node[7].smub
+node[8].smua
+node[8].smub
+"
+#CH name Vmin Vmax Imax    Imaxpulse  HIGHC  SourceCurrent
+ch1="Vd  -15   15  0.0005  0.010      false    false"
+ch2="Vs  -15   15  0.0005  0.010      false    false"
+ch3="Vg  -15   15  0.0005  0.010      false    false"
+ch4="Vg  -15   15  0.0005  0.010      false    false"
+
+DIGIOS=""
+
+
