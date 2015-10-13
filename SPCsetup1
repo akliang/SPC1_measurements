@@ -5,7 +5,7 @@ NDEV="$MAINSMU.imager.umro"
 DDIR='../measurements/spc/'
 
 DFILEPREFIX="comp001_JMi_29D1-8_WP1_6-6_Diff_$(hostname)_"
-DFILEPREFIX="amp004_19c_29D1-8_WP2_1-7_2T_$(hostname)_"
+DFILEPREFIX="amp006_19c_29D1-8_WP2_3-9_2R_$(hostname)_"
 
 PNTYPE=1
 

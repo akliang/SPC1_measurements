@@ -1033,7 +1033,7 @@ function amp_bias_sweep() {  # step through voltages to test resistor
   done
 }
 
-function amp_bias_sweep_extctrl() {  # step through voltages to test resistor
+function amp_bias_sweep_extflag() {  # step through voltages to test resistor
   if [ "$1" == "" ]; then echo "Could not source \$1 (hint: SPCpytrigger    ;  user-defined python variables file)"; return; fi
   source $1
 
@@ -1057,6 +1057,34 @@ function amp_bias_sweep_extctrl() {  # step through voltages to test resistor
     done
   done
 }
+
+function ext_bias_ctrl() { # change the channel voltages with an external file
+  if [ "$1" == "" ]; then echo "Could not source \$1 (hint: SPCpytrigger    ;  user-defined python variables file)"; return; fi
+  source $1
+
+  while true; do
+    echo -n "Waiting for pytrigger... "
+    while [ ! -e $PYTRIGGER ]; do
+      sleep 0.1
+    done
+    echo "hit!"
+
+    while read LINE; do
+      echo "$LINE"
+      if [ "$LINE" == "FIN" ]; then
+        echo "Caught FIN signal -- exiting!"
+        rm $PYTRIGGER
+        exit
+      else
+        send_cmd "$LINE"
+      fi
+      sleep 1
+    done < $PYTRIGGER
+    rm $PYTRIGGER
+  done
+
+}
+
 
 function do10kclock() {  # pulse channel 4 as a 10khz clock
   VHI=4
