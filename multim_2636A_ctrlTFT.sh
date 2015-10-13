@@ -109,6 +109,21 @@ function do_sweep_fixrange() { # performs a defined sweep, fixing channel curren
       send_cmd "ar1=autorangei1(smua.AUTORANGE_OFF) ar2=autorangei2(smua.AUTORANGE_OFF) ar3=autorangei3(smua.AUTORANGE_OFF)"
       read -t $TO N && break
       send_cmd "autorangei1(ar1) autorangei2(ar2) autorangei3(ar3)"
+
+      # gm step added on 2015-07-17 by Liang
+      TGM=60
+      V2=$( echo "$V 0.1" | gawk '{ print $1-$2 }' )
+      send_cmd "$CH($V2)"
+      read -t $TGM N && break
+      send_cmd "$CH($V)"
+      read -t $TGM N && break
+      V2=$( echo "$V 0.1" | gawk '{ print $1+$2 }' )
+      send_cmd "$CH($V2)"
+      read -t $TGM N && break
+      V2=""
+      TGM=""
+      # end gm step
+      
   done
   rm "$DATACTRLFILE"
   V=$V1
