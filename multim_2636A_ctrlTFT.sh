@@ -112,12 +112,18 @@ function do_sweep_fixrange() { # performs a defined sweep, fixing channel curren
 
       # gm step added on 2015-07-17 by Liang
       TGM=60
-      V2=$( echo "$V 0.1" | gawk '{ print $1-$2 }' )
+      V2=$( echo "$V -0.02" | gawk '{ print $1+$2 }' )
+      send_cmd "$CH($V2)"
+      read -t $TGM N && break
+      V2=$( echo "$V +0.02" | gawk '{ print $1+$2 }' )
+      send_cmd "$CH($V2)"
+      read -t $TGM N && break
+      V2=$( echo "$V -0.1" | gawk '{ print $1+$2 }' )
       send_cmd "$CH($V2)"
       read -t $TGM N && break
       send_cmd "$CH($V)"
       read -t $TGM N && break
-      V2=$( echo "$V 0.1" | gawk '{ print $1+$2 }' )
+      V2=$( echo "$V +0.1" | gawk '{ print $1+$2 }' )
       send_cmd "$CH($V2)"
       read -t $TGM N && break
       V2=""
