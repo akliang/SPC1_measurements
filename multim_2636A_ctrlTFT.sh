@@ -54,6 +54,28 @@ function do_sweep() { # performs a defined sweep
       read -t $TOFINAL N && break
   echo "Sweep completed."
 }
+function do_sweep_adaptiveTO() { # performs a defined sweep with adaptive TO
+  echo
+  echo "Sweep_adaptiveTO $SWEEP: CH=$CH, TO=$TO, TOFAC=$TOFAC, VALS=( " $VALS " )"
+  if [ "$1" == "" ]; then echo "Sweep info completed."; return; fi
+  V1=""
+  NN=0
+  for V in $VALS; do
+      send_cmd "$CH($V)"
+      if [ "$V1" == "" ]; then 
+          V1=$V
+          echo $SWEEP >"$DATACTRLFILE"
+          read -t $(( $TO * 3 )) N && break  # Wait a little for things to settle in
+      fi
+      NN=$(( $NN + 1 ))
+      read -t $( echo $TO $TOFAC $NN | gawk '{ print $1*$2^$3 }' ) N && break
+  done
+  rm "$DATACTRLFILE"
+  V=$V1
+  send_cmd "$CH($V)"
+      read -t $TOFINAL N && break
+  echo "Sweep completed."
+}
 function do_sweep_dual() { # performs a defined sweep on two channels
   echo
   echo "Sweep $SWEEP: CHX=$CHX, CHY=$CHY, TO=$TO, VALS=( " $VALS " )"
@@ -311,7 +333,8 @@ function do_transfer() { # TFT transfer characteristic, do_transfer FROM STEP TO
   [ "$TO" == "" ] && TO=5
   CH="v3"
   send_cmd "v1($VD) v2($VS) v3($VG)"
-  do_sweep yes
+  #do_sweep yes
+  do_sweep_adaptiveTO yes
 
   send_cmd "v1(0) v2(0) v3(0)"
   done
@@ -415,6 +438,7 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
   VDSHI=9  VDSMAX=15
   VGSHI=11 VGSMAX=20
   # Initial, quick transfer chars to verify setup
+  TOFAC=1
   do_transfer -6 0.2 $VGSHI  "0.100 0.500"
 
   do_output $VDSHI "0.000 4.000"
@@ -424,7 +448,9 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
     MEASNR=$(( $MEASNR + 1 ))
     VGSHI=$(( $VGSHI + 3 )); [ $VGSHI -ge $VGSMAX ] && VGSHI=$VGSMAX;
     VDSHI=$(( $VDSHI + 2 )); [ $VDSHI -ge $VDSMAX ] && VDSHI=$VDSMAX;
-    TO=5
+    #TO=5
+    TO=15
+    TOFAC=0.993  # ^200 = 0.245
     do_transfer -6 0.1 $VGSHI  "0.100 0.000 0.010 0.050 0.200 0.300 0.500 0.101"
     do_transfer -6 0.1 $VGSHI  "1.000 2.000 3.000 5.000 7.000 9.000 0.102"
     TO=2
@@ -453,6 +479,7 @@ function do_tftloop() { # TFT transfer, output and noise characteristics
 function do_resloop() { # Resistor transfer, output and noise characteristics
   MEASNR=1000
   TO=1
+  TOFAC=1
   VDSHI=9  VDSMAX=15
   VGSHI=11 VGSMAX=20
   # Initial, quick transfer chars to verify setup
@@ -465,7 +492,9 @@ function do_resloop() { # Resistor transfer, output and noise characteristics
     MEASNR=$(( $MEASNR + 1 ))
     VGSHI=$(( $VGSHI + 3 )); [ $VGSHI -ge $VGSMAX ] && VGSHI=$VGSMAX;
     VDSHI=$(( $VDSHI + 2 )); [ $VDSHI -ge $VDSMAX ] && VDSHI=$VDSMAX;
-    TO=5
+    #TO=5
+    TO=15
+    TOFAC=0.993  # ^200 = 0.245
     do_transfer -6 0.1 $VGSHI  "0.100 0.010 0.050 0.200 0.500"
     do_transfer -6 0.1 $VGSHI  "1.000 5.000 0.102"
     TO=2
