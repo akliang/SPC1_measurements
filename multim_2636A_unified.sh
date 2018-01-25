@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# $HeadURL$
-# $Id$
-# Started 2011-10-20, based on multim_2636A_triple, to operate Gen2 TAA 29B1-3 on Gen2 platform using PNC#4 with G3 and four SMUs
+# Based on git-svn-id: svn://svn.imager.umro/masdax@618 92890ac3-fb6f-4dbc-9a08-888296f68159
+# svn://svn.imager.umro/masdax/trunk/scripts/scriptmeas/multim_2636A_unified.sh
+# Author: koniczek <koniczek@92890ac3-fb6f-4dbc-9a08-888296f68159>
+# Date:   Mon Apr 23 14:18:31 2012 +0000
 
 if [ "$2" == "loop" ]; then
   echo "loop should not be necessary anymore. Aborting."; exit 77
@@ -49,8 +50,8 @@ SLOCK="$DIRIPC/sleep.lock"
 #ch1=Von_ch2=Voff_ch3=Qinj_ch4=Vbias_ch5=Vreset_ch6=VccSF_ch7=PLHI_ch8=DLHI_$(hostname)_"
 
 echo "$(date)" >> "$DDIR$DFILEPREFIX.log"
-svn stat "$0"  >> "$DDIR$DFILEPREFIX.log"
-svn diff "$0"  >> "$DDIR$DFILEPREFIX.log"
+###svn stat "$0"  >> "$DDIR$DFILEPREFIX.log"
+###svn diff "$0"  >> "$DDIR$DFILEPREFIX.log"
 
 
 if false; then
@@ -70,7 +71,7 @@ else
   nc $NDEV 5025 <"$TD/p5" >"$TD/p6" &
   NCPID=$!
   rm "$TD/p5" "$TD/p6" # actual delete will only occur once files are no longer accessed
-  trap "nc $NDEV 1030; kill $NCPID; rm '$SLOCK' '$SCPIFILE'; rmdir '$TD'; rm '$PIDFILE'; exit" EXIT
+  trap "nc $NDEV 1030; kill $NCPID; rm '$SLOCK' '$SCPIFILE'; rmdir '$TD'; rm '$PIDFILE'; date; exit" EXIT
   echo $$ > "$PIDFILE"
 fi
 
@@ -83,7 +84,7 @@ function sendscpi() { # send commands to the device (not only SCPI)
         echo -e -n "$2\n" >&5
         RESULT=""
 	if [ "$1" != "0" ]; then
-        while read -t $1 RES <&6; do
+        while read -u 6 -t $1 RES; do
                 RES="${RES%%$'\r'*}"
                 [ "$3" == "" ] && echo "RESPONSE<<: <$RES>"
                 RESULT="$RESULT$RES"
@@ -93,11 +94,15 @@ function sendscpi() { # send commands to the device (not only SCPI)
 }
 
 function sendscpi_cond() { # silent if no result is read
-	sendscpi "$1" "$2" dontshow "$4" "$5"
+	sendscpi "0" "$2" dontshow "$4" "$5"
+	sleep "$1"
+	if read -u 6 -t 0; then
+	sendscpi "1" "" dontshow "$4" "$5"
 	if [ "$RESULT" != "" ]; then
         [ "$3" == "" ] && echo "SENT>>>: $2"
         [ "$3" == "" ] && echo "RESP<<: <$RESULT>"
         [ "$5" != "" ] && sleep $5
+	fi
 	fi
 }
 
@@ -126,7 +131,7 @@ done
 if false; then
 #echo 'script.factory.scripts.KIPulse.list()' >&5
 echo 'script.factory.scripts.KIParlib.list()' >&5
-while read -t 5 K <&6; do echo "$K"; done
+while read -u 6 -t 5 K; do echo "$K"; done
 fi
 
 sendscpi 6 'tsplink.reset() print(tsplink.state)' "" wait4onelineonly
@@ -260,8 +265,10 @@ N=0
 CURSUM=0
 for SMU in $SMUS; do
   N=$(( $N + 1 ))
-  F1="$( echo $1 | gawk '{ printf "%+.3e\n", $1 }' )"
-  F2="$( echo $2 | gawk '{ printf "%+.3e\n", $1 }' )"
+  #F1="$( echo $1 | gawk '{ printf "%+.3e\n", $1 }' )"
+  #F2="$( echo $2 | gawk '{ printf "%+.3e\n", $1 }' )"
+  F1="$( printf "%+.3e" $1 )"
+  F2="$( printf "%+.3e" $2 )"
   CURSUM="$( echo $CURSUM $2 | gawk '{ printf "%+.3e\n", $1+$2 }' )"
   STR="$STR$( echo -e "$SMU\tv$N()\t$F1\ti$N()\t$F2" )
 "
@@ -277,23 +284,25 @@ for DIGIO in $DIGIOS; do
   STR="$STR digio$N: $1 "
   shift 1
 done
-  IND=$( echo $LCNT | gawk '{ if ($1 % 2) { print "+"; } else { print "o"; } }' )
+  #IND=$( echo $LCNT | gawk '{ if ($1 % 2) { print "+"; } else { print "o"; } }' )
+  if [ $(( $LCNT % 2 )) = 0 ]; then IND="+"; else IND="0"; fi
   echo
   echo "$IND $STR"
   echo
 }
 
-{
+( # Use a sub-process () instead of context {}, so that wait only waits for the sleep?
 
 T1=0.2 # use full integers for some older BASH shells
 T2=5  # Maximum time to wait for results and after error messages
 LCNT=0 # Loop counter
 
-#until read -t $T1 K; do
-until read -t 0.01 K; do
+#until read -t 0.01 K; do # Is this the read which sometimes blocks? Using "while true" for now...
+while true; do
   LCNT=$(( LCNT + 1 ))
-  touch "$SLOCK"
-  { sleep $T1; rm "$SLOCK"; } &
+  #touch "$SLOCK"
+  #{ sleep $T1; rm "$SLOCK"; } &
+  sleep $T1 &
   #echo # to clear echo -n from below?
   if [ -e "$SCPIFILE" ]; then
 	mv "$SCPIFILE" "$SCPIFILE.tmp"
@@ -306,9 +315,9 @@ until read -t 0.01 K; do
   fi
   sendscpi $T2 'MKmultiMeasure() MKmultiPrint() MKcheckError()' silent singleline
   RESLINE="$(
-  echo "$(date +"%Y-%m-%d %H:%M:%S,%s.%N"),"$RESULT | sed -e 's/ *, */\t/g' 
-  )"
+  echo "$(date +"%Y-%m-%d %H:%M:%S,%s.%N"),"$RESULT | sed -e 's/ *, */\t/g' )"
   echo "$RESLINE" >>"$DDIR$DFILE"
+  [ -p /dev/shm/fifo_uart ] && echo -e "SMUDATA\t$RESLINE" >/dev/shm/fifo_uart
   sendscpi_cond 0.1 '-- reading errors' "" "" $T2 >&2
   if [ -e "$DATACTRLFILE" ]; then
 	DATAEXT="$(<"$DATACTRLFILE")"
@@ -320,17 +329,12 @@ until read -t 0.01 K; do
 	echo "$RESLINE" >"$DATASAMPFILE.result"
 	rm "$DATASAMPFILE"
   fi
-  #echo "Waiting for $PRPID to finish..."
-  #[ "$PRPID" != "" ] && wait $PRPID
-  #echo "...$PRPID finished!"
-  print_result $RESLINE &
-  PRPID=$!
-  while [ -e "$SLOCK" ]; do sleep 0.01; done
+  print_result $RESLINE # used to be in background with &, might have caused race condition. TODO: check name space?
+  wait
+  #while [ -e "$SLOCK" ]; do sleep 0.01; done
 done
 
-  [ "$PRPID" != "" ] && wait $PRPID
-
-}
+)
 
 MSG=""
 for SMU in $SMUS; do
