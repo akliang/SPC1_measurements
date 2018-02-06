@@ -6,6 +6,7 @@ DDIR='../measurements/spc/'
 
 DFILEPREFIX="comp001_JMi_29D1-8_WP1_6-6_Diff_$(hostname)_"
 DFILEPREFIX="amp006_19c_29D1-8_WP2_3-9_2R_$(hostname)_"
+DFILEPREFIX="spc001_probe12c_29D1-8_WP2_1-3-3_amp1st2T_$(hostname)_"
 
 PNTYPE=1
 
@@ -25,12 +26,12 @@ node[3].smua
 node[3].smub
 "
 #CH name Vmin Vmax Imax    Imaxpulse  HIGHC  SourceCurrent
-ch1="VDA  -10   10   0.001   0.010      false    false"
-ch2="VSA  -10   10   0.001   0.010      false    false"
-ch3="BIA  -10   10   0.001   0.010      false    false"
-ch4="THR  -10   10   0.001   0.010      false    false"
-ch5="VDD  -10   10   0.010   0.010      false    false"
-ch6="VSD  -12   10   0.010   0.010      false    false"
+ch1="VCC  -10   10   0.001   0.010      false    false"
+ch2="GND  -10   10   0.001   0.010      false    false"
+ch3="M2B  -10   10   0.001   0.010      false    false"
+ch4="M3B  -10   10   0.001   0.010      false    false"
+ch5="M4B  -10   10   0.010   0.010      false    false"
+ch6="NCC  -10   10   0.010   0.010      false    false"
 
 
 DIGIOS=""
