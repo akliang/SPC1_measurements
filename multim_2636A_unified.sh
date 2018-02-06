@@ -65,10 +65,12 @@ else
   nc $NDEV 1030 
   #TD=$( mktemp -d )
   TD="$DIRIPC"
-  mkfifo "$TD/p5" "$TD/p6"
+  mkfifo "$TD/p5" || echo "mkfifo p5  failed with $?"
+  mkfifo "$TD/p6" || echo "mkfifo p6 failed with $?"
   exec 5<>"$TD/p5"
   exec 6<>"$TD/p6"
   nc $NDEV 5025 <"$TD/p5" >"$TD/p6" &
+  sleep 1  # some kind of race condition with nc not opening STDIN (p5) soon enough before rm $TD/p5
   NCPID=$!
   rm "$TD/p5" "$TD/p6" # actual delete will only occur once files are no longer accessed
   trap "nc $NDEV 1030; kill $NCPID; rm '$SLOCK' '$SCPIFILE'; rmdir '$TD'; rm '$PIDFILE'; date; exit" EXIT
