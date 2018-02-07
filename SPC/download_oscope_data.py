@@ -1,72 +1,76 @@
-
+  
 import visa
 import os
 import subprocess
 import re
 from time import gmtime,strftime,time
+import sys
 
-# note: dont forget to mountpsidata on the oscilloscope
+def run(measdir,dfileprefix):
+  "Connects to and downloads all probe and math channels from the oscilloscope, also saves oscilloscope settings"
+  # note: dont forget to mountpsidata on the oscilloscope
 
-dir="/mnt/ArrayData/MasdaX/2018-01/measurements"
-windir="P:\\MasdaX\\2018-01\\measurements"
-scopeip="192.168.66.85"
-dtag=strftime("%Y%m%dT%H%M%S",gmtime())
-utime=int(time())
+  utime=int(time())
+  scopeip="192.168.66.85"
 
-dfileprefix=subprocess.check_output("grep DFILEPREFIX ../SPCsetup1 | grep -v '#' | tail -n 1 | sed -e 's/.*=//' -e 's/\"//g'",shell=True)
-hostname=subprocess.check_output("hostname",shell=True)
-hostname=hostname.rstrip()  # take off newline
-dfileprefix=re.sub("\$\(hostname\)_",hostname,dfileprefix)
-dfileprefix=dfileprefix.rstrip()  # take off newline
-unixdfileprefix="%s/%s_%s_%s" % (dir,dtag,utime,dfileprefix)
-windfileprefix="%s\\%s_%s_%s" % (windir,dtag,utime,dfileprefix)
+  if len(measdir)>100:
+    print "Error: directory length (%s) is too long, scope can only accept 128 chars" % (measdir)
+    print "Note: script limit set to 100 char to leave room for filenames"
+    return
 
+  # create a windows path equivalent of measdir
+  windir=re.sub(r"/",r"\\\\",measdir)
+  windir=re.sub(r"^\\\\mnt\\\\ArrayData",r"P:",windir)
 
-
-screenshotfile="%s_screenshot.png" % (windfileprefix)
-envfile="%s_scopeenv.txt" % (unixdfileprefix)
-envfh=open(envfile,'w')
-
-
-
-rm=visa.ResourceManager('@py')
-mi=rm.open_resource("TCPIP::" + scopeip + "::INSTR")
-
-# set correct setting values
-query=[
-["export:filename \"%s\"" % (screenshotfile) ], 
-["save:waveform spreadsheetcsv"],
-]
-for q in query:
-  print q[0]
-  mi.write(q[0])
-
-
-# write some oscilloscope settings to the envfh file
-query=[ "*IDN?" , "ch1?" , "ch2?" , "ch3?" , "ch4?" , "math1?" , "math2?" , "math3?" , "math4?" ]
-for q in query:
-  print q
-  envfh.write(q + ": ")
-  envfh.write(mi.query(q))
-envfh.flush()
-os.fsync(envfh.fileno())
-envfh.close()
-
-# export data
-query=[
-["export start"], 
-["save:waveform ch1,\"%s_%s\"" % (windfileprefix,"ch1.csv")],
-["save:waveform ch2,\"%s_%s\"" % (windfileprefix,"ch2.csv")],
-["save:waveform ch3,\"%s_%s\"" % (windfileprefix,"ch3.csv")],
-["save:waveform ch4,\"%s_%s\"" % (windfileprefix,"ch4.csv")],
-["save:waveform math1,\"%s_%s\"" % (windfileprefix,"math1.csv")],
-["save:waveform math2,\"%s_%s\"" % (windfileprefix,"math2.csv")],
-["save:waveform math3,\"%s_%s\"" % (windfileprefix,"math3.csv")],
-["save:waveform math4,\"%s_%s\"" % (windfileprefix,"math4.csv")],
-]
-for q in query:
-  print q[0]
-  mi.write(q[0])
+  # paths to files created by this function
+  screenshotfile="%s\\\\export_screenshot.png" % (windir)
+  envfile="%s/environment.txt" % (measdir)
+  envfh=open(envfile,'w')
+ 
+  # add SMU information to env file
+  smudata=subprocess.check_output("grep %d ../../measurements/spc/%s_.session | head -n 1" % (utime,dfileprefix),shell=True)
+  envfh.write(smudata)
+  
+  
+  # connect to the scope and start gathering data
+  rm=visa.ResourceManager('@py')
+  mi=rm.open_resource("TCPIP::" + scopeip + "::INSTR")
+  
+  # set correct setting values
+  query=[
+  ["export:filename \"%s\"" % (screenshotfile) ], 
+  ["save:waveform spreadsheetcsv"],
+  ]
+  for q in query:
+    mi.write(q[0])
+  
+  
+  # write some oscilloscope settings to the envfh file
+  query=[ "*IDN?" , "ch1?" , "ch2?" , "ch3?" , "ch4?" , "math1?" , "math2?" , "math3?" , "math4?" ]
+  for q in query:
+    envfh.write(q + ": ")
+    envfh.write(mi.query(q))
+ 
+ 
+  # export data
+  # note: from this point forward, the path must be windir  
+  query=[
+  ["export start"], 
+  ["save:waveform ch1,\"%s\\\\%s\"" % (windir,"ch1.csv")],
+  ["save:waveform ch2,\"%s\\\\%s\"" % (windir,"ch2.csv")],
+  ["save:waveform ch3,\"%s\\\\%s\"" % (windir,"ch3.csv")],
+  ["save:waveform ch4,\"%s\\\\%s\"" % (windir,"ch4.csv")],
+  ["save:waveform math1,\"%s\\\\%s\"" % (windir,"math1.csv")],
+  ["save:waveform math2,\"%s\\\\%s\"" % (windir,"math2.csv")],
+  ["save:waveform math3,\"%s\\\\%s\"" % (windir,"math3.csv")],
+  ["save:waveform math4,\"%s\\\\%s\"" % (windir,"math4.csv")],
+  ]
+  for q in query:
+    mi.write(q[0])
 
 
+  # clean up the envfh file handle
+  #envfh.flush()
+  #os.fsync(envfh.fileno())
+  envfh.close()
 
