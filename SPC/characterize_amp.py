@@ -1,4 +1,7 @@
 
+# runs on python2.7 (untested for python3.2)
+# package dependencies: pyvisa, pyvisa-py
+
 import numpy as np
 import os
 from time import sleep,gmtime,time,strftime
