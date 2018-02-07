@@ -47,8 +47,8 @@ if os.path.isfile(pytrigger):
 dircnt=1  # variable used to create separate folders for each meas point
 #for F in np.linspace(0,8,num=33,endpoint=True):
 #  for G in np.linspace(0,8,num=17,endpoint=True):
-for F in np.linspace(0,6,num=7,endpoint=True):
-  for G in np.linspace(0,6,num=7,endpoint=True):
+for F in np.linspace(0,6,num=61,endpoint=True):
+  for G in np.linspace(0,6,num=25,endpoint=True):
 
     # write the voltages to the SPCpytrigger file
     # for some reason, it MUST have two newlines in order for !ext_bias_ctrl to work

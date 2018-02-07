@@ -11,6 +11,7 @@ def run(measdir,dfileprefix):
   # note: dont forget to mountpsidata on the oscilloscope
 
   utime=int(time())
+  utime -= 2  # grab the SMU data from a couple seconds before, to avoid writing race condition
   scopeip="192.168.66.85"
 
   if len(measdir)>100:
