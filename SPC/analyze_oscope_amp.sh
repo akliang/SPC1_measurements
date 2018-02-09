@@ -1,37 +1,57 @@
 #!/bin/bash
 
 PDIR="../../measurements"
-WDIR="20180207T222252"
+WDIR="20180207T213107" # 1V steps, 1kHz sine
+WDIR="20180207T222252" # 1V steps, 100Hz sine
+WDIR="20180208T220404" # m2(0.1V) and m4(0.25V) steps, 1kHz sine
+
+WDIR="20180209T194639" # bode plot testing
 DATFILE="$PDIR/$WDIR/results.dat"
+
+# scan the DATFILE to see which meas number have already been converted
+if [ -e "$DATFILE" ]; then
+  LASTMEAS="$( tail -n 1 $DATFILE | gawk '{ print $1 }' )"
+fi
+if [ "$LASTMEAS" == "" ]; then
+  LASTMEAS=0
+else
+  echo "LASTMEAS is $LASTMEAS"
+fi
 
 FTAGS="math1.csv math2.csv"
 # step through each file and append the data to DATFILE
 for F in $( find "$PDIR/$WDIR/" -name 'meas*' | sort ); do
-  VCC="$( head -n 1 "$F/environment.txt" | gawk '{ print $4 }' )"
-  GND="$( head -n 1 "$F/environment.txt" | gawk '{ print $6 }' )"
-  M2B="$( head -n 1 "$F/environment.txt" | gawk '{ print $8 }' )"
-  M3B="$( head -n 1 "$F/environment.txt" | gawk '{ print $10 }' )"
-  M4B="$( head -n 1 "$F/environment.txt" | gawk '{ print $12 }' )"
-  M2BR=$( echo $M2B | gawk '{ printf "%0.2f",$1 }' )
-  M3BR=$( echo $M3B | gawk '{ printf "%0.2f",$1 }' )
-  M4BR=$( echo $M4B | gawk '{ printf "%0.2f",$1 }' )
-  DRET=""
+  MEASNUM=$( basename "$F" | sed -e "s/^meas//" )
+  if [ $MEASNUM -le $LASTMEAS ]; then continue; fi
+  SMUVOLTS="$( head -n 1 "$F/environment.txt" | gawk '{ print $4,$6,$8,$10,$12 }' )"
+  VROUND=$( echo $SMUVOLTS | gawk '{ printf "%0.2f %0.2f %0.2f",$3,$4,$5 }' )
+  DRET="$MEASNUM $VROUND $SMUVOLTS"
   for FTAG in $FTAGS; do 
     FFILE=$( find "$F" -name "$FTAG" )
-    # strip off the weird oscilloscope-appended data
-    ./clean_csv.sh "$FFILE"
-    TMP=$( echo "extract_waveform_values('$FFILE')" | octave -qH )
-    if [ "$DRET" == "" ]; then
-      DRET="$TMP"
-    else
-      DRET="$DRET $TMP"
+#    # strip off the weird oscilloscope-appended data
+#time    ./clean_csv.sh "$FFILE"
+#time    TMP=$( echo "extract_waveform_values('$FFILE')" | octave -qH )
+
+
+    # find the freq and amp of the input signal
+    if [ "$FTAG" == "math1.csv" ]; then
+      TMPF=$( mktemp )
+      ./clean_csv.sh "$FFILE" "$TMPF"
+      INVALS=$( echo "find_freq('$TMPF')" | octave -qH )
+      rm "$TMPF"
+      DRET="$DRET $INVALS"
     fi
+
+
+    # legacy code for files that had oscope header data stripped
+    if [ "$( head -n 1 $FFILE | gawk -F ',' '{ print NF }')" == 2 ]; then
+      MINMAX=$( gawk -F "," 'BEGIN{min=9999;max=-9999} {if(($2)<min) min=($2); if(($2)>max) max=($2)}END {print min,max}' $FFILE )
+    else
+      MINMAX=$( gawk -F "," 'BEGIN{min=9999;max=-9999} {if(($5)<min) min=($5); if(($5)>max) max=($5)}END {print min,max}' $FFILE )
+    fi
+    DRET="$DRET $MINMAX"
   done
-  OUT="$M2BR $M3BR $M4BR $VCC $GND $M2B $M3B $M4B $DRET"
-  echo "$OUT"
-  echo "$OUT" >> $DATFILE
+  echo "$DRET"
+  echo "$DRET" >> $DATFILE
 done
-
-
-
 
