@@ -7,11 +7,12 @@ import numpy as np
 import os
 from time import sleep,gmtime,time,strftime
 import sys
-import download_oscope_data
 import io
 import subprocess
 import re
 import visa
+sys.path.append('./helpers')
+import download_oscope_data
 
 # make the working directory
 unixdir="/mnt/ArrayData/MasdaX/2018-01/measurements"
