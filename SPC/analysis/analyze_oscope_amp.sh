@@ -33,7 +33,7 @@ for F in $( find "$PDIR/$WDIR/" -name 'meas*' | sort ); do
     if [ "$FTAG" == "math1.csv" ]; then
       TMPF=$( mktemp )
       ./clean_csv.sh "$FFILE" "$TMPF"
-      INVALS=$( echo "find_freq('$TMPF')" | octave -qH )
+      INVALS=$( echo "helper_find_freq('$TMPF')" | octave -qH )
       rm "$TMPF"
       DRET="$DRET $INVALS"
     fi

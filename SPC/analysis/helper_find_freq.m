@@ -1,5 +1,5 @@
 
-function find_freq(csvfile)
+function helper_find_freq(csvfile)
 
   debug=false;
 
