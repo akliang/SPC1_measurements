@@ -6,10 +6,11 @@ import numpy as np
 import os
 from time import sleep,gmtime,time,strftime
 import sys
-import download_oscope_data
 import io
 import subprocess
 import re
+sys.path.append('./helpers')
+import download_oscope_data
 
 print """
 Checklist before starting:
