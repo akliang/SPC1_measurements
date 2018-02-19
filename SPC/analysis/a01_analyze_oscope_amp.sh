@@ -1,5 +1,6 @@
 #!/bin/bash
 
+{  # tee output
 PDIR="../../measurements"
 WDIR="20180207T213107" # 1V steps, 1kHz sine
 WDIR="20180207T222252" # 1V steps, 100Hz sine
@@ -49,4 +50,4 @@ for F in $( find "$PDIR/$WDIR/" -name 'meas*' | sort ); do
   echo "$DRET"
   echo "$DRET" >> $DATFILE
 done
-
+} 2>&1 | tee -a a01_output.log 
