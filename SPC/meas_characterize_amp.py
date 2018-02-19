@@ -12,14 +12,14 @@ import re
 sys.path.append('./helpers')
 import download_oscope_data
 
-print """
+print("""
 Checklist before starting:
 - Is "./multim_2636A_unified.sh SPCsetup1" is running?
 - Is "./multim_2636A_ctrlSPC_amp.sh SPCsetup1" is running?
 - Did you set the Vcc and other default voltages?  (todo - make this automatic)
 - Did you start the "!ext_bias_ctrl SPCpytrigger" function?
 - Did you mount psidata on the oscilloscope?
-"""
+""")
 
 raw_input("Press ENTER to continue...")
 
@@ -57,7 +57,7 @@ for F in np.linspace(0,6,num=61,endpoint=True):
     # write the voltages to the SPCpytrigger file
     # for some reason, it MUST have two newlines in order for !ext_bias_ctrl to work
     vstring="v3(%0.2f)\n\nv5(%0.2f)\n\n" % (F,G)
-    print "Sending voltages to SMU: %s" % (re.sub("\n"," ",vstring))
+    print("Sending voltages to SMU: %s" % (re.sub("\n"," ",vstring)))
     fh = open(pytrigger,'wb')
     fh.write(unicode(vstring))
     fh.close()
@@ -72,16 +72,16 @@ for F in np.linspace(0,6,num=61,endpoint=True):
         sys.stdout.write(".....")
         sys.stdout.flush()
         if (cnt > cnt_thresh):
-          print "no response after %d seconds, is it stuck?" % (cnt)
+          print("no response after %d seconds, is it stuck?" % (cnt))
       sleep(1)
       cnt += 1
 
     # perform actions after SMU consumes the file
-    print "\n  Voltage file gone... assuming SMU consumed it"
+    print("\n  Voltage file gone... assuming SMU consumed it")
     sleepwait=40
-    print "  Waiting %d seconds for oscilloscope to settle in" % (sleepwait)
+    print("  Waiting %d seconds for oscilloscope to settle in" % (sleepwait))
     sleep(sleepwait)
-    print "  Downloading oscilloscope data"
+    print("  Downloading oscilloscope data")
     # make the directory to store the oscilloscope data
     measdir="%s/meas%03d" % (workdir,dircnt)
     os.mkdir(measdir)
@@ -89,7 +89,7 @@ for F in np.linspace(0,6,num=61,endpoint=True):
     dircnt += 1
 
 
-print "Voltage loop finished, terminating !ext_bias_ctrl with FIN"
+print("Voltage loop finished, terminating !ext_bias_ctrl with FIN")
 vstring="FIN"
 fh = open(pytrigger,'w')
 fh.write(vstring)

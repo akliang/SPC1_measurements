@@ -41,7 +41,7 @@ if os.path.isfile(pytrigger):
 
 # set the circuit to a specific operating point
 vstring="v1(8)\n\nv2(0)\n\nv3(2.5)\n\nv4(1.5)\n\nv5(2.5)\n\n"
-print "Sending voltages to SMU: %s" % (re.sub("\n"," ",vstring))
+print("Sending voltages to SMU: %s" % (re.sub("\n"," ",vstring)))
 fh = open(pytrigger,'wb')
 fh.write(unicode(vstring))
 fh.close()
@@ -57,10 +57,10 @@ while os.path.isfile(pytrigger):
     sys.stdout.write(".....")
     sys.stdout.flush()
     if (cnt > cnt_thresh):
-      print "no response after %d seconds, is it stuck?" % (cnt)
+      print("no response after %d seconds, is it stuck?" % (cnt))
   sleep(1)
   cnt += 1
-print "\n  Voltage file gone... assuming SMU consumed it"
+print("\n  Voltage file gone... assuming SMU consumed it")
 
 
 
@@ -98,23 +98,22 @@ for F in freqs:
   mi.write("SOURCE1:FREQ %f" % (F))
   # calculate the width to set the scope to (10 divs in horiz direction)
   # num horizon divs changeable with HORizontal:DIVisions command
-  print type(F)
   fperiod=1/F
   numwaves=3
   tot_time=fperiod*numwaves
   time_per_div=tot_time/10
-  print "  Frequency is %f, numwaves %f, time_per_div %0.4e" % (F,numwaves,time_per_div)
+  print("  Frequency is %f, numwaves %f, time_per_div %0.4e" % (F,numwaves,time_per_div))
   mi2.write("HOR:MODE:SCALE %f" % (time_per_div))
   sleepwait=40
-  print "  Waiting %d seconds for oscilloscope to settle in" % (sleepwait)
+  print("  Waiting %d seconds for oscilloscope to settle in" % (sleepwait))
   sleep(sleepwait)
 
-  print "  Downloading oscilloscope data"
+  print("  Downloading oscilloscope data")
   # make the directory to store the oscilloscope data
   measdir="%s/meas%03d" % (workdir,dircnt)
   os.mkdir(measdir)
   download_oscope_data.run(measdir,dfileprefix)
   dircnt += 1
 
-print "done!"
+print("done!")
 
