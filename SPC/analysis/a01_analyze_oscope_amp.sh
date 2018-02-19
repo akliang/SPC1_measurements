@@ -32,7 +32,7 @@ for F in $( find "$PDIR/$WDIR/" -name 'meas*' | sort ); do
     # find the freq and amp of the input signal
     if [ "$FTAG" == "math1.csv" ]; then
       TMPF=$( mktemp )
-      ./clean_csv.sh "$FFILE" "$TMPF"
+      ./helper_clean_csv.sh "$FFILE" "$TMPF"
       INVALS=$( echo "helper_find_freq('$TMPF')" | octave -qH )
       rm "$TMPF"
       DRET="$DRET $INVALS"
