@@ -28,10 +28,6 @@ for F in $( find "$PDIR/$WDIR/" -name 'meas*' | sort ); do
   DRET="$MEASNUM $VROUND $SMUVOLTS"
   for FTAG in $FTAGS; do 
     FFILE=$( find "$F" -name "$FTAG" )
-#    # strip off the weird oscilloscope-appended data
-#time    ./clean_csv.sh "$FFILE"
-#time    TMP=$( echo "extract_waveform_values('$FFILE')" | octave -qH )
-
 
     # find the freq and amp of the input signal
     if [ "$FTAG" == "math1.csv" ]; then
@@ -41,7 +37,6 @@ for F in $( find "$PDIR/$WDIR/" -name 'meas*' | sort ); do
       rm "$TMPF"
       DRET="$DRET $INVALS"
     fi
-
 
     # legacy code for files that had oscope header data stripped
     if [ "$( head -n 1 $FFILE | gawk -F ',' '{ print NF }')" == 2 ]; then
