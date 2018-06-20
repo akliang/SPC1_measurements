@@ -1,5 +1,5 @@
 
-function generate_colormap(csvfile)
+function a02_generate_colormap(csvfile)
 
   [filepath,filename,fileext]=fileparts(csvfile);
   q=load(csvfile);
