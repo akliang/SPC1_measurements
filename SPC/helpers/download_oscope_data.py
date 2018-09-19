@@ -3,7 +3,7 @@ import visa
 import os
 import subprocess
 import re
-from time import gmtime,strftime,time
+from time import gmtime,strftime,time,sleep
 import sys
 
 def run(measdir,dfileprefix):
@@ -11,7 +11,7 @@ def run(measdir,dfileprefix):
   # note: dont forget to mountpsidata on the oscilloscope
 
   utime=int(time())
-  utime -= 2  # grab the SMU data from a couple seconds before, to avoid writing race condition
+  #utime -= 2  # grab the SMU data from a couple seconds before, to avoid writing race condition
   scopeip="192.168.66.85"
 
   if len(measdir)>100:
@@ -29,7 +29,17 @@ def run(measdir,dfileprefix):
   envfh=open(envfile,'w')
  
   # add SMU information to env file
-  smudata=subprocess.check_output("grep %d ../../measurements/spc/%s_.session | head -n 1" % (utime,dfileprefix),shell=True)
+  smudata=""
+  smudatacnt=0
+  smudatacntthresh=10
+  while smudata == "":
+    smudatacnt += 1
+    smudata=subprocess.check_output("grep %d ../../measurements/spc/%s_.session | head -n 1" % (utime,dfileprefix),shell=True)
+    if smudatacnt > smudatacntthresh:
+      print("Did not find SMU data for timepoint %d... setting to NA and moving on" % (utime))
+      smudata="%d	NA" % (utime)
+    else:
+      sleep(1)
   envfh.write(smudata)
   
   
@@ -40,7 +50,7 @@ def run(measdir,dfileprefix):
   # set correct setting values
   query=[
   ["export:filename \"%s\"" % (screenshotfile) ], 
-  ["save:waveform spreadsheetcsv"],
+  ["save:waveform:fileformat spreadsheetcsv"],
   ]
   for q in query:
     mi.write(q[0])
