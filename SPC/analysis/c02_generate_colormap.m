@@ -47,7 +47,7 @@ function [ m2b,m4b,gain,outV ] = b03_generate_colormap(txtfile)
   %%{
   fh=figure();
   imagesc(m4b,m2b,outV); colorbar
-  caxis([0.05 2])
+  caxis([0.01 4.25])
   set(gca,'YDir','normal');
   xlabel('m4b (V)')
   ylabel('m2b (V)')
@@ -69,11 +69,14 @@ function [ m2b,m4b,gain,outV ] = b03_generate_colormap(txtfile)
   %}
 
   % plot a specific meas ID
-  %{
-  measID=382;
+  %%{
+  measID=459;
   figure
   q=load([filepath '/meas' sprintf('%04d',measID) '/math2.csv.clean']);
+  qin=load([filepath '/meas' sprintf('%04d',measID) '/math1.csv.clean']);
   plot(q(:,1),q(:,2))
+  hold
+  plot(qin(:,1),qin(:,2),'r')
   %}
 
   
