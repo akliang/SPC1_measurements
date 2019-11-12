@@ -1,11 +1,6 @@
-change python timestamp to localtime
-auto-set vcc, m3b voltages
 analyze sort problem when outputting formatted result CSV data
 SMU missing data points problem
 ---send characterize amp log to file
 ---change scope scale depending on siggen frequency
-change download scope data to only capture data after X number of acqs gotten
-write script to set up math1 and math2 automatically
 break out mini-functions that are common to measurement scripts (such as init)
-poll oscope to find when 300 acq have been recorded
 

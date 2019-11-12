@@ -1,111 +1,103 @@
 
-# runs on python2.7 (untested for python3.2)
-# package dependencies: pyvisa, pyvisa-py
-
 import numpy as np
 import os
-from time import sleep,gmtime,time,strftime
-import sys
-import io
+import time
 import subprocess
 import re
-sys.path.append('./helpers')
-import download_oscope_data
+from helpers import download_oscope_data
+from helpers import set_multim2636A_voltage as smv
+import hw_settings as hwset
+import visa
 
-m3b=2.1
-chipID="29D1-8_WP3_2-1-1_amp3st1bw"
-runcon="custom step wave 200 Hz 50 mVpp with 1:5 voltage divider, effective 10 mVpp"
-notes="changed python sleep step from 50s to 30s since it takes about 16s to get 300 acq for math2 avg (horiz setting is 1ms/div, 10MS/s, 100ns/pt)"
-sleepwait=30
+# hi-res settings
+m2b_vals = (0, 6, 61)
+m3b_vals = (1, 1, 1)
+m4b_vals = (0, 6, 25)
+# low-res settings
+#m2b_vals = (0.5, 2.5, 3)
+#m3b_vals = (1, 1, 1)
+#m4b_vals = (0, 1, 3)
+chipID = "29D1-8_WP3_2-1-1_amp3st1bw"
+runcon = "custom step wave 200 Hz 50 mVpp with 1:10 voltage divider, effective 5 mVpp"
+notes = "probe12C"
 
+# oscilloscope math channel settings
+# math<#> = (ch#, command, #samples)
+math_ch = (2, "AVG(CH2)", 300)
+# TODO: auto-set horiz and vert?
+
+# sanity check to make sure everything is running
 print("""
 Checklist before starting:
 - Is "./multim_2636A_unified.sh SPCsetup1" is running?
-- Is "./multim_2636A_ctrlSPC_amp.sh SPCsetup1" is running?
-- Did you set the Vcc and other default voltages?  (todo - make this automatic)
-- Did you start the "!ext_bias_ctrl SPCpytrigger" function?
+- Is eve proxy running? (ssh -D 9998 eve)
 - Did you mount psidata on the oscilloscope?
 - Are all the desired channels and maths turned on? (eg, ch1 ch2 math1 math2)
 """)
-
-raw_input("Press ENTER to continue...")
+input("Press ENTER to continue...")
+# TODO: auto turn-on all channels and math
+# TODO: auto-set sig-gen
 
 # make the working directory
-unixdir="/mnt/ArrayData/MasdaX/2018-01/measurements"
-dtag=strftime("%Y%m%dT%H%M%S",gmtime())
-utime=int(time())
-workdir="%s/%s" % (unixdir,dtag)
+unixdir = "/mnt/ArrayData/MasdaX/2018-01/measurements"
+# patch for Mac
+if not os.path.exists(unixdir):
+    unixdir = re.sub("mnt", "Volumes", unixdir)
+dtag = time.strftime("%Y%m%dT%H%M%S", time.localtime())
+utime = int(time.time())
+workdir = "%s/%s" % (unixdir, dtag)
 os.mkdir(workdir)
 
 # write the SPCsetup[12] information
-dfileprefix=subprocess.check_output("grep DFILEPREFIX ../SPCsetup1 | grep -v '#' | tail -n 1 | sed -e 's/.*=//' -e 's/\"//g'",shell=True)
-hostname=subprocess.check_output("hostname",shell=True)
-hostname=hostname.rstrip()  # take off newline
-dfileprefix=re.sub("\$\(hostname\)_",hostname,dfileprefix)
-dfileprefix=dfileprefix.rstrip()  # take off newline
-idfh = open("%s/id.txt" % (workdir),'w')
-idfh.write("directory_prefix: %s" % (dfileprefix))
-idfh.write("\nchip_id: %s" % (chipID))
-idfh.write("\nrun_conditions: %s" % (runcon))
-idfh.write("\nnotes: %s" % (notes))
-idfh.write("\nsleepwait: %f" % (sleepwait))
+smu_data = subprocess.check_output("grep DFILEPREFIX ../SPCsetup1 | grep -v '#' | tail -n 1 | sed -e 's/.*=//' -e 's/\"//g'", shell=True)
+hostname = subprocess.check_output("grep SMUHOST ../SPCsetup1 | grep -v '#' | tail -n 1 | sed -e 's/.*=//' -e 's/\"//g'", shell=True)
+smu_data = re.sub("\$\(hostname\)_", hostname.decode('utf-8'), smu_data.decode('utf-8'))
+smu_data = smu_data.rstrip()  # take off newline
+idfh = open("%s/id.txt" % workdir, 'w')
+idfh.write("directory_prefix: %s" % smu_data)
+idfh.write("\nchip_id: %s" % chipID)
+idfh.write("\nrun_conditions: %s" % runcon)
+idfh.write("\nnotes: %s" % notes)
+idfh.write("\nmath2 avg: %f" % math_ch[2])
 idfh.close()
 
+# Set up the default voltages for vcc and gnd
+smv.send_scpi("v1(8)")
+smv.send_scpi("v2(0)")
 
+# connect to the oscilloscope and set up the math channel(s)
+rm = visa.ResourceManager('@py')
+mi = rm.open_resource("TCPIP::" + hwset.scopeip + "::INSTR")
+mi.write("MATH%s:DEF \"%s\"" % (math_ch[0], math_ch[1]))
+mi.write("MATH%s:NUMAVG %s" % (math_ch[0], math_ch[2]))
 
-# todo: copy the method used in download_oscope_data
-pytrigger="/mnt/ArrayData/MasdaX/2018-01/scriptmeas/flags/2636_pytrigger.flag"
-if os.path.isfile(pytrigger):
-  os.remove(pytrigger)
+dircnt = 1  # variable used to create separate folders for each meas point
+for P in np.linspace(m3b_vals[0], m3b_vals[1], num=m3b_vals[2], endpoint=True):
+    for F in np.linspace(m2b_vals[0], m2b_vals[1], num=m2b_vals[2], endpoint=True):
+        for G in np.linspace(m4b_vals[0], m4b_vals[1], num=m4b_vals[2], endpoint=True):
 
+            # write the voltages to the SPCpytrigger file
+            smv.send_scpi("v3(%f)" % F)
+            smv.send_scpi("v4(%f)" % P)
+            smv.send_scpi("v5(%f)" % G)
 
-dircnt=1  # variable used to create separate folders for each meas point
-for P in np.linspace(m3b,m3b,num=1,endpoint=True):
-  for F in np.linspace(0,6,num=61,endpoint=True):
-    for G in np.linspace(0,6,num=25,endpoint=True):
-#for P in np.linspace(0.5,2.5,num=3,endpoint=True):
-#  for F in np.linspace(1,5,num=5,endpoint=True):
-#    for G in np.linspace(1,5,num=5,endpoint=True):
+            # perform actions after SMU consumes the file
+            print("  Waiting for %s acquisitions before saving file" % math_ch[2])
+            acqnow = mi.query("ACQ:NUMACQ?")
+            acqstart = int(acqnow)
+            while int(acqnow) < (acqstart + math_ch[2]):
+                acqnow = mi.query("ACQ:NUMACQ?")
+                time.sleep(2)
+            print("  Downloading oscilloscope data")
+            # make the directory to store the oscilloscope data
+            measdir = "%s/meas%04d" % (workdir, dircnt)
+            os.mkdir(measdir)
+            download_oscope_data.run(measdir, smu_data)
 
-      # write the voltages to the SPCpytrigger file
-      # for some reason, it MUST have two newlines in order for !ext_bias_ctrl to work
-      vstring="v3(%0.2f)\n\nv4(%0.2f)\n\nv5(%0.2f)\n\n" % (F,P,G)
-      print("Sending voltages to SMU: %s" % (re.sub("\n"," ",vstring)))
-      fh = open(pytrigger,'wb')
-      fh.write(unicode(vstring))
-      fh.close()
+            # send the measdir over for pre-processing
+            # TODO: set this flag
 
-      # wait for the SMU to consume the file
-      cnt=1
-      cnt_thresh=10
-      sys.stdout.write("Waiting for SMU to consume voltages file...")
-      sys.stdout.flush()
-      while os.path.isfile(pytrigger):
-        if (cnt%5 == 0):
-          sys.stdout.write(".....")
-          sys.stdout.flush()
-          if (cnt > cnt_thresh):
-            print("no response after %d seconds, is it stuck?" % (cnt))
-        sleep(1)
-        cnt += 1
+            dircnt += 1
 
-      # perform actions after SMU consumes the file
-      print("\n  Voltage file gone... assuming SMU consumed it")
-      print("  Waiting %d seconds for oscilloscope to settle in" % (sleepwait))
-      sleep(sleepwait)
-      print("  Downloading oscilloscope data")
-      # make the directory to store the oscilloscope data
-      measdir="%s/meas%04d" % (workdir,dircnt)
-      os.mkdir(measdir)
-      download_oscope_data.run(measdir,dfileprefix)
-      dircnt += 1
-
-
-print("Voltage loop finished, terminating !ext_bias_ctrl with FIN")
-vstring="FIN"
-fh = open(pytrigger,'w')
-fh.write(vstring)
-fh.close()
-fh = open("/mnt/ArrayData/MasdaX/2018-01/scriptmeas/flags/meas_characterize_amp_done.flag",'w')
-fh.write("done")
-fh.close()
+print("Voltage loop finished!")
+# TODO: send message to notify loop is done
