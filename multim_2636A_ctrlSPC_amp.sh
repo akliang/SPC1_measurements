@@ -68,9 +68,6 @@ function amp_bias_sweep() {  # sweep two amp biases manually
 }
 
 function amp_bias_sweep_extflag() {  # use pytrigger to automatically step bias voltages
-  if [ "$1" == "" ]; then echo "Could not source \$1 (hint: SPCpytrigger    ;  user-defined python variables file)"; return; fi
-  source $1
-
   send_cmd "v1(4) v2(-4) v3(-3.5) v4(-4) v5(-4)"
   CH1="v2"
   CH2="v4"
@@ -91,17 +88,18 @@ function amp_bias_sweep_extflag() {  # use pytrigger to automatically step bias 
 }
 
 function ext_bias_ctrl() { # change the channel voltages with an external file
-  if [ "$1" == "" ]; then echo "Could not source \$1 (hint: SPCpytrigger    ;  user-defined python variables file)"; return; fi
-  source $1
-
+  echo "Listening for $PYTRIGGER"
   while true; do
     echo -n "Waiting for pytrigger... "
+    CNT=0
     while [ ! -e $PYTRIGGER ]; do
-      sleep 0.1
+      echo "here $CNT"
+      CNT=$(( $CNT+1 ))
+      sleep 1
     done
     echo "hit!"
 
-    while read LINE; do
+    while IFS='' read -r LINE || [[ -n "$LINE" ]]; do
       echo "$LINE"
       if [ "$LINE" == "FIN" ]; then
         echo "Caught FIN signal -- exiting!"
@@ -114,7 +112,6 @@ function ext_bias_ctrl() { # change the channel voltages with an external file
     done < $PYTRIGGER
     rm $PYTRIGGER
   done
-
 }
 
 
