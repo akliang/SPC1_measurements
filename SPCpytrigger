@@ -5,7 +5,8 @@
 
 
 # trigger file that the SMUs monitor to perform commands
+# retired on 2019-11-01 by moving PYTRIGGER variable to SPCsetup[12]
 #PYTRIGGER="/dev/shm/2636_ctrlSPC_pytrigger.flag"
 #PYTRIGGER="/mnt/bongo/Xshare/XSPC/scripts/python/flags/2636_ctrlSPC_pytrigger.flag"
-PYTRIGGER="/mnt/ArrayData/MasdaX/2018-01/scriptmeas/flags/2636_pytrigger.flag"
+#PYTRIGGER="/mnt/ArrayData/MasdaX/2018-01/scriptmeas/flags/2636_pytrigger.flag"
 
