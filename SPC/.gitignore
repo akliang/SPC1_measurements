@@ -2,3 +2,5 @@
 *.pyc
 attic
 .idea
+._*
+venv*
