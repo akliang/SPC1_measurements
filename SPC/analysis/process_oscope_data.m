@@ -2,17 +2,12 @@
 % analysis folder
 ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20191111T172723';  % test run for script dev
 
-
-% overall settings
-%flagdir = '/Volumes/ArrayData/MasdaX/2018-01/scriptmeas/SPC/analysis/flags';
-
-
 % clean the oscope data to make it matlab-friendly
 % also, compute the gain and settling time for each measurement point
-clean_and_analyze_oscope_data(ana_folder)
+%clean_and_analyze_oscope_data(ana_folder);
 
 % generate the visual colormap of the overall results
-%generate_colormap(ana_folder)
+[m2b m4b gain outV]=generate_colormap(ana_folder);
 
 
 function clean_and_analyze_oscope_data(ana_folder)
@@ -49,10 +44,6 @@ end % function clean_oscope_data()
 
 function [amplifier_input,amplifier_output,settling_time]=analyze_oscope_amp(measdir)
   % copied from b02_analyze_oscope_amp on 2019-11-13
-
-  %measdir='/Volumes/ArrayData/MasdaX/2018-01/measurements/20180306T185749/meas001/';
-  %measnum=regexprep(measdir,'.*meas','');
-  %measnum=regexprep(measnum,'/$','');
 
   % assuming input and output csv files
   incsv=[measdir '/math1.csv.clean'];
@@ -147,11 +138,10 @@ function [amplifier_input,amplifier_output,settling_time]=analyze_oscope_amp(mea
 end % function analyze_oscope_amp
 
 
-function [ m2b,m4b,gain,outV ] = generate_colormap(txtfile)
+function [ m2b,m4b,gain,outV ] = generate_colormap(ana_folder)
   % copied from c02_generate_colormap on 2019-11-13
 
-  [filepath,filename,fileext]=fileparts(txtfile);
-  q=load(txtfile);
+  q=load([ana_folder '/results.txt']);
   q=sortrows(q,1);
 
   s.measid=1;
@@ -180,21 +170,21 @@ function [ m2b,m4b,gain,outV ] = generate_colormap(txtfile)
 
   
   % plot gain
-  %{
-  fh=figure();
+  %%{
+  fh=figure(1);
   imagesc(m4b,m2b,gain); colorbar
   set(gca,'YDir','normal');
   xlabel('m4b (V)')
   ylabel('m2b (V)')
   colormap jet
+  title(sprintf('Amp gain in response to %0.2e step function (maxgain=%0.2f at m2b=%0.2f and m4b=%0.2f)',mean(q(:,s.inval)),maxgain,m2b(r),m4b(c)))
   % save the figure to a PNG
-  title(sprintf('Amp gain in response to %0.2f step function (maxgain=%0.2f at m2b=%0.2f and m4b=%0.2f)',mean(q(:,s.inval)),maxgain,m2b(r),m4b(c)))
   %print(fh,sprintf('%s/colormap_gain.png',filepath));
   %}
 
   % plot absolute voltage output
   %%{
-  fh=figure();
+  fh=figure(2);
   imagesc(m4b,m2b,outV); colorbar
   %caxis([0.01 4.25])
   set(gca,'YDir','normal');
@@ -205,27 +195,28 @@ function [ m2b,m4b,gain,outV ] = generate_colormap(txtfile)
   %}
 
   % plot a grid of sample output curves
-  %{
-  figure
+  %%{
+  figure(3)
   subplot_size_x=6;
   subplot_size_y=6;
   subplot_size=subplot_size_x*subplot_size_y;
   step_size=floor(numel(outV)/subplot_size);
   for F=1:subplot_size
     subplot(subplot_size_x,subplot_size_y,F);
-    q=load([filepath '/meas' sprintf('%04d',F*step_size) '/math2.csv.clean']);
+    q=load([ana_folder '/meas' sprintf('%04d',F*step_size) '/math2.csv.clean']);
     plot(q(:,1),q(:,2))
+    title(sprintf('meas%04d',F*step_size));
   end
   %}
 
   % plot a specific meas ID
   %%{
   measID=459;
-  figure
-  q=load([filepath '/meas' sprintf('%04d',measID) '/math2.csv.clean']);
-  qin=load([filepath '/meas' sprintf('%04d',measID) '/math1.csv.clean']);
+  figure(4)
+  q=load([ana_folder '/meas' sprintf('%04d',measID) '/math2.csv.clean']);
+  qin=load([ana_folder '/meas' sprintf('%04d',measID) '/math1.csv.clean']);
   plot(q(:,1),q(:,2))
-  hold
+  hold on
   plot(qin(:,1),qin(:,2),'r')
   hold off
   title(sprintf('Waveform of meas %d',measID))
