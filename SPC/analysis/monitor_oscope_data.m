@@ -1,52 +1,47 @@
 
-% A monitoring script to pre-process raw oscilloscope data
-% (Designed to be run continuously)
-
-flagdir = '/Volumes/ArrayData/MasdaX/2018-01/scriptmeas/SPC/analysis/flags';
-
-clean_oscope_data(flagdir)
-generate_colormap('/Volumes/ArrayData/MasdaX/2018-01/measurements/20191111T172723/results.txt')
+% analysis folder
+ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20191111T172723';  % test run for script dev
 
 
-function clean_oscope_data()
+% overall settings
+%flagdir = '/Volumes/ArrayData/MasdaX/2018-01/scriptmeas/SPC/analysis/flags';
 
-    fprintf(1,'Checking for flags...\n');
-    flaglist = dir(flagdir);
 
-    for fidx=3:numel(flaglist)
-        fpath=[flagdir '/' flaglist(fidx).name];
+% clean the oscope data to make it matlab-friendly
+% also, compute the gain and settling time for each measurement point
+clean_and_analyze_oscope_data(ana_folder)
 
-        % read flag file contents
-        fprintf(1,'Current processing flag file %s...\n',flaglist(fidx).name);
-        fid = fopen(fpath);
-        datdir = textscan(fid,'%s','Delimiter','\n');
-        datdir = datdir{1}{1};
-        fclose(fid);
+% generate the visual colormap of the overall results
+%generate_colormap(ana_folder)
 
-        % clean the data
-        [xx odat]=system(sprintf('./b01_analyze_oscope_folder.sh %s',datdir));
+
+function clean_and_analyze_oscope_data(ana_folder)
+
+    dir_files = dir([ana_folder '/meas*']);
+
+    for fidx=1:numel(dir_files)
+        if (mod(fidx,10)==0)
+            fprintf(1,'Progress: %d/%d\n',fidx,numel(dir_files));
+        end
+
+        % clean the data and extract SMU data points
+        measdir=[ana_folder '/' dir_files(fidx).name];
+        [xx odat]=system(sprintf('./process_oscope_data_helper.sh %s',measdir));
         % remove last character from odat (newline)
         odat=odat(1:end-1);
 
-        % derive metrics
-        [ampin ampout settling_time]=analyze_oscope_amp(datdir);
+        % derive count-rate metrics
+        [ampin ampout settling_time]=analyze_oscope_amp(measdir);
 
         % output to results file
-        [filepath name ext]=fileparts(datdir);
-        resfile = [filepath '/results.txt' ];
+        resfile = [ana_folder '/results.txt' ];
         fid = fopen(resfile,'a');
         fprintf(fid,"%s\t%f\t%f\t%f\n",odat,ampin,ampout,settling_time);
         fclose(fid);
 
         % debug info
-        if false;
-            odat
-            ampin
-            ampout
-            settling_time
-        end
+        if false; odat, ampin, ampout, settling_time, end
 
-        system(sprintf('rm %s',fpath));
     end
   
 end % function clean_oscope_data()
@@ -80,9 +75,15 @@ function [amplifier_input,amplifier_output,settling_time]=analyze_oscope_amp(mea
   invals_diff=diff(invals_binary);
   % find the falling and rising edges
   in_falling_idx = find(invals_diff == -1);
-  if (numel(in_falling_idx) > 1); warning('More than 1 falling edge found, taking the first one'); in_falling_idx=in_falling_idx(1); end
+  if (numel(in_falling_idx) > 1)
+      %warning('More than 1 falling edge found, taking the first one');
+      in_falling_idx=in_falling_idx(1);
+  end
   in_rising_idx = find(invals_diff == 1);
-  if (numel(in_rising_idx) > 1); warning('More than 1 rising edge found, taking the first one'); in_rising_idx=in_rising_idx(1); end
+  if (numel(in_rising_idx) > 1)
+      %warning('More than 1 rising edge found, taking the first one');
+      in_rising_idx=in_rising_idx(1);
+  end
   % truncate the signal
   idx_range = in_falling_idx-10 : in_rising_idx-10;
   invals=invals(idx_range);
