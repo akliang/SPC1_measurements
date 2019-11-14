@@ -1,6 +1,6 @@
 
 % analysis folder
-ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20191111T172723';  % test run for script dev
+ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20191111T172723';  % 29D1-8_WP3_2-1-1
 
 % clean the oscope data to make it matlab-friendly
 % also, compute the gain and settling time for each measurement point
@@ -45,6 +45,8 @@ end % function clean_oscope_data()
 function [amplifier_input,amplifier_output,settling_time]=analyze_oscope_amp(measdir)
   % copied from b02_analyze_oscope_amp on 2019-11-13
 
+  close all
+  
   % assuming input and output csv files
   incsv=[measdir '/math1.csv.clean'];
   if(~exist(incsv))
@@ -64,19 +66,29 @@ function [amplifier_input,amplifier_output,settling_time]=analyze_oscope_amp(mea
   invals_mean=mean(invals);
   invals_binary=(invals>invals_mean);
   invals_diff=diff(invals_binary);
-  % find the falling and rising edges
+  % find the falling edges
   in_falling_idx = find(invals_diff == -1);
-  if (numel(in_falling_idx) > 1)
-      %warning('More than 1 falling edge found, taking the first one');
-      in_falling_idx=in_falling_idx(1);
+  % remove false positives near invals_mean due to noise
+  invals_mean_tol = 1e-3;
+  true_points = invals(in_falling_idx) > invals_mean_tol;
+  in_falling_idx = in_falling_idx(true_points);
+  if (numel(in_falling_idx) < 3)
+      error('Less than 3 falling edges found, cannot run analysis');
   end
-  in_rising_idx = find(invals_diff == 1);
-  if (numel(in_rising_idx) > 1)
-      %warning('More than 1 rising edge found, taking the first one');
-      in_rising_idx=in_rising_idx(1);
-  end
+  
+  %{
+  figure
+  plot(invals,'b')
+  hold on
+  plot(outvals,'r')
+  plot(in_falling_idx,invals(in_falling_idx),'kx')
+  plot(in_falling_idx(2)-10,invals(in_falling_idx(2)-10),'ro')
+  plot(in_falling_idx(3)-10,invals(in_falling_idx(3)-10),'go')
+  hold off
+  %}
+  
   % truncate the signal
-  idx_range = in_falling_idx-10 : in_rising_idx-10;
+  idx_range = in_falling_idx(2)-30 : in_falling_idx(3)-10;
   invals=invals(idx_range);
   outtime=outtime(idx_range);
   outvals=outvals(idx_range);
@@ -89,15 +101,16 @@ function [amplifier_input,amplifier_output,settling_time]=analyze_oscope_amp(mea
   % figure out the input size
   % note: this is assuming the input pulse steps downwards
   amplifier_input=in(idx,2)-min(in(:,2));
-  
   % average the output up to idx to find the baseline
   baseV=mean(out(1:idx,2));
   maxV=max(out(:,2));
   amplifier_output = maxV-baseV;
   
   % settling time
-  % first attempt... smooth with 1/75th width sliding window
-  smooth_span = round(numel(outvals)/75);
+  % first attempt... smooth with 1/20th width sliding window
+  % note: this makes amp-max very inaccurate.
+  %       do not use outvals_smooth to derive amp-max!!
+  smooth_span = round(numel(outvals)/20);
   outvals_smooth = movmean(outvals,smooth_span);
   % define the threshold (absoluve value)
   settling_time_threshold = abs(amplifier_output*0.05);
@@ -116,6 +129,21 @@ function [amplifier_input,amplifier_output,settling_time]=analyze_oscope_amp(mea
   end
   settling_time = outtime(settling_idx) - outtime(idx);
 
+  %{
+  figure(1)
+  plot(outtime,outvals,'b')
+  hold on
+  plot(outtime,outvals_smooth,'r')
+  plot([outtime(1) outtime(end)],[baseV baseV],'k')
+  plot([outtime(1) outtime(end)],[baseV+settling_time_threshold baseV+settling_time_threshold],'c')
+  plot([outtime(1) outtime(end)],[baseV-settling_time_threshold baseV-settling_time_threshold],'c')
+  plot(outtime(crossAbove),outvals_smooth(crossAbove),'go')
+  plot(outtime(crossBelow),outvals_smooth(crossBelow),'kx')
+  plot(outtime(idx),outvals_smooth(idx),'rs')
+  hold off
+  %}
+  
+  
   % plot stuff
   if false
     plot(outtime,outvals)
@@ -150,23 +178,26 @@ function [ m2b,m4b,gain,outV ] = generate_colormap(ana_folder)
   s.m4br=4;
   s.inval=5;
   s.outval=6;
+  s.settime=7;
 
   m2b=sort(unique(q(:,s.m2br)));
   m3b=sort(unique(q(:,s.m3br)));
   m4b=sort(unique(q(:,s.m4br)));
-
-  gain=q(:,s.outval)./q(:,s.inval);
-  gain=reshape(gain,[numel(m4b) numel(m2b)]);
-  gain=gain';  % transpose to match the orientation of the simulations
-
+  
+  inV = reshape( q(:,s.inval),[numel(m4b) numel(m2b)]);
+  inV = inV'; % transpose to match the orientation of the simulations
+  outV = reshape( q(:,s.outval),[numel(m4b) numel(m2b)]);
+  outV = outV'; % transpose to match the orientation of the simulations
+  settling_time = reshape(q(:,s.settime),[numel(m4b) numel(m2b)]);
+  settling_time = settling_time'; % transpose to match the orientation of the simulations
+  
+  
   % find the max gain and bias settings
+  gain=outV ./ inV;
   maxgain=max(max(gain))
   [r c]=find(gain==maxgain);
-
-  % prep the abvolute voltage variable
-  outV=q(:,s.outval);
-  outV=reshape(outV,[numel(m4b) numel(m2b)]);
-  outV=outV';
+  if (numel(r)>1); r=r(1); end
+  if (numel(c)>1); c=c(1); end
 
   
   % plot gain
@@ -181,10 +212,23 @@ function [ m2b,m4b,gain,outV ] = generate_colormap(ana_folder)
   % save the figure to a PNG
   %print(fh,sprintf('%s/colormap_gain.png',filepath));
   %}
+  
+  % plot settling time
+  %%{
+  fh=figure(2);
+  imagesc(m4b,m2b,gain); colorbar
+  set(gca,'YDir','normal');
+  xlabel('m4b (V)')
+  ylabel('m2b (V)')
+  colormap jet
+  title(sprintf('Amp gain in response to %0.2e step function (maxgain=%0.2f at m2b=%0.2f and m4b=%0.2f)',mean(q(:,s.inval)),maxgain,m2b(r),m4b(c)))
+  % save the figure to a PNG
+  %print(fh,sprintf('%s/colormap_gain.png',filepath));
+  %}
 
   % plot absolute voltage output
   %%{
-  fh=figure(2);
+  fh=figure(3);
   imagesc(m4b,m2b,outV); colorbar
   %caxis([0.01 4.25])
   set(gca,'YDir','normal');
@@ -196,7 +240,7 @@ function [ m2b,m4b,gain,outV ] = generate_colormap(ana_folder)
 
   % plot a grid of sample output curves
   %%{
-  figure(3)
+  figure(4)
   subplot_size_x=6;
   subplot_size_y=6;
   subplot_size=subplot_size_x*subplot_size_y;
@@ -210,17 +254,52 @@ function [ m2b,m4b,gain,outV ] = generate_colormap(ana_folder)
   %}
 
   % plot a specific meas ID
+  r
+  c
   %%{
-  measID=459;
-  figure(4)
+  measID=meas_to_rc_translator(ana_folder,[r c]);
+  figure(5)
   q=load([ana_folder '/meas' sprintf('%04d',measID) '/math2.csv.clean']);
   qin=load([ana_folder '/meas' sprintf('%04d',measID) '/math1.csv.clean']);
   plot(q(:,1),q(:,2))
   hold on
   plot(qin(:,1),qin(:,2),'r')
   hold off
-  title(sprintf('Waveform of meas %d',measID))
+  title(sprintf('Waveform of meas %d (inV = %f; outV = %f; settling time = %f',measID,inV(r,c),outV(r,c),settling_time(r,c)))
   %}
 
   
 end % end-function
+
+function [retval] = meas_to_rc_translator(ana_folder,inval)
+% note: this function relies on results.txt
+
+    q=load([ana_folder '/results.txt']);
+    q=sortrows(q,1);
+
+    s.measid=1;
+    s.m2br=2;
+    s.m3br=3;
+    s.m4br=4;
+    s.inval=5;
+    s.outval=6;
+
+    m2b=sort(unique(q(:,s.m2br)));
+    m3b=sort(unique(q(:,s.m3br)));
+    m4b=sort(unique(q(:,s.m4br)));
+
+    if (numel(inval)==1)
+        % translate a meas num into r/c pair
+        res = q(q(:,1)==inval,:);
+        retval_r = find(m2b == res(2));
+        retval_c = find(m4b == res(4));
+        retval = [retval_r retval_c m2b(retval_r) m4b(retval_c)];
+    else
+        % translate an r/c pair into a meas num
+        m2b_val = m2b(inval(1));
+        m4b_val = m4b(inval(2));
+        res = q(   q(:,s.m2br)==m2b_val, : );
+        res = res( res(:,s.m4br)==m4b_val, : );
+        retval = res(1);
+    end
+end  % end-function meas_to_rc_translator
