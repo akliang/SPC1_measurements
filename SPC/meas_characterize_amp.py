@@ -10,16 +10,16 @@ import hw_settings as hwset
 import visa
 
 # hi-res settings
-m2b_vals = (0, 6, 61)
+m2b_vals = (-1.5, 4, 61)
 m3b_vals = (1, 1, 1)
-m4b_vals = (0, 6, 25)
+m4b_vals = (-1.5, 4, 25)
 # low-res settings
 #m2b_vals = (0.5, 2.5, 3)
 #m3b_vals = (1, 1, 1)
 #m4b_vals = (0, 1, 3)
-chipID = "29D1-8_WP3_2-1-1_amp3st1bw"
-runcon = "custom step wave 200 Hz 50 mVpp with 1:10 voltage divider, effective 5 mVpp"
-notes = "probe12C"
+chipID = "29D1-8_WP5_5-1-2_amp3st1bw"
+runcon = "custom step wave 200 Hz 130 mVpp with 1:10 voltage divider, effective 13 mVpp, fixed all impedances (high-Z)"
+notes = "probe12C in high-Z = 1:10 atten (10x factor applied at scope); probes are DC coupled with 20 MHz BW limit; performing wider m2b and m4b sweep"
 
 # oscilloscope math channel settings
 # math<#> = (ch#, command, #samples)
@@ -32,7 +32,9 @@ Checklist before starting:
 - Is "./multim_2636A_unified.sh SPCsetup1" is running?
 - Is eve proxy running? (ssh -D 9998 eve)
 - Did you mount psidata on the oscilloscope?
+- Did you update chipID, runcon, and notes?
 - Are all the desired channels and maths turned on? (eg, ch1 ch2 math1 math2)
+- Are all impedances set correctly?  Atten factor applied to scope?
 """)
 input("Press ENTER to continue...")
 # TODO: auto turn-on all channels and math
