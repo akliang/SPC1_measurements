@@ -1,19 +1,20 @@
 
 % analysis folder
 global gainfac;  % temporary patch for mis-atten data, delete after 20191119T101410 is no longer needed
-ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/attic/20191111T172723'; gainfac=10;  % 29D1-8_WP3_2-1-1
-%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/attic/20191113T165352'; gainfac=10;
-%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/attic/20191114T100721'; gainfac=10;
-%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/attic/20191115T105635'; gainfac=10;
-%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/attic/20191118T101600'; gainfac=10;
-%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/attic/20191119T101410'; gainfac=10;
-%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20191120T135534'; gainfac=1;
+%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/attic/20191111T172723'; gainfac=10;  % scope acq = 300; script acq = 300
+%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/attic/20191113T165352'; gainfac=10;  % scope acq = 300; script acq = 300
+%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/attic/20191114T100721'; gainfac=10;  % scope acq = 300; script acq = 300
+%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/attic/20191115T105635'; gainfac=10;  % scope acq = 300; script acq = 300
+%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/attic/20191118T101600'; gainfac=10;  % scope acq = 300; script acq = 300
+%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/attic/20191119T101410'; gainfac=10;  % scope acq = 300; script acq = 300
+%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/attic/20191120T135534'; gainfac=1;   % scope acq = 400; script acq = 400 (mistake!)
+ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20191121T161359'; gainfac=1;
 
 % clean the oscope data to make it matlab-friendly
 clean_oscope_data(ana_folder);
 
 % compute the gain and settling time for each measurement point
-%analyze_oscope_data(ana_folder);
+analyze_oscope_data(ana_folder);
 
 % generate the visual colormap of the overall results
 [m2b, m4b, gain, outV]=generate_colormap(ana_folder);
@@ -223,6 +224,8 @@ function [ m2b,m4b,gain,outV ] = generate_colormap(ana_folder)
 %{
   % very special patch to force 0-6V m2b/m4b sweep
   % find index boundaries to slice the data with
+  % NOTE: plot_specific_meas does NOT work in this mode! (the rc->meas translation is wrong)
+  warning('Artifically shifting data to 0-6V... plot_specific_meas is NOT VALID in this mode!')
   m2b_low  = find(m2b==0);
   m2b_high = find(m2b==4);
   m4b_low  = find(m4b==0);
