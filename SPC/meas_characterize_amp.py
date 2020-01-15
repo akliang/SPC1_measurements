@@ -10,20 +10,21 @@ import hw_settings as hwset
 import visa
 
 # hi-res settings
-m2b_vals = (-1.5, 4, 61)
+m2b_vals = (-2, 4, 61)
 m3b_vals = (1, 1, 1)
-m4b_vals = (-1.5, 4, 25)
+m4b_vals = (-2, 4, 25)
 # low-res settings
 #m2b_vals = (0.5, 2.5, 3)
 #m3b_vals = (1, 1, 1)
 #m4b_vals = (0, 1, 3)
-chipID = "29D1-8_WP5_5-1-2_amp3st1bw"
-runcon = "custom step wave 200 Hz 130 mVpp with 1:10 voltage divider, effective 13 mVpp, fixed all impedances (high-Z)"
-notes = "probe12C in high-Z = 1:10 atten (10x factor applied at scope); probes are DC coupled with 20 MHz BW limit; performing wider m2b and m4b sweep"
+chipID = "29D1-8_WP5_5-1-3_amp3st1bw"
+runcon = "custom step wave 200 Hz 130 mVpp with 1:10 voltage divider, effective 13 mVpp, fixed all impedances (high-Z); probe12C in high-Z = 1:10 atten (10x factor applied at scope); probes are DC coupled with 20 MHz BW limit"
+notes = ""
 
 # oscilloscope math channel settings
 # math<#> = (ch#, command, #samples)
 math_ch = (2, "AVG(CH2)", 300)
+acq_delay = 400  # purposely waiting an extra 100 acq
 # TODO: auto-set horiz and vert?
 
 # sanity check to make sure everything is running
@@ -51,6 +52,7 @@ workdir = "%s/%s" % (unixdir, dtag)
 os.mkdir(workdir)
 
 # write the SPCsetup[12] information
+# TODO: import basic_functions and use get_smu_data() function
 smu_data = subprocess.check_output("grep DFILEPREFIX ../SPCsetup1 | grep -v '#' | tail -n 1 | sed -e 's/.*=//' -e 's/\"//g'", shell=True)
 hostname = subprocess.check_output("grep SMUHOST ../SPCsetup1 | grep -v '#' | tail -n 1 | sed -e 's/.*=//' -e 's/\"//g'", shell=True)
 smu_data = re.sub("\$\(hostname\)_", hostname.decode('utf-8'), smu_data.decode('utf-8'))
@@ -84,10 +86,10 @@ for P in np.linspace(m3b_vals[0], m3b_vals[1], num=m3b_vals[2], endpoint=True):
             smv.send_scpi("v5(%f)" % G)
 
             # perform actions after SMU consumes the file
-            print("  Waiting for %s acquisitions before saving file" % math_ch[2])
+            print("  Waiting for %s acquisitions before saving file" % acq_delay)
             acqnow = mi.query("ACQ:NUMACQ?")
             acqstart = int(acqnow)
-            while int(acqnow) < (acqstart + math_ch[2]):
+            while int(acqnow) < (acqstart + acq_delay):
                 acqnow = mi.query("ACQ:NUMACQ?")
                 time.sleep(2)
             print("  Downloading oscilloscope data")
@@ -95,9 +97,6 @@ for P in np.linspace(m3b_vals[0], m3b_vals[1], num=m3b_vals[2], endpoint=True):
             measdir = "%s/meas%04d" % (workdir, dircnt)
             os.mkdir(measdir)
             download_oscope_data.run(measdir, smu_data)
-
-            # send the measdir over for pre-processing
-            # TODO: set this flag
 
             dircnt += 1
 
