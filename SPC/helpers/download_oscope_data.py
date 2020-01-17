@@ -5,6 +5,8 @@ import subprocess
 import re
 import time
 
+# DEPRECATED?
+# Don't delete until meas_amp is working
 
 def run(measdir, dfileprefix):
     # Connects to and downloads all probe and math channels from the oscilloscope, also saves oscilloscope settings
