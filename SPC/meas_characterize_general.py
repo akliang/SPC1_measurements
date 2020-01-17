@@ -16,8 +16,8 @@ unixdir = "/mnt/ArrayData/MasdaX/2018-01/measurements"
 chipID = "29D1-8_WP5_5-1-3_amp3st1bw"
 runcon = "custom step wave 200 Hz 130 mVpp with 1:10 voltage divider, effective 13 mVpp, fixed all impedances (high-Z); probe12C in high-Z = 1:10 atten (10x factor applied at scope); probes are DC coupled with 20 MHz BW limit"
 notes = ""
-#meas_type = "amp"
-meas_type = "comp"
+meas_type = "amp"
+#meas_type = "comp"
 #meas_type = "clockgen"
 #meas_type = "counter"
 
@@ -59,7 +59,7 @@ idfh.write("\nchip_id: %s" % chipID)
 idfh.write("\nrun_conditions: %s" % runcon)
 idfh.write("\nnotes: %s" % notes)
 # TODO: make this math-setting loop dynamic, currently hard-coded for math2 channel
-idfh.write("\nmath2 avg: %f" % math_ch[2])
+idfh.write("\nmath2 avg: %d" % math_ch[2])
 idfh.close()
 
 # Set up the default voltages for vcc and gnd
@@ -75,7 +75,7 @@ mi.write("MATH%s:NUMAVG %s" % (math_ch[0], math_ch[2]))
 
 if meas_type == "amp":
     # TODO: simplify function variable inputs?
-    meas_characterize_amp.run(mi, measdir, smu_data, acq_delay, "high")
+    meas_characterize_amp.run(mi, measdir, smu_data, acq_delay, "low")
 elif meas_type == "comp":
     meas_characterize_comp.run(mi, measdir, smu_data)
 elif meas_type == "clockgen":

@@ -2,7 +2,6 @@
 from helpers import set_multim2636A_voltage as smv
 from helpers import download_oscope_data2 as dod
 import time
-import os
 import numpy as np
 
 
@@ -38,8 +37,6 @@ def run(mi, measdir, smu_data, acq_delay, res_level):
                     time.sleep(2)
                 # make the directory to store the oscilloscope data
                 measdir2 = "%s/meas%04d" % (measdir, dircnt)
-                os.mkdir(measdir2)
-                print("  Downloading oscilloscope data")
                 dod.run(mi, measdir2, smu_data)
 
                 dircnt += 1

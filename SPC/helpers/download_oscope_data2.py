@@ -4,7 +4,7 @@ import subprocess
 import re
 import time
 import shutil
-from .. import hw_settings as hwset
+import hw_settings as hwset
 
 
 def run(mi, measdir, dfileprefix):
@@ -88,10 +88,10 @@ def run(mi, measdir, dfileprefix):
     envfh.close()
 
     # move the files from temp folder to measdir
-    print("Saving oscope data, please wait...")
+    print("  Saving oscope data, please wait...")
     while not os.path.exists("%s/flag_dod_done.csv" % tmpdir):
         pass
-    print("flag_dod_done.csv found, dod is done")
+    print("  flag_dod_done.csv found, dod is done")
     # wait a moment to make absolutely sure everything finishes
     time.sleep(2)
     shutil.move(tmpdir, measdir)
