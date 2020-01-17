@@ -28,3 +28,12 @@ def send_scpi(vstring):
     # clean up the temp file
     os.close(fd)
     os.remove(temp_path)
+
+
+def set_defaults():
+    send_scpi("v1(8)")
+    send_scpi("v2(0)")
+    send_scpi("v3(1.5)")
+    send_scpi("v4(1)")
+    send_scpi("v5(0.5)")
+    send_scpi("v6(0)")
