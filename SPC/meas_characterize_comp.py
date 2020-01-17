@@ -1,5 +1,5 @@
 
-from helpers import download_oscope_data2 as dod
+from helpers import download_oscope_data as dod
 
 
 def run(mi, measdir, smu_data):

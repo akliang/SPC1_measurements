@@ -1,6 +1,6 @@
 
 from helpers import set_multim2636A_voltage as smv
-from helpers import download_oscope_data2 as dod
+from helpers import download_oscope_data as dod
 import time
 import numpy as np
 
