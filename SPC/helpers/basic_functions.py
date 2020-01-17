@@ -2,7 +2,7 @@
 import subprocess
 import re
 
-
+# if this is the only function in basic_functions, perhaps it can go back to the _general script
 def get_smu_data(SPCsetup_path):
 
     smu_data = subprocess.check_output(

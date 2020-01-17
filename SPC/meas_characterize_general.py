@@ -1,11 +1,10 @@
 
 import os
-import shutil
 import time
 import re
 from helpers import set_multim2636A_voltage as smv
+from helpers import hw_settings as hwset
 from helpers import basic_functions as bf
-import hw_settings as hwset
 import visa
 import meas_characterize_amp
 import meas_characterize_comp
@@ -25,7 +24,6 @@ meas_type = "amp"
 # FORMAT:  math<#> = (ch_num, command, num_samples)
 math_ch = (2, "AVG(CH2)", 300)
 acq_delay = 400  # purposely waiting an extra 100 acq
-# TODO: auto-set horiz and vert?
 
 
 # ---- Begin measurement script ---- #
@@ -39,13 +37,12 @@ Checklist before starting:
 - Are all impedances set correctly?  Atten factor applied to scope?
 """)
 input("Press ENTER to continue...")
-# TODO: auto turn-on all channels and math
-# TODO: auto-set sig-gen
 
 
 # make the working directory
-# patch for Mac
 dtag = time.strftime("%Y%m%dT%H%M%S", time.localtime())
+# patch for Mac
+# probably will never run on Mac anymore... delete?
 if not os.path.exists(unixdir):
     unixdir = re.sub("mnt", "Volumes", unixdir)
 measdir = "%s/%s_%s" % (unixdir, dtag, chipID)
@@ -72,6 +69,9 @@ mi = rm.open_resource("TCPIP::" + hwset.scopeip + "::INSTR")
 # TODO: make this math-setting loop dynamic, currently hard-coded for math2 channel
 mi.write("MATH%s:DEF \"%s\"" % (math_ch[0], math_ch[1]))
 mi.write("MATH%s:NUMAVG %s" % (math_ch[0], math_ch[2]))
+# TODO: auto turn-on all channels and math
+# TODO: auto-set sig-gen
+# TODO: auto-set horiz and vert?
 
 if meas_type == "amp":
     # TODO: simplify function variable inputs?

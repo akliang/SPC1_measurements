@@ -4,7 +4,6 @@ import subprocess
 import re
 import time
 import shutil
-import hw_settings as hwset
 
 
 def run(mi, measdir, dfileprefix):
@@ -22,7 +21,7 @@ def run(mi, measdir, dfileprefix):
 
     # create the temporary directory
     dtag = time.strftime("%Y%m%dT%H%M%S", time.localtime())
-    tmpdir = "%s/%s" % (hwset.tmpdir_abs, dtag)
+    tmpdir = "/mnt/ArrayData/MasdaX/2018-01/temp/%s" % dtag
     os.mkdir(tmpdir)
     # create a windows path equivalent of tmpdir
     windir = re.sub(r"/", r"\\\\", tmpdir)
