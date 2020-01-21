@@ -1,22 +1,23 @@
 
 import os
+import subprocess
 import time
 import re
 from helpers import set_multim2636A_voltage as smv
 from helpers import hw_settings as hwset
-from helpers import basic_functions as bf
 import visa
 import meas_characterize_amp
 import meas_characterize_comp
 
 
 # ---- User-defined settings ---- #
+SPCsetup_path = "../SPCsetup1"
 unixdir = "/mnt/ArrayData/MasdaX/2018-01/measurements"
 chipID = "29D1-8_WP5_5-1-3_amp3st1bw"
 runcon = "custom step wave 200 Hz 130 mVpp with 1:10 voltage divider, effective 13 mVpp, fixed all impedances (high-Z); probe12C in high-Z = 1:10 atten (10x factor applied at scope); probes are DC coupled with 20 MHz BW limit"
 notes = ""
-meas_type = "amp"
-#meas_type = "comp"
+#meas_type = "amp"
+meas_type = "comp"
 #meas_type = "clockgen"
 #meas_type = "counter"
 
@@ -49,7 +50,12 @@ measdir = "%s/%s_%s" % (unixdir, dtag, chipID)
 os.mkdir(measdir)
 
 # write the SPCsetup[12] information
-smu_data = bf.get_smu_data("../SPCsetup1")
+smu_data = subprocess.check_output(
+    "grep DFILEPREFIX %s | grep -v '#' | tail -n 1 | sed -e 's/.*=//' -e 's/\"//g'" % SPCsetup_path, shell=True)
+hostname = subprocess.check_output(
+    "grep SMUHOST %s | grep -v '#' | tail -n 1 | sed -e 's/.*=//' -e 's/\"//g'" % SPCsetup_path, shell=True)
+smu_data = re.sub("\$\(hostname\)_", hostname.decode('utf-8'), smu_data.decode('utf-8'))
+smu_data = smu_data.rstrip()  # take off newline
 idfh = open("%s/id.txt" % measdir, 'w')
 idfh.write("directory_prefix: %s" % smu_data)
 idfh.write("\nchip_id: %s" % chipID)
