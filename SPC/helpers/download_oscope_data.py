@@ -10,10 +10,6 @@ def run(mi, measdir, dfileprefix):
     # Connects to and downloads all probe and math channels from the oscilloscope, also saves oscilloscope settings
     # note: dont forget to mountpsidata on the oscilloscope
 
-    # 2020-01-10: Improvements from ver1:
-    # - removes the max-path-char-limit (ver1 was limited to 100 char for measdir)
-    #   (write all files to tmpdir, and then move to measdir later)
-
     # make sure the path doesn't already exist or else it will get overwritten by the move later
     if os.path.exists(measdir):
         print("Error: measdir(%s) already exists and would get overwritten... bailing out" % measdir)
@@ -29,14 +25,17 @@ def run(mi, measdir, dfileprefix):
 
     utime = int(time.time())
     #utime -= 2  # grab the SMU data from a couple seconds before, to avoid writing race condition
+    print("  Saving oscope data, please wait...")
+    
+    # Freeze the oscilloscope data
+    query = [
+      ["ACQUIRE:STOPAFTER SEQUENCE"],
+      ["ACQUIRE:STATE 1"],
+    ]
+    for q in query:
+        mi.write(q[0])
 
-    # TODO: issue Single command to oscope
-
-    # paths to files created by this function
-    # TODO: change screenshotfile to same format as the ch1.csv below
-    screenshotfile = "%s\\\\export_screenshot.png" % windir
     envfile = "%s/environment.txt" % tmpdir
-
     # add SMU information to env file
     envfh = open(envfile, 'w')
     smudata = ""
@@ -52,24 +51,19 @@ def run(mi, measdir, dfileprefix):
         else:
             time.sleep(1)
     envfh.write(smudata.decode('utf-8'))
-
-    # set correct setting values
-    query = [
-      ["export:filename \"%s\"" % screenshotfile],
-      ["save:waveform:fileformat spreadsheetcsv"],
-    ]
-    for q in query:
-        mi.write(q[0])
-
     # write some oscilloscope settings to the envfh file
     query = ["*IDN?", "ch1?", "ch2?", "ch3?", "ch4?", "math1?", "math2?", "math3?", "math4?"]
     for q in query:
         envfh.write(q + ": ")
         envfh.write(mi.query(q))
+    # close the envfh file handle
+    envfh.close()
 
-    # export data
+    # export data from the oscilloscope
     query = [
+        ["export:filename \"%s\\\\%s\"" % (windir, "export_screenshot.png")],
         ["export start"],
+        ["save:waveform:fileformat spreadsheetcsv"],
         ["save:waveform ch1,\"%s\\\\%s\"" % (windir, "ch1.csv")],
         ["save:waveform ch2,\"%s\\\\%s\"" % (windir, "ch2.csv")],
         ["save:waveform ch3,\"%s\\\\%s\"" % (windir, "ch3.csv")],
@@ -83,11 +77,7 @@ def run(mi, measdir, dfileprefix):
     for q in query:
         mi.write(q[0])
 
-    # close the envfh file handle
-    envfh.close()
-
     # move the files from temp folder to measdir
-    print("  Saving oscope data, please wait...")
     while not os.path.exists("%s/flag_dod_done.csv" % tmpdir):
         pass
     print("  flag_dod_done.csv found, dod is done")
@@ -95,4 +85,10 @@ def run(mi, measdir, dfileprefix):
     time.sleep(2)
     shutil.move(tmpdir, measdir)
 
-
+    # Set the oscilloscope back to continuous run
+    query = [
+      ["ACQUIRE:STOPAFTER RUNSTOP"],
+      ["ACQUIRE:STATE 1"],
+    ]
+    for q in query:
+        mi.write(q[0])
