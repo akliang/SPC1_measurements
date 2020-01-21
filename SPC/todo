@@ -1,6 +1,3 @@
 analyze sort problem when outputting formatted result CSV data
 SMU missing data points problem
----send characterize amp log to file
----change scope scale depending on siggen frequency
-break out mini-functions that are common to measurement scripts (such as init)
 
