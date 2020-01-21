@@ -4,7 +4,6 @@ import subprocess
 import time
 import re
 from helpers import set_multim2636A_voltage as smv
-from helpers import hw_settings as hwset
 import visa
 import meas_characterize_amp
 import meas_characterize_comp
@@ -12,6 +11,7 @@ import meas_characterize_comp
 
 # ---- User-defined settings ---- #
 SPCsetup_path = "../SPCsetup1"
+scopeip = "192.168.66.85"
 unixdir = "/mnt/ArrayData/MasdaX/2018-01/measurements"
 chipID = "29D1-8_WP5_5-1-3_amp3st1bw"
 runcon = "custom step wave 200 Hz 130 mVpp with 1:10 voltage divider, effective 13 mVpp, fixed all impedances (high-Z); probe12C in high-Z = 1:10 atten (10x factor applied at scope); probes are DC coupled with 20 MHz BW limit"
@@ -71,7 +71,7 @@ smv.send_scpi("v2(0)")
 
 # connect to the oscilloscope and set up the math channel(s)
 rm = visa.ResourceManager('@py')
-mi = rm.open_resource("TCPIP::" + hwset.scopeip + "::INSTR")
+mi = rm.open_resource("TCPIP::" + scopeip + "::INSTR")
 # TODO: make this math-setting loop dynamic, currently hard-coded for math2 channel
 mi.write("MATH%s:DEF \"%s\"" % (math_ch[0], math_ch[1]))
 mi.write("MATH%s:NUMAVG %s" % (math_ch[0], math_ch[2]))
