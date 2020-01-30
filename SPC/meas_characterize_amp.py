@@ -35,7 +35,6 @@ def run(mi, measdir, smu_data, acq_delay, res_level):
                 while int(acqnow) < (acqstart + acq_delay):
                     acqnow = mi.query("ACQ:NUMACQ?")
                     time.sleep(2)
-                # make the directory to store the oscilloscope data
                 measdir2 = "%s/meas%04d" % (measdir, dircnt)
                 dod.run(mi, measdir2, smu_data)
 
