@@ -13,17 +13,20 @@ import meas_characterize_comp
 SPCsetup_path = "../SPCsetup1"
 scopeip = "192.168.66.85"
 unixdir = "/mnt/ArrayData/MasdaX/2018-01/measurements"
-chipID = "29D1-8_WP5_5-1-3_amp3st1bw"
-runcon = "custom step wave 200 Hz 130 mVpp with 1:10 voltage divider, effective 13 mVpp, fixed all impedances (high-Z); probe12C in high-Z = 1:10 atten (10x factor applied at scope); probes are DC coupled with 20 MHz BW limit"
-notes = ""
+chipID = "29D1-8_WP5_2-4-3_schmitt"
+#runcon = "custom step wave 200 Hz 130 mVpp with 1:10 voltage divider, effective 13 mVpp, fixed all impedances (high-Z); probe12C in high-Z = 1:10 atten (10x factor applied at scope); probes are DC coupled with 20 MHz BW limit"
+runcon = "ramp 0-3.5V 10khz, 1.8MEG 12c probe with calibrated gain of 16 (24 dB)"
+notes = "third test of acq script, this time with math2 avg 300 and acq_delay 400"
 #meas_type = "amp"
 meas_type = "comp"
+cirtype = "schmitt"
 #meas_type = "clockgen"
 #meas_type = "counter"
 
 # oscilloscope math channel settings
 # FORMAT:  math<#> = (ch_num, command, num_samples)
 math_ch = (2, "AVG(CH2)", 300)
+# TODO: consider moving this value into each respective measurement (amp, comp, etc)
 acq_delay = 400  # purposely waiting an extra 100 acq
 
 
@@ -63,11 +66,12 @@ idfh.write("\nrun_conditions: %s" % runcon)
 idfh.write("\nnotes: %s" % notes)
 # TODO: make this math-setting loop dynamic, currently hard-coded for math2 channel
 idfh.write("\nmath2 avg: %d" % math_ch[2])
+idfh.write("\nacq_delay: %d" % acq_delay)
 idfh.close()
 
 # Set up the default voltages for vcc and gnd
-smv.send_scpi("v1(8)")
-smv.send_scpi("v2(0)")
+#smv.send_scpi("v1(8)")
+#smv.send_scpi("v2(0)")
 
 # connect to the oscilloscope and set up the math channel(s)
 rm = visa.ResourceManager('@py')
@@ -83,7 +87,7 @@ if meas_type == "amp":
     # TODO: simplify function variable inputs?
     meas_characterize_amp.run(mi, measdir, smu_data, acq_delay, "low")
 elif meas_type == "comp":
-    meas_characterize_comp.run(mi, measdir, smu_data)
+    meas_characterize_comp.run(mi, measdir, smu_data, acq_delay, cirtype)
 elif meas_type == "clockgen":
     meas_characterize_clockgen.run(mi, measdir, smu_data)
 elif meas_type == "counter":
