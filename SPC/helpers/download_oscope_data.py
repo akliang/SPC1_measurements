@@ -35,12 +35,13 @@ def run(mi, measdir, dfileprefix):
     for q in query:
         mi.write(q[0])
 
-    envfile = "%s/environment.txt" % tmpdir
     # add SMU information to env file
+    envfile = "%s/environment.txt" % tmpdir
     envfh = open(envfile, 'w')
     smudata = ""
     smudatacnt = 0
     smudatacntthresh = 10
+    # TODO: bug?  this loop only runs once even if the grep returns nothing
     while smudata == "":
         smudatacnt += 1
         # TODO: the session path is relative... make it absolute somehow
@@ -51,6 +52,7 @@ def run(mi, measdir, dfileprefix):
         else:
             time.sleep(1)
     envfh.write(smudata.decode('utf-8'))
+
     # write some oscilloscope settings to the envfh file
     query = ["*IDN?", "ch1?", "ch2?", "ch3?", "ch4?", "math1?", "math2?", "math3?", "math4?"]
     for q in query:
@@ -72,17 +74,16 @@ def run(mi, measdir, dfileprefix):
         ["save:waveform math2,\"%s\\\\%s\"" % (windir, "math2.csv")],
         ["save:waveform math3,\"%s\\\\%s\"" % (windir, "math3.csv")],
         ["save:waveform math4,\"%s\\\\%s\"" % (windir, "math4.csv")],
-        ["save:waveform ch1,\"%s\\\\%s\"" % (windir, "flag_dod_done.csv")],
     ]
     for q in query:
         mi.write(q[0])
 
-    # move the files from temp folder to measdir
-    while not os.path.exists("%s/flag_dod_done.csv" % tmpdir):
-        pass
-    print("  flag_dod_done.csv found, dod is done")
+    # wait until the scope is finished
+    while not int(mi.query('*OPC?')) == 1:
+        time.sleep(1)
+
     # wait a moment to make absolutely sure everything finishes
-    time.sleep(2)
+    time.sleep(1)
     shutil.move(tmpdir, measdir)
 
     # Set the oscilloscope back to continuous run
