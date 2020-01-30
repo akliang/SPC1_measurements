@@ -1,4 +1,10 @@
 
+% TODO:
+% 1. rename this script to analyze_amplifier_meas.m
+% 2. delete the local clean_oscope_data function and use the one in helper_functions directory
+% 3. delete the duplicate process_oscope_data_helper.sh script (there is one in the helper_fxns directory too)
+% 4. vbiases.txt file has been updated to incorporate ALL voltages (so need to update the columns used below accordingly)
+
 % analysis folder
 global gainfac;  % temporary patch for mis-atten data, delete after 20191119T101410 is no longer needed
 %ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/attic/20191111T172723'; gainfac=10;  % scope acq = 300; script acq = 300
@@ -14,7 +20,7 @@ ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20191121T161359'; g
 clean_oscope_data(ana_folder);
 
 % compute the gain and settling time for each measurement point
-analyze_oscope_data(ana_folder);
+%analyze_oscope_data(ana_folder);
 
 % generate the visual colormap of the overall results
 [m2b, m4b, gain, outV]=generate_colormap(ana_folder);
@@ -264,6 +270,21 @@ function [ m2b,m4b,gain,outV ] = generate_colormap(ana_folder)
   % report the "best" conditions (lowest settling time)
   %best_gain = gain(settime_r,settime_c);
   %best_time = settling_time(settime_r,settime_c);
+  
+  
+  % find the optimal operating point
+  minV = 1.25;  maxV = 2;
+  valid_idx  = (outV>=minV);
+  valid_idx2 = (outV<=maxV);
+  valid_idx  = valid_idx .* valid_idx2;
+  if (sum(valid_idx)==0); error('No valid outV values >= %f found',minV); end
+  % use valid_idx to zero-out invalid settling times, then set those values to NaN
+  valid_settime = settling_time .* valid_idx;
+  valid_settime(valid_settime==0) = NaN;
+  [opt_r, opt_c] = find(valid_settime == min(min(valid_settime)));
+  fprintf(1,'Number of opt_r = %d ; Number of opt_c = %d\n',numel(opt_r),numel(opt_c));
+  opt_r = opt_r(1);  opt_c = opt_c(1);
+  
 
   
   % plot metrics
@@ -304,20 +325,33 @@ function [ m2b,m4b,gain,outV ] = generate_colormap(ana_folder)
   saveas(fh,sprintf('%s/sample_outputs.png',pngpath));
 
   % plot - waveform of max gain
-  measID=meas_to_rc_translator(ana_folder,[gain_r gain_c]);
-  fh=figure(5);
-  plot_specific_meas(ana_folder,measID);
-  title(sprintf('Waveform of max outV (meas %d - outV = %f; gain = %f; settling time = %f',measID,outV(gain_r,gain_c),gain(gain_r,gain_c),settling_time(gain_r,gain_c)))
-  saveas(fh,sprintf('%s/gain_waveform.png',pngpath));
+  %now_r = gain_r;  now_c = gain_c;
+  %measID=meas_to_rc_translator(ana_folder,[now_r now_c]);
+  %fh=figure(5);
+  %plot_specific_meas(ana_folder,measID);
+  %title(sprintf('Waveform of max outV (meas %d - outV = %f; gain = %f; settling time = %f',measID,outV(now_r,now_c),gain(now_r,now_c),settling_time(now_r,now_c)))
+  %saveas(fh,sprintf('%s/gain_waveform.png',pngpath));
   
   % plot - waveform of lowest settling time
-  measID=meas_to_rc_translator(ana_folder,[settime_r settime_c]);
-  fh=figure(6);
+  %now_r = settime_r;  settime_c = opt_c;
+  %measID=meas_to_rc_translator(ana_folder,[now_r now_c]);
+  %fh=figure(6);
+  %plot_specific_meas(ana_folder,measID);
+  %title(sprintf('Waveform of min settling time (meas %d - outV = %f; gain = %f; settling time = %f',measID,outV(now_r,now_c),gain(now_r,now_c),settling_time(now_r,now_c)))
+  %saveas(fh,sprintf('%s/settlingtime_waveform.png',pngpath));
+
+  % plot - waveform of lowest settling time
+  now_r = opt_r;  now_c = opt_c;
+  custom_str = sprintf('Waveform of optimal point (minV=%0.2f)',minV);
+  measID=meas_to_rc_translator(ana_folder,[now_r now_c]);
+  fh=figure(7);
   plot_specific_meas(ana_folder,measID);
-  title(sprintf('Waveform of min settling time (meas %d - outV = %f; gain = %f; settling time = %f',measID,outV(settime_r,settime_c),gain(settime_r,settime_c),settling_time(settime_r,settime_c)))
+  % generate title string
+  [~, ana_folder_ID, ~] = fileparts(ana_folder);
+  stat_str1 = sprintf('meas %d (m2b = %0.2f ; m4b = %0.2f)',measID,m2b(now_r),m4b(now_c));
+  stat_str2 = sprintf('outV = %f; inV = %f; gain = %f; settling time = %f',outV(now_r,now_c),inV(now_r,now_c),gain(now_r,now_c),settling_time(now_r,now_c));
+  title({custom_str,sprintf('ana folder: %s',ana_folder_ID),stat_str1,stat_str2})
   saveas(fh,sprintf('%s/settlingtime_waveform.png',pngpath));
-
-
   
 end % end-function generate_colormap
 
