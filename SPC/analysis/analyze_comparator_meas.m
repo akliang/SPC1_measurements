@@ -1,8 +1,8 @@
 
 
 ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200122T164209_29D1-8_WP5_2-4-3_schmitt';  % first full acq of comparator
-
-close all
+%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200127T171505_29D1-8_WP5_2-4-3_schmitt';  % second full acq of comparator
+ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200129T173850_29D1-8_WP5_2-4-3_schmitt';  % second full acq of comparator
 
 addpath('./helper_functions');
 % clean the oscope data to make it matlab-friendly
@@ -29,20 +29,18 @@ resfile = [ana_folder '/results.txt' ];
 csvwrite(resfile,alldat);
 
 generate_colormap(ana_folder);
+plot_specific_meas(ana_folder, [0.5 0])
 
-% figure(2)
-% plot(ana_res_all(:,1))
-% hold on
-% plot(ana_res_all(:,2),'r')
-% plot(ana_res_all(:,3),'gx')
-% plot(ana_res_all(:,4),'kx')
-% hold off
 
 function [minout, maxout, deltaout, rising_thresh, falling_thresh, hysteresis] = analyze_comparator_oscope_data(measdir)
 
   % load in and out files
   in_raw=load([measdir '/ch1.csv.clean']);
-  out_raw=load([measdir '/ch2.csv.clean']);
+  if exist([measdir '/math2.csv.clean'])
+      out_raw = load([measdir '/math2.csv.clean']);
+  else
+    out_raw=load([measdir '/ch2.csv.clean']);
+  end
   trig_raw=load([measdir '/ch4.csv.clean']);  % use siggen trig, or comp output?
   trig = trig_raw(:,2);
   
@@ -100,6 +98,9 @@ end
 
 function generate_colormap(ana_folder)
 
+  [~, filename, ~] = fileparts(ana_folder);
+  set(0,'defaultTextInterpreter','none');
+
   q=load([ana_folder '/results.txt']);
   q=sortrows(q,1);
 
@@ -120,24 +121,83 @@ function generate_colormap(ana_folder)
   vbias=sort(unique(q(:,s.vbias)));
   vthresh=sort(unique(q(:,s.vthresh)));
   
+  % this reshape actually covers up the missing SMU data points!
   deltaout = reshape( q(:,s.deltaout),[numel(vthresh) numel(vbias)]);
   hysteresis = reshape( q(:,s.hysteresis),[numel(vthresh) numel(vbias)]);
   
   figure
-  imagesc(vthresh,vbias,deltaout); colorbar
+  imagesc(vbias,vthresh,deltaout); colorbar
   set(gca,'YDir','normal');
   xlabel('Vthresh (V)')
   ylabel('Vbias (V)')
   colormap jet
-  title('Delta between comparator off and on')
+  title(sprintf('Delta between comparator off and on (%s)', filename))
+  caxis([0 8])
+  saveas(gcf,[ana_folder '/deltaout.png']);
+
   
   figure
-  imagesc(vthresh,vbias,hysteresis); colorbar
+  imagesc(vbias,vthresh,hysteresis); colorbar
   set(gca,'YDir','normal');
   xlabel('Vthresh (V)')
   ylabel('Vbias (V)')
   colormap jet
-  title('Hysteresis of comparator')
+  title(sprintf('Hysteresis of comparator (%s)', filename))
+  caxis([0 2.5])
+  saveas(gcf,[ana_folder '/hysteresis.png']);
+  
+
+
+end
+
+
+
+function plot_specific_meas(ana_folder, input)
+
+  [~, filename, ~] = fileparts(ana_folder);
+  set(0,'defaultTextInterpreter','none');
+
+  q=load([ana_folder '/results.txt']);
+  q=sortrows(q,1);
+
+  s.measid=1;
+  s.vcca=2;
+  s.gnda=3;
+  s.vccd=4;
+  s.gndd=5;
+  s.vbias=6;
+  s.vthresh=7;
+  s.minout=8;
+  s.maxout=9;
+  s.deltaout=10;
+  s.rising_thresh=11;
+  s.falling_thresh=12;
+  s.hysteresis=13;
+
+  if (numel(input)==2)
+      vbias = input(1)
+      vthresh = input(2)
+      idx1 = (q(:,s.vbias)==vbias)
+      idx2 = (q(:,s.vthresh)==vthresh)
+      idx = find( (idx1 .* idx2) == 1 );
+  else
+      idx = input;
+  end
+  
+  measdir = [ana_folder '/' sprintf('/meas%04d',idx)];
+  qin = load([measdir '/ch1.csv.clean']);
+  if (exist([measdir '/math2.csv.clean']))
+      qout = load([measdir '/math2.csv.clean']);
+  else
+      qout = load([measdir '/ch2.csv.clean']);
+  end
+  
+  figure
+  plot(qin(:,1),qin(:,2))
+  hold on
+  plot(qout(:,1),qout(:,2),'r')
+  hold off
+  saveas(gcf,[ana_folder sprintf('/meas%04d.png',idx)]);
 
 
 end
