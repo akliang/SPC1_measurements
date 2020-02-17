@@ -6,7 +6,7 @@ import time
 import shutil
 
 
-def run(mi, measdir, dfileprefix):
+def run(mi, measdir, dfileprefix, doSingle):
     # Connects to and downloads all probe and math channels from the oscilloscope, also saves oscilloscope settings
     # note: dont forget to mountpsidata on the oscilloscope
 
@@ -28,14 +28,16 @@ def run(mi, measdir, dfileprefix):
     print("  Saving oscope data, please wait...")
     
     # Freeze the oscilloscope data
-    query = [
-      ["ACQUIRE:STOPAFTER SEQUENCE"],
-      ["ACQUIRE:STATE 1"],
-    ]
-    for q in query:
-        mi.write(q[0])
+    if doSingle == "true":
+        query = [
+          ["ACQUIRE:STOPAFTER SEQUENCE"],
+          ["ACQUIRE:STATE 1"],
+        ]
+        for q in query:
+            mi.write(q[0])
 
     # add SMU information to env file
+    # TODO: fix bug where SMU data sometimes isnt found
     envfile = "%s/environment.txt" % tmpdir
     envfh = open(envfile, 'w')
     smudata = ""
@@ -87,9 +89,10 @@ def run(mi, measdir, dfileprefix):
     shutil.move(tmpdir, measdir)
 
     # Set the oscilloscope back to continuous run
-    query = [
-      ["ACQUIRE:STOPAFTER RUNSTOP"],
-      ["ACQUIRE:STATE 1"],
-    ]
-    for q in query:
-        mi.write(q[0])
+    if doSingle == "true":
+        query = [
+          ["ACQUIRE:STOPAFTER RUNSTOP"],
+          ["ACQUIRE:STATE 1"],
+        ]
+        for q in query:
+            mi.write(q[0])

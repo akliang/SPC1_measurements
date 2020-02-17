@@ -3,6 +3,7 @@ from helpers import set_multim2636A_voltage as smv
 from helpers import download_oscope_data as dod
 import time
 import numpy as np
+from helpers import acq_delayer
 
 
 def run(mi, measdir, smu_data, acq_delay, res_level):
@@ -29,14 +30,13 @@ def run(mi, measdir, smu_data, acq_delay, res_level):
                 smv.send_scpi("v5(%f)" % G)
 
                 # perform actions after SMU consumes the file
-                print("  Waiting for %s acquisitions before saving file" % acq_delay)
-                acqnow = mi.query("ACQ:NUMACQ?")
-                acqstart = int(acqnow)
-                while int(acqnow) < (acqstart + acq_delay):
-                    acqnow = mi.query("ACQ:NUMACQ?")
-                    time.sleep(2)
+                if acq_delay == 0:
+                    time.sleep(2)  # wait a few seconds to let everything settle
+                else:
+                    acq_delayer.run(mi, acq_delay)
                 measdir2 = "%s/meas%04d" % (measdir, dircnt)
-                dod.run(mi, measdir2, smu_data)
+                dod.run(mi, measdir2, smu_data, "false")
+
 
                 dircnt += 1
 

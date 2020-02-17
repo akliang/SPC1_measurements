@@ -150,8 +150,6 @@ function generate_colormap(ana_folder)
 
 end
 
-
-
 function plot_specific_meas(ana_folder, input)
 
   [~, filename, ~] = fileparts(ana_folder);

@@ -13,13 +13,13 @@ import meas_characterize_comp
 SPCsetup_path = "../SPCsetup1"
 scopeip = "192.168.66.85"
 unixdir = "/mnt/ArrayData/MasdaX/2018-01/measurements"
-chipID = "29D1-8_WP5_2-4-3_schmitt"
-#runcon = "custom step wave 200 Hz 130 mVpp with 1:10 voltage divider, effective 13 mVpp, fixed all impedances (high-Z); probe12C in high-Z = 1:10 atten (10x factor applied at scope); probes are DC coupled with 20 MHz BW limit"
-runcon = "ramp 0-3.5V 10khz, 1.8MEG 12c probe with calibrated gain of 16 (24 dB)"
-notes = "third test of acq script, this time with math2 avg 300 and acq_delay 400"
-#meas_type = "amp"
-meas_type = "comp"
-cirtype = "schmitt"
+chipID = "29D1-5_WP5_1-1-1_amp3st1bw"
+runcon = "custom step wave 200 Hz 130 mVpp with 1:10 voltage divider, effective 13 mVpp"
+#runcon = "ramp 0-3.5V 10khz, 1.8MEG 12c probe with calibrated gain of 16 (24 dB)"
+notes = "second time trying upgraded python acq script on amplifier"
+meas_type = "amp"
+#meas_type = "comp"
+#cirtype = "schmitt"
 #meas_type = "clockgen"
 #meas_type = "counter"
 
@@ -85,7 +85,7 @@ mi.write("MATH%s:NUMAVG %s" % (math_ch[0], math_ch[2]))
 
 if meas_type == "amp":
     # TODO: simplify function variable inputs?
-    meas_characterize_amp.run(mi, measdir, smu_data, acq_delay, "low")
+    meas_characterize_amp.run(mi, measdir, smu_data, acq_delay, "high")
 elif meas_type == "comp":
     meas_characterize_comp.run(mi, measdir, smu_data, acq_delay, cirtype)
 elif meas_type == "clockgen":

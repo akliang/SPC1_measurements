@@ -1,9 +1,10 @@
 
 % TODO:
-% 1. rename this script to analyze_amplifier_meas.m
-% 2. delete the local clean_oscope_data function and use the one in helper_functions directory
-% 3. delete the duplicate process_oscope_data_helper.sh script (there is one in the helper_fxns directory too)
-% 4. vbiases.txt file has been updated to incorporate ALL voltages (so need to update the columns used below accordingly)
+% 1. (DONE) rename this script to analyze_amplifier_meas.m
+% 2. (DONE) delete the local clean_oscope_data function and use the one in helper_functions directory
+% 3. (DONE) delete the duplicate process_oscope_data_helper.sh script (there is one in the helper_fxns directory too)
+% 4. (DONE) vbiases.txt file has been updated to incorporate ALL voltages (so need to update the columns used below accordingly)
+% 5. Remove gainfac
 
 % analysis folder
 global gainfac;  % temporary patch for mis-atten data, delete after 20191119T101410 is no longer needed
@@ -14,86 +15,42 @@ global gainfac;  % temporary patch for mis-atten data, delete after 20191119T101
 %ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/attic/20191118T101600'; gainfac=10;  % scope acq = 300; script acq = 300
 %ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/attic/20191119T101410'; gainfac=10;  % scope acq = 300; script acq = 300
 %ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/attic/20191120T135534'; gainfac=1;   % scope acq = 400; script acq = 400 (mistake!)
-ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20191121T161359'; gainfac=1;
+%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20191121T161359'; gainfac=1;
 
+% new data taken with improved acq script and on wafer5
+%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200212T172727_29D1-5_WP5_1-1-1_amp3st1bw/'; gainfac=1;
+ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200214T174201_29D1-5_WP5_1-1-1_amp3st1bw/'; gainfac=1;
+
+addpath('./helper_functions');
 % clean the oscope data to make it matlab-friendly
 clean_oscope_data(ana_folder);
+vb_dat = load([ana_folder '/vbiases.txt']);
 
-% compute the gain and settling time for each measurement point
-%analyze_oscope_data(ana_folder);
+% walk through every meas and analyze
+ana_res_all = zeros([size(vb_dat,1) 3]);
+for fidx=1:size(vb_dat,1)
+    if (mod(fidx,10)==0)
+        fprintf(1,'Progress: Analyzing meas %d/%d\n',fidx,size(vb_dat,1));
+    end
+
+    measdir=sprintf('%s/meas%04d',ana_folder,vb_dat(fidx,1));
+    [ampin, ampout, settling_time] = analyze_oscope_amp(measdir);
+    ana_res_all(fidx,:) = [ampin, ampout, settling_time];
+end
+
+% concat vbiases and ana results and write the results file
+alldat = [vb_dat ana_res_all];
+resfile = [ana_folder '/results.txt' ];
+csvwrite(resfile,alldat);
+
 
 % generate the visual colormap of the overall results
 [m2b, m4b, gain, outV]=generate_colormap(ana_folder);
-
-% debug code
-%[amplifier_input,amplifier_output,settling_time]=analyze_oscope_amp([ana_folder '/meas0336'])
-
-
-
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %    analysis functions    %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function clean_oscope_data(ana_folder)
-
-    resfile = [ana_folder '/vbiases.txt' ];
-    if (exist(resfile,'file'))
-        fprintf(1,'Found existing resfile (%s)... skipping clean_oscope_data\n',resfile);
-        return
-    end
-
-    dir_files = dir([ana_folder '/meas*']);
-
-    odat_all = cell([1 numel(dir_files)]);
-    for fidx=1:numel(dir_files)
-        if (mod(fidx,10)==0)
-            fprintf(1,'Progress: Cleaning meas %d/%d\n',fidx,numel(dir_files));
-        end
-
-        % clean the data and extract SMU data points
-        measdir=[ana_folder '/' dir_files(fidx).name];
-        [xx odat]=system(sprintf('./process_oscope_data_helper.sh %s',measdir));
-        % remove last character from odat (newline)
-        % and save into the all cell
-        odat_all{fidx}=odat(1:end-1);
-    end
-    
-    % save odat_all to a file
-    fid = fopen(resfile,'w');
-    fprintf(fid,'%s\n',odat_all{:});
-    fclose(fid);
-  
-end % end-function clean_oscope_data
-
-
-function analyze_oscope_data(ana_folder)
-
-    % load the vbias data
-    vb_file = [ana_folder '/vbiases.txt'];
-    vb_dat = load(vb_file);
-
-    % walk through every meas and analyze
-    ana_res_all = zeros([size(vb_dat,1) 3]);
-    for fidx=1:size(vb_dat,1)
-        if (mod(fidx,10)==0)
-            fprintf(1,'Progress: Analyzing meas %d/%d\n',fidx,size(vb_dat,1));
-        end
-        
-        measdir=sprintf('%s/meas%04d',ana_folder,vb_dat(fidx,1));
-        [ampin, ampout, settling_time] = analyze_oscope_amp(measdir);
-        ana_res_all(fidx,:) = [ampin, ampout, settling_time];
-    end
-    
-    % concat vbiases and ana results and write the results file
-    alldat = [vb_dat ana_res_all];
-    resfile = [ana_folder '/results.txt' ];
-    csvwrite(resfile,alldat);
-   
-end % end-function analyze_oscope_data
-
-
 function [amplifier_input,amplifier_output,settling_time]=analyze_oscope_amp(measdir)
 
   debug=false;
@@ -207,12 +164,15 @@ function [ m2b,m4b,gain,outV ] = generate_colormap(ana_folder)
   q=sortrows(q,1);
 
   s.measid=1;
-  s.m2br=2;
-  s.m3br=3;
-  s.m4br=4;
-  s.inval=5;
-  s.outval=6;
-  s.settime=7;
+  s.vcc=2;
+  s.gnd=3;
+  s.m2br=4;
+  s.m3br=5;
+  s.m4br=6;
+  s.m5br=7; % note: this is nothing for the amp
+  s.inval=8;
+  s.outval=9;
+  s.settime=10;
 
   m2b=sort(unique(q(:,s.m2br)));
   m3b=sort(unique(q(:,s.m3br)));
@@ -412,7 +372,11 @@ end
 
 function plot_specific_meas(ana_folder,measID)
     q=load([ana_folder '/meas' sprintf('%04d',measID) '/math2.csv.clean']);
-    qin=load([ana_folder '/meas' sprintf('%04d',measID) '/math1.csv.clean']);
+    if exist([ana_folder '/meas' sprintf('%04d',measID) '/math1.csv.clean'])
+        qin=load([ana_folder '/meas' sprintf('%04d',measID) '/math1.csv.clean']);
+    else
+        qin=load([ana_folder '/meas' sprintf('%04d',measID) '/ch1.csv.clean']);
+    end
     plot(q(:,1),q(:,2)-mean(q(:,2)),'LineWidth',1.5)
     hold on
     plot(qin(:,1),qin(:,2)-abs(min(q(:,2)-mean(q(:,2))))-0.015,'r')

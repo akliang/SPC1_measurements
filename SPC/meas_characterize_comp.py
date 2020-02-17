@@ -57,7 +57,7 @@ def run(mi, measdir, smu_data, acq_delay, cirtype):
             else:
                 acq_delayer.run(mi, acq_delay)
             measdir2 = "%s/meas%04d" % (measdir, dircnt)
-            dod.run(mi, measdir2, smu_data)
+            dod.run(mi, measdir2, smu_data, "false")
 
             dircnt += 1
 

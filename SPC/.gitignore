@@ -4,3 +4,4 @@ attic
 .idea
 ._*
 venv*
+test.py
