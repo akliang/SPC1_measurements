@@ -14,11 +14,13 @@ def run(mi, measdir, smu_data, acq_delay, cirtype):
         vlo = 0
         vbias = (-1, 3.5, 19)
         vthresh = (-1, 4, 6)
+        frequency = 100000
     else:
         vhi = 3.5
         vlo = 0
         vbias = (-0.5, 2.5, 13)
         vthresh = (1, 5, 5)
+        frequency = 100000
 
     smv.send_scpi("v1(0)")
     smv.send_scpi("v2(0)")
@@ -31,7 +33,6 @@ def run(mi, measdir, smu_data, acq_delay, cirtype):
     print("Setting Vcc supplies back to 8 V.")
 
     # program the siggen settings
-    # TODO: add frequency (typically 10 kHz) to siggen setting
     # TODO: offset isnt working correctly?
     query = [
         ["OUTPUT1:STATE OFF"],
@@ -40,6 +41,7 @@ def run(mi, measdir, smu_data, acq_delay, cirtype):
         ["SOURCE1:FUNCTION:SHAPE RAMP"],
         ["SOURCE1:VOLTAGE:LEVEL:IMMEDIATE:HIGH %fV" % vhi],
         ["SOURCE1:VOLTAGE:LEVEL:IMMEDIATE:LOW  %fV" % vlo],
+        ["SOURCE1:FREQUENCY %f" % frequency]
         ["OUTPUT1:STATE ON"],
     ]
     siggen_functions.send_query(query)
