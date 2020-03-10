@@ -7,22 +7,24 @@ from helpers import set_multim2636A_voltage as smv
 import visa
 import meas_characterize_amp
 import meas_characterize_comp
+import meas_characterize_countrate
 
 
 # ---- User-defined settings ---- #
 SPCsetup_path = "../SPCsetup1"
 scopeip = "192.168.66.85"
 unixdir = "/mnt/ArrayData/MasdaX/2018-01/measurements"
-chipID = "29D1-5_WP5_1-1-1_amp3st1bw"
-runcon = "custom step wave 200 Hz 130 mVpp with 1:10 voltage divider, effective 13 mVpp"
-#runcon = "ramp 0-3.5V 10khz, 1.8MEG 12c probe with calibrated gain of 16 (24 dB)"
-notes = "second time trying upgraded python acq script on amplifier"
-meas_type = "amp"
-#meas_type = "comp"
-#cirtype = "schmitt"
+chipID = "29D1-8_WP5_2-4-3_schmitt"
+#runcon = "custom step wave 200 Hz 130 mVpp with 1:10 voltage divider, effective 13 mVpp, horiz acq is 10k samples"
+runcon = "ramp 0-3.5V 100khz, 1.8MEG 12c probe with calibrated gain of 16 (24 dB)"
+notes = "added 50ohm load to siggen input to probe card, running standard comp sweep at 100 kHz"
+#meas_type = "amp"
+meas_type = "comp"
+cirtype = "schmitt"
 #meas_type = "clockgen"
 #meas_type = "counter"
 
+target_recordlength = 10000
 # oscilloscope math channel settings
 # FORMAT:  math<#> = (ch_num, command, num_samples)
 math_ch = (2, "AVG(CH2)", 300)
@@ -79,19 +81,28 @@ mi = rm.open_resource("TCPIP::" + scopeip + "::INSTR")
 # TODO: make this math-setting loop dynamic, currently hard-coded for math2 channel
 mi.write("MATH%s:DEF \"%s\"" % (math_ch[0], math_ch[1]))
 mi.write("MATH%s:NUMAVG %s" % (math_ch[0], math_ch[2]))
+# make sure the record length is 10k samples
+curr_recordlength = float(mi.query("HORIZONTAL:MODE:RECORDLENGTH?"))
+if curr_recordlength != target_recordlength:
+    samplerate_gainfac = target_recordlength/curr_recordlength
+    new_samplerate = float(mi.query("HORIZONTAL:MODE:SAMPLERATE?")) * samplerate_gainfac
+    mi.write("HORIZONTAL:MODE:SAMPLERATE %f" % new_samplerate)
 # TODO: auto turn-on all channels and math
-# TODO: auto-set sig-gen
-# TODO: auto-set horiz and vert?
+# TODO: auto-set horiz and vert to right positions?
 
 if meas_type == "amp":
     # TODO: simplify function variable inputs?
+    mi.write("MATH1:DEF \"Ch1/10\"")
     meas_characterize_amp.run(mi, measdir, smu_data, acq_delay, "high")
 elif meas_type == "comp":
+    mi.write("MATH1:DEF \"Ch1\"")
     meas_characterize_comp.run(mi, measdir, smu_data, acq_delay, cirtype)
 elif meas_type == "clockgen":
     meas_characterize_clockgen.run(mi, measdir, smu_data)
 elif meas_type == "counter":
     meas_characterize_counter.run(mi, measdir, smu_data)
+elif meas_type == "countrate":
+    meas_characterize_countrate.run(mi. measdir, smu_data)
 else:
     print("Error: Invalid meas_type specified")
 
