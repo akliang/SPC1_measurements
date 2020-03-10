@@ -12,7 +12,7 @@ def run(mi, measdir, smu_data, acq_delay, res_level):
         # hi-res settings
         m2b_vals = (-2, 4, 61)
         m3b_vals = (1, 1, 1)
-        m4b_vals = (-2, 4, 25)
+        m4b_vals = (-4, 2, 25)
     else:
         # low-res settings
         m2b_vals = (0.5, 2.5, 3)
