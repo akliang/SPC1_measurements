@@ -3,8 +3,8 @@ import os
 import subprocess
 import time
 import re
-from helpers import set_multim2636A_voltage as smv
 import visa
+from helpers import oscope_functions
 import meas_characterize_amp
 import meas_characterize_comp
 import meas_characterize_countrate
@@ -15,14 +15,23 @@ SPCsetup_path = "../SPCsetup1"
 scopeip = "192.168.66.85"
 unixdir = "/mnt/ArrayData/MasdaX/2018-01/measurements"
 chipID = "29D1-8_WP5_2-4-3_schmitt"
-#runcon = "custom step wave 200 Hz 130 mVpp with 1:10 voltage divider, effective 13 mVpp, horiz acq is 10k samples"
-runcon = "ramp 0-3.5V 100khz, 1.8MEG 12c probe with calibrated gain of 16 (24 dB)"
-notes = "added 50ohm load to siggen input to probe card, running standard comp sweep at 100 kHz"
+
 #meas_type = "amp"
-meas_type = "comp"
-cirtype = "schmitt"
+#runcon = "custom step wave 200 Hz 130 mVpp with 1:10 voltage divider, effective 13 mVpp, horiz acq is 10k samples"
+#notes = "added 50ohm load to siggen input to probe card, running standard comp sweep at 100 kHz"
+
+#meas_type = "comp"
+#cirtype = "schmitt"
+#runcon = "ramp 0-3.5V 100khz, 1.8MEG 12c probe with calibrated gain of 16 (24 dB)"
+#notes = "added 50ohm load to siggen input to probe card, running standard comp sweep at 100 kHz"
+
 #meas_type = "clockgen"
+
 #meas_type = "counter"
+
+meas_type = "countrate"
+runcon = "square 0-3V, freq from 10^2 to 10^7, 50ohm siggen load"
+notes = "fourth trial of new script with improved oscope windowing"
 
 target_recordlength = 10000
 # oscilloscope math channel settings
@@ -78,15 +87,13 @@ idfh.close()
 # connect to the oscilloscope and set up the math channel(s)
 rm = visa.ResourceManager('@py')
 mi = rm.open_resource("TCPIP::" + scopeip + "::INSTR")
+# note: trigger source is changed to CH1 whenever autoset is run
+mi.write("TRIGGER:A:EDGE:SOURCE CH4")
 # TODO: make this math-setting loop dynamic, currently hard-coded for math2 channel
 mi.write("MATH%s:DEF \"%s\"" % (math_ch[0], math_ch[1]))
 mi.write("MATH%s:NUMAVG %s" % (math_ch[0], math_ch[2]))
 # make sure the record length is 10k samples
-curr_recordlength = float(mi.query("HORIZONTAL:MODE:RECORDLENGTH?"))
-if curr_recordlength != target_recordlength:
-    samplerate_gainfac = target_recordlength/curr_recordlength
-    new_samplerate = float(mi.query("HORIZONTAL:MODE:SAMPLERATE?")) * samplerate_gainfac
-    mi.write("HORIZONTAL:MODE:SAMPLERATE %f" % new_samplerate)
+oscope_functions.set_recordlength(mi, 10000)
 # TODO: auto turn-on all channels and math
 # TODO: auto-set horiz and vert to right positions?
 
@@ -102,7 +109,16 @@ elif meas_type == "clockgen":
 elif meas_type == "counter":
     meas_characterize_counter.run(mi, measdir, smu_data)
 elif meas_type == "countrate":
-    meas_characterize_countrate.run(mi. measdir, smu_data)
+    voltage_db = {
+        "29D1-8_WP5_2-4-3_schmitt": ["v1(8)", "v2(0)", "v3(8)", "v4(0)", "v5(1)", "v6(3)", "comp"]
+    }
+    if chipID not in voltage_db.keys():
+        print("Error: no voltage data entry found for %s" % chipID)
+        quit()
+    else:
+        voltages = voltage_db[chipID]
+        CRmeas_type = voltages.pop()
+    meas_characterize_countrate.run(mi, measdir, smu_data, acq_delay, voltages, CRmeas_type)
 else:
     print("Error: Invalid meas_type specified")
 
