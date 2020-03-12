@@ -3,7 +3,7 @@ from helpers import set_multim2636A_voltage as smv
 from helpers import download_oscope_data as dod
 import time
 import numpy as np
-from helpers import acq_delayer
+from helpers import oscope_functions
 
 
 def run(mi, measdir, smu_data, acq_delay, res_level):
@@ -33,7 +33,7 @@ def run(mi, measdir, smu_data, acq_delay, res_level):
                 if acq_delay == 0:
                     time.sleep(2)  # wait a few seconds to let everything settle
                 else:
-                    acq_delayer.run(mi, acq_delay)
+                    oscope_functions.acq_delayer(mi, acq_delay)
                 measdir2 = "%s/meas%04d" % (measdir, dircnt)
                 dod.run(mi, measdir2, smu_data, "false")
 
