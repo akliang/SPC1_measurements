@@ -5,7 +5,7 @@ import subprocess
 import re
 import visa
 from helpers import download_oscope_data as dod
-from helpers import acq_delayer
+from helpers import oscope_functions
 
 
 def run():
@@ -31,7 +31,7 @@ def run():
     smu_data = re.sub("\$\(hostname\)_", hostname.decode('utf-8'), smu_data.decode('utf-8'))
     smu_data = smu_data.rstrip()  # take off newline
 
-    acq_delayer.run(mi, 400)
+    oscope_functions.run(mi, 400)
     dod.run(mi, measdir, smu_data)
 
     # write notes files to measdir
