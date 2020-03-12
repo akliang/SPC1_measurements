@@ -1,67 +1,77 @@
 
 import numpy as np
+import math
 import time
 from helpers import download_oscope_data as dod
 from helpers import siggen_functions
 from helpers import set_multim2636A_voltage as smv
-from helpers import acq_delayer
+from helpers import oscope_functions
 
 
-def run(mi, measdir, smu_data, acq_delay, cirtype):
+def run(mi, measdir, smu_data, acq_delay, voltages, CRmeas_type):
 
-    if cirtype == "schmitt":
-        vhi = 3.5
+    # set voltages
+    for val in voltages:
+        smv.send_scpi("%s" % val)
+
+    # program some basic overall siggen settings
+    if CRmeas_type == "comp":
+        vhi = 3
         vlo = 0
-        vbias = (-1, 3.5, 19)
-        vthresh = (-1, 4, 6)
-        frequency = 100000
-    else:
-        vhi = 3.5
+        # note: beyond 4.9 MHz, trigger output from siggen is divided down (see AFG quick start manual)
+        # do not recommend testing higher than 1 MHz
+        frequency = (2, 7, 60)
+    elif CRmeas_type == "clockgen":
+        vhi = 3
         vlo = 0
-        vbias = (-0.5, 2.5, 13)
-        vthresh = (1, 5, 5)
-        frequency = 100000
-
-    smv.send_scpi("v1(0)")
-    smv.send_scpi("v2(0)")
-    smv.send_scpi("v3(0)")
-    smv.send_scpi("v4(0)")
-    print("[Pre-run calibration] Vcc supplies set to 0 V, zero probe currents before starting measurement.")
-    input("Press ENTER to continue...")
-    smv.send_scpi("v1(8)")
-    smv.send_scpi("v3(8)")
-    print("Setting Vcc supplies back to 8 V.")
-
-    # program the siggen settings
-    # TODO: offset isnt working correctly?
+        frequency = (2, 7, 50)
     query = [
         ["OUTPUT1:STATE OFF"],
         ["OUTPUT2:STATE OFF"],
         ["SOURCE1:VOLTAGE:UNIT VPP"],
-        ["SOURCE1:FUNCTION:SHAPE RAMP"],
+        ["SOURCE1:FUNCTION:SHAPE SQUARE"],
         ["SOURCE1:VOLTAGE:LEVEL:IMMEDIATE:HIGH %fV" % vhi],
         ["SOURCE1:VOLTAGE:LEVEL:IMMEDIATE:LOW  %fV" % vlo],
-        ["SOURCE1:FREQUENCY %f" % frequency]
         ["OUTPUT1:STATE ON"],
     ]
     siggen_functions.send_query(query)
 
+    # run count rate loop
     dircnt = 1  # variable used to create separate folders for each meas point
-    for P in np.linspace(vbias[0], vbias[1], num=vbias[2], endpoint=True):
-        for F in np.linspace(vthresh[0], vthresh[1], num=vthresh[2], endpoint=True):
+    for F in np.logspace(frequency[0], frequency[1], num=frequency[2], endpoint=True, base=10):
 
-            # write the voltages to the SPCpytrigger file
-            smv.send_scpi("v5(%f)" % P)
-            smv.send_scpi("v6(%f)" % F)
+        # change the siggen frequency
+        query = [
+            ["SOURCE1:FREQUENCY %f" % F]
+        ]
+        siggen_functions.send_query(query)
 
-            if acq_delay == 0:
-                time.sleep(2)  # wait a few seconds to let everything settle
-            else:
-                acq_delayer.run(mi, acq_delay)
-            measdir2 = "%s/meas%04d" % (measdir, dircnt)
-            dod.run(mi, measdir2, smu_data, "false")
+        # change the time window and record length for horizontal acq
+        mi.write('AUTOSET EXECUTE')
+        # unfortunately, OPC and BUSY dont work here, so just hard-coded a sleep...
+        time.sleep(4.5)
 
-            dircnt += 1
+        # fix for: sometimes autoset chooses the wrong horizontal div scale
+        # round up to nearest whole frequency
+        Fpower = math.floor(math.log10(F))
+        F = F / 10 ** Fpower
+        F = math.ceil(F)
+        F = F * 10 ** Fpower
+        Fdiv = 1/F
+        # set the oscope to at least this division step
+        mi.write("HORIZONTAL:MODE:SCALE %0.12f" % Fdiv)
+        # make sure the record length is 10k
+        oscope_functions.set_recordlength(mi, 10000)
+
+        # acquire the data
+        if acq_delay == 0:
+            time.sleep(2)  # wait a few seconds to let everything settle
+        else:
+            oscope_functions.acq_delayer(mi, acq_delay)
+        measdir2 = "%s/meas%04d" % (measdir, dircnt)
+        dod.run(mi, measdir2, smu_data, "false")
+
+        dircnt += 1
 
 
 
