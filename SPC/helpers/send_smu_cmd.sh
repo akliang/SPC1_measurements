@@ -38,6 +38,7 @@ done
 
 
 # send the command over to SMUHOST (make sure proxy port on eve is open!)
+# TODO: evesock isn't needed anymore
 if [ -e "/usr/bin/nc" ]; then
   cat "$INFILE" | ssh -o ProxyCommand='/usr/bin/nc -x 127.0.0.1:9998 %h %p' $SMUHOST "$CMD"
 else
