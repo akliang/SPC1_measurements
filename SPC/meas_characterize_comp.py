@@ -10,7 +10,7 @@ from helpers import oscope_functions
 def run(mi, measdir, smu_data, acq_delay, cirtype):
 
     if cirtype == "schmitt":
-        vhi = 3.5
+        vhi = 4.5
         vlo = 0
         vbias = (-1, 3.5, 19)
         vthresh = (-1, 4, 6)
@@ -41,7 +41,7 @@ def run(mi, measdir, smu_data, acq_delay, cirtype):
         ["SOURCE1:FUNCTION:SHAPE RAMP"],
         ["SOURCE1:VOLTAGE:LEVEL:IMMEDIATE:HIGH %fV" % vhi],
         ["SOURCE1:VOLTAGE:LEVEL:IMMEDIATE:LOW  %fV" % vlo],
-        ["SOURCE1:FREQUENCY %f" % frequency]
+        ["SOURCE1:FREQUENCY %f" % frequency],
         ["OUTPUT1:STATE ON"],
     ]
     siggen_functions.send_query(query)
