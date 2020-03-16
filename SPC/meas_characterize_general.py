@@ -20,18 +20,18 @@ chipID = "29D1-8_WP5_2-4-3_schmitt"
 #runcon = "custom step wave 200 Hz 130 mVpp with 1:10 voltage divider, effective 13 mVpp, horiz acq is 10k samples"
 #notes = "added 50ohm load to siggen input to probe card, running standard comp sweep at 100 kHz"
 
-#meas_type = "comp"
-#cirtype = "schmitt"
-#runcon = "ramp 0-3.5V 100khz, 1.8MEG 12c probe with calibrated gain of 16 (24 dB)"
-#notes = "added 50ohm load to siggen input to probe card, running standard comp sweep at 100 kHz"
+meas_type = "comp"
+cirtype = "schmitt"
+runcon = "ramp 0-4.5V 100khz, 1.8MEG 12c probe with calibrated gain of 16 (24 dB)"
+notes = "re-running standard comp sweep with high ramp max so hysteresis curve looks more symmetrical"
 
 #meas_type = "clockgen"
 
 #meas_type = "counter"
 
-meas_type = "countrate"
-runcon = "square 0-3V, freq from 10^2 to 10^7, 50ohm siggen load"
-notes = "fourth trial of new script with improved oscope windowing"
+#meas_type = "countrate"
+#runcon = "square 0-3V, freq from 10^2 to 10^7, 50ohm siggen load"
+#notes = "fourth trial of new script with improved oscope windowing"
 
 target_recordlength = 10000
 # oscilloscope math channel settings
