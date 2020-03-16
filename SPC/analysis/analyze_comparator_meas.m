@@ -4,16 +4,16 @@ global best_vthresh;
 global input_type;
 % running an explicit clear since the normal clear does not clear globals
 clear global input_type
+global fign
+fign = 0;
 
 %ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200122T164209_29D1-8_WP5_2-4-3_schmitt';  % first full acq of comparator
 %ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200127T171505_29D1-8_WP5_2-4-3_schmitt';  % second full acq of comparator
 %ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200129T173850_29D1-8_WP5_2-4-3_schmitt';  best_vbias = 0.5; best_vthresh=0; % third full acq of comparator
 %ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200309T123730_29D1-8_WP5_2-4-3_schmitt';  best_vbias = 1; best_vthresh=3; % fourth full acq of comparator, 100 khz, improper load termination
-%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200309T150149_29D1-8_WP5_2-4-3_schmitt';  best_vbias = 1; best_vthresh=3; % fourth full acq of comparator, 100 khz, fixed load termination
-%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200310T164402_29D1-8_WP5_2-4-3_schmitt';  best_vbias = NaN; best_vthresh=NaN;  % count rate sweep at vbias(1) and vthresh(3), 10 steps, up to 10 MHz, errors out on the 10 MHz measurement
-ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200311T123835_29D1-8_WP5_2-4-3_schmitt';  best_vbias = NaN; best_vthresh=NaN;  % count rate sweep at vbias(1) and vthresh(3), finer 50 steps, only up to 1 MHz since beyond 4.9 MHz, the siggen trigger isn't valid
-ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200311T135710_29D1-8_WP5_2-4-3_schmitt';  best_vbias = NaN; best_vthresh=NaN;  % count rate sweep at vbias(1) and vthresh(3), finer 50 steps, only up to 1 MHz since beyond 4.9 MHz, the siggen trigger isn't valid
-ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200311T161607_29D1-8_WP5_2-4-3_schmitt';  best_vbias = NaN; best_vthresh=NaN;  % count rate sweep at vbias(1) and vthresh(3), finer 50 steps, only up to 1 MHz since beyond 4.9 MHz, the siggen trigger isn't valid
+ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200309T150149_29D1-8_WP5_2-4-3_schmitt';  best_vbias = 1; best_vthresh=3; % fourth full acq of comparator, 100 khz, fixed load termination
+%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200311T161607_29D1-8_WP5_2-4-3_schmitt';  best_vbias = NaN; best_vthresh=NaN;  % count rate sweep at vbias(1) and vthresh(3)
+ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200312T170353_29D1-8_WP5_2-4-3_schmitt';  best_vbias = 1; best_vthresh=3;  % full acq with ramp 0-4.5V so hystersis curve looks more symmetrical
 
 addpath('./helper_functions');
 % clean the oscope data to make it matlab-friendly
@@ -21,13 +21,12 @@ clean_oscope_data(ana_folder);
 % load the vbias data
 vb_dat = load([ana_folder '/vbiases.txt']);
 
+%%{
 % walk through every meas and analyze
 global waveform_save;
 waveform_save={};
 ana_res_all = zeros([size(vb_dat,1) 7]);
 for fidx=1:size(vb_dat,1)
-%for fidx=[26:28 42:44]
-%for fidx=[58]
     if (mod(fidx,10)==0)
         fprintf(1,'Progress: Analyzing meas %d/%d\n',fidx,size(vb_dat,1));
     end
@@ -41,16 +40,16 @@ end
 alldat = [vb_dat ana_res_all];
 resfile = [ana_folder '/results.txt' ];
 csvwrite(resfile,alldat);
-
+%}
 
 close all; generate_colormap(ana_folder);
 
-
 function [minout, maxout, deltaout, rising_thresh, falling_thresh, hysteresis, frequency] = analyze_comparator_oscope_data(measdir)
 
-  global waveform_save
-  global wss
-  global input_type
+  global waveform_save;
+  global wss;
+  global input_type;
+  global fign;
   
   debug=false;
   
@@ -70,9 +69,10 @@ function [minout, maxout, deltaout, rising_thresh, falling_thresh, hysteresis, f
       in_raw_delta = (in_raw_delta + min(in_raw(:,2))) /2;
       in_test1 = (in_raw(:,2) > in_raw_delta*0.4);
       in_test2 = (in_raw(:,2) > in_raw_delta*0.6);
-
+      
       if debug
-          figure
+          fign = fign+1;
+          figure(fign)
           plot(in_raw(:,2))
           hold on
           plot(out_raw(:,2),'r')
@@ -80,7 +80,7 @@ function [minout, maxout, deltaout, rising_thresh, falling_thresh, hysteresis, f
       end
   
       % noise in the signal can cause the high-low transistions to jitter, use a threshold to detect square waves
-      if ((in_test1 - in_test2) < 10)
+      if (abs(sum(in_test1 - in_test2)) < 10)
           fprintf(1,'Square wave detected for in_raw, using ch1 as the trig_raw\n');
           input_type = 'square';
       else
@@ -91,7 +91,7 @@ function [minout, maxout, deltaout, rising_thresh, falling_thresh, hysteresis, f
   if (strcmp(input_type,'square'))
       trig_raw = in_raw;
   else
-      trig_raw=load([measdir '/ch4.csv.clean']);  % use siggen trig, or ch1 input?
+      trig_raw=load([measdir '/ch4.csv.clean']);
   end
   trig = trig_raw(:,2);
     
@@ -99,23 +99,14 @@ function [minout, maxout, deltaout, rising_thresh, falling_thresh, hysteresis, f
   % due to jittery noise, purposely look for pos edge slightly above mean and neg edge slightly below mean
   pos_trig_edges = find(diff(trig > mean(trig)*.6) == 1)';
   neg_trig_edges = find(diff(trig > mean(trig)*.4) == -1)';
-  % i dont think the below code is good, can cause problems... commenting out for now.  why does it HAVE to have an anchor?
-%   % create an index anchor if the waveform begins in the low state
-%   if (neg_trig_edges(1) > pos_trig_edges(1))
-%       neg_trig_edges = [1 neg_trig_edges]
-%   end
-%   % create an index anchor if the waveform ends on the low state
-%   if (neg_trig_edges(end) < pos_trig_edges(end))
-%       neg_trig_edges = [neg_trig_edges numel(trig)]
-%   end
   if (strcmp(input_type,'square'))
     % noise in the signal can cause the high-low transistions to jitter
     % make sure the jumps between pos_trig_edges is a true jump and not jitter
-    trig_edge_mean = mean(diff(pos_trig_edges));
+    trig_edge_idx_mean = mean(diff(pos_trig_edges));
     % for a normal case, trig_edge_mean will accidentall remove half of the valid points, so set threshold a moderate amount below the mean
     % for jittery cases, this moderate threshold should still detect the jitter since jitter diff is far below the mean
     % for very jittery cases, this could break down if the mean gets dragged down too low
-    trig_edge_selector = (diff(pos_trig_edges) > trig_edge_mean*0.75);
+    trig_edge_selector = (diff(pos_trig_edges) > trig_edge_idx_mean*0.75);
     % diff always loses an element, so pad a 1 to the end of the logical
     trig_edge_selector = [trig_edge_selector true];
     % select out the pos_trig_edges using the logical filter
@@ -146,13 +137,16 @@ function [minout, maxout, deltaout, rising_thresh, falling_thresh, hysteresis, f
     rampminR = pos_trig_edges(2);
   elseif (strcmp(input_type,'ramp'))
       % find the first rampmin
-      [~, rampminL] = min(in_raw(neg_trig_edges(1):pos_trig_edges(1),2));
+      [~, rampminL] = min(in_raw(neg_trig_edges(1):neg_trig_edges(2),2));
       rampminL = rampminL+neg_trig_edges(1);
       % find the second rampmin
-      [~, rampminR] = min(in_raw(neg_trig_edges(2):pos_trig_edges(2),2));
+      [~, rampminR] = min(in_raw(neg_trig_edges(2):neg_trig_edges(3),2));
       rampminR = rampminR + neg_trig_edges(2);
+      % find the rampmax between these two points
+      [~, rampmax] = max(in_raw(rampminL:rampminR,2));
+      rampmax = rampmax + rampminL;
   end
-  % segment out the data from one rampmin to the other
+  % finally, segment out the data from one rampmin to the other
   time = out_raw(rampminL:rampminR,1);
   outvals = out_raw(rampminL:rampminR,2);
   invals = in_raw(rampminL:rampminR,2);
@@ -174,7 +168,8 @@ function [minout, maxout, deltaout, rising_thresh, falling_thresh, hysteresis, f
   frequency = 1/(time(end) - time(1));
   
   if debug
-      figure
+      fign = fign+1;
+      figure(fign)
       plot(time,invals)
       hold on
       plot(time,outvals,'r')
@@ -194,7 +189,14 @@ function [minout, maxout, deltaout, rising_thresh, falling_thresh, hysteresis, f
   wss.trig = 4;
   wss.deltaout = 5;
   wss.hysteresis = 6;
-  waveform_save{measID} = {time, invals, outvals, trig, deltaout, hysteresis};
+  wss.rampminL = 7;
+  wss.rampminR = 8;
+  wss.rampmax = 9;
+  wss.intersectL = 10;
+  wss.intersectR = 11;
+  wss.minout = 12;
+  wss.maxout = 13;
+  waveform_save{measID} = {time, invals, outvals, trig, deltaout, hysteresis, rampminL, rampminR, rampmax, intersectL, intersectR, minout, maxout};
 
 end
 
@@ -205,6 +207,7 @@ function generate_colormap(ana_folder)
   global s;
   global best_vbias;
   global best_vthresh;
+  global fign;
 
   [~, filename, ~] = fileparts(ana_folder);
   set(0,'defaultTextInterpreter','none');
@@ -212,24 +215,21 @@ function generate_colormap(ana_folder)
   q=load([ana_folder '/results.txt']);
   q=sortrows(q,1);
 
-  % why is this coded this way?  i dont remember...
-  if (numel(s) == 0)
-    s.measid=1;
-    s.vcca=2;
-    s.gnda=3;
-    s.vccd=4;
-    s.gndd=5;
-    s.vbias=6;
-    s.vthresh=7;
-    s.minout=8;
-    s.maxout=9;
-    s.deltaout=10;
-    s.rising_thresh=11;
-    s.falling_thresh=12;
-    s.hysteresis=13;
-    s.frequency=14;
-  end
-  
+  s.measid=1;
+  s.vcca=2;
+  s.gnda=3;
+  s.vccd=4;
+  s.gndd=5;
+  s.vbias=6;
+  s.vthresh=7;
+  s.minout=8;
+  s.maxout=9;
+  s.deltaout=10;
+  s.rising_thresh=11;
+  s.falling_thresh=12;
+  s.hysteresis=13;
+  s.frequency=14;
+
   vbias=sort(unique(q(:,s.vbias)));
   vthresh=sort(unique(q(:,s.vthresh)));
 
@@ -250,7 +250,7 @@ function generate_colormap(ana_folder)
   pngpath = [ana_folder '/analysis_pngs'];
   if ~exist(pngpath,'dir'); mkdir(pngpath); end
   
-  % find the "best point"
+  % find the "best point" (note: hard-coding opt_r and opt_c instead of using this code)
   % currently defined as hysteresis between 0.25 and 0.5V
   % and then maximum delta out
   valid_idx1 = (hysteresis>0.25);
@@ -272,10 +272,9 @@ function generate_colormap(ana_folder)
   valid_idx = valid_idx1(valid_idx2);
   measID = q(valid_idx,1);
   
-  figure(1)
-  plot_specific_meas(ana_folder, [vbias(opt_r) vthresh(opt_c)]);
   
-  figure(2)
+  fign = fign+1;
+  figure(fign)
   % faster changing dimension (vthresh) goes first (x-dir)
   imagesc(vthresh,vbias,deltaout); colorbar
   set(gca,'YDir','normal');
@@ -286,7 +285,8 @@ function generate_colormap(ana_folder)
   caxis([0 8])
   saveas(gcf,[pngpath '/deltaout.png']);
 
-  figure(3)
+  fign = fign+1;
+  figure(fign)
   imagesc(vthresh,vbias,hysteresis); colorbar
   set(gca,'YDir','normal');
   xlabel('Vthresh (V)')
@@ -304,29 +304,56 @@ function generate_colormap(ana_folder)
                   'waveform_save', 'wss'};
   save([ana_folder '/ana_results.mat'],vars_to_save{:},'-v7');
 
+
+  % plot_specific_meas depends on ana_result.m existing, so it has to go here
+  plot_specific_meas(ana_folder, [vbias(opt_r) vthresh(opt_c)]);
+
 end
 
 function plot_countrate(ana_folder)
-  global s
+  global s;
+  global vbias;
+  global vthresh;
+  global fign;
+
+  % create folder to save analysis PNGs
+  pngpath = [ana_folder '/analysis_pngs'];
+  if ~exist(pngpath,'dir'); mkdir(pngpath); end
 
   q=load([ana_folder '/results.txt']);
   q=sortrows(q,1);
-  
-  % todo: if analysis code can set invalid points to freq=0, then this can eliminate them
-  qfreq = q(:,s.frequency);
-  qfreq(qfreq==0) = NaN;
-  q(:,s.frequency) = qfreq;
-  
 
-  
-  figure(99)
-  semilogx(q(:,s.frequency),q(:,s.deltaout))
+  % find the max count rate
+  % first, find the mean of the deltaout when the circuit is functioning
+  deltaout_idx = (q(:,s.deltaout) > mean(q(:,s.deltaout)));
+  % find the level that's 95-percent of the total
+  deltaout_mean = mean(q(deltaout_idx,s.deltaout));
+  cr_max_idx = (q(:,s.deltaout) > deltaout_mean*0.95);
+  cr_max_idx = find(diff(cr_max_idx)==-1)+1;
+  cr_max = q(cr_max_idx,s.frequency);
+ 
+  fign = fign+1; 
+  figure(fign)
+  semilogx(q(:,s.frequency),q(:,s.deltaout), 'r-o')
+  hold on
+  plot(q(cr_max_idx,s.frequency),q(cr_max_idx,s.deltaout),'kx')
+  hold off
+  title(sprintf('Count rate plot - max count rate: %f',cr_max))
+  xlabel('Frequency')
+  ylabel('Output voltage')
+  saveas(gcf,[pngpath '/count_rate.png']);
+
+  % save the analysis data for make_paper_plots
+  vars_to_save = {'vbias','vthresh','q','s', ...
+                  'deltaout_mean','cr_max','cr_max_idx'};
+  save([ana_folder '/ana_results.mat'],vars_to_save{:},'-v7');
 
 end
 
 function plot_specific_meas(ana_folder, input)
 
   global s;
+  global fign;
 
   [~, filename, ~] = fileparts(ana_folder);
   set(0,'defaultTextInterpreter','none');
@@ -352,12 +379,43 @@ function plot_specific_meas(ana_folder, input)
       qout = load([measdir '/ch2.csv.clean']);
   end
   
-  %figure
+  % waveform plot
+  fign = fign+1;
+  figure(fign)
   plot(qin(:,1),qin(:,2))
   hold on
   plot(qout(:,1),qout(:,2),'r')
   hold off
   saveas(gcf,[ana_folder sprintf('/analysis_pngs/meas%04d.png',idx)]);
 
+  % hysteresis plot
+  qmat = load([ana_folder '/ana_results.mat']);
+  qwaveform_save = qmat.waveform_save{idx};
+  qrampminL = qwaveform_save{qmat.wss.rampminL};
+  qrampminR = qwaveform_save{qmat.wss.rampminR};
+  qrampmax  = qwaveform_save{qmat.wss.rampmax};
+  fign = fign+1;
+  figure(fign)
+  plot(qin(qrampminL:qrampminR,1),qin(qrampminL:qrampminR,2))
+  hold on
+  plot(qout(qrampminL:qrampminR,1),qout(qrampminL:qrampminR,2),'r')
+  plot(qin(qrampmax,1),qin(qrampmax,2),'ko');
+  hold off
+  
+  % segment out the rising ramp data from the falling ramp data
+  rise_dat_in  = qin(qrampminL:qrampmax,2);
+  rise_dat_out = qout(qrampminL:qrampmax,2);
+  fall_dat_in  = qin(qrampmax:qrampminR,2);
+  fall_dat_out = qout(qrampmax:qrampminR,2);
+  
+  fign = fign+1;
+  figure(fign)
+  plot(rise_dat_in,rise_dat_out);
+  hold on
+  plot(fall_dat_in,fall_dat_out,'r');
+  hold off
+  
+  
+  
 
 end
