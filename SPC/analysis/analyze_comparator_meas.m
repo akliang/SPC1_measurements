@@ -11,9 +11,10 @@ fign = 0;
 %ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200127T171505_29D1-8_WP5_2-4-3_schmitt';  % second full acq of comparator
 %ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200129T173850_29D1-8_WP5_2-4-3_schmitt';  best_vbias = 0.5; best_vthresh=0; % third full acq of comparator
 %ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200309T123730_29D1-8_WP5_2-4-3_schmitt';  best_vbias = 1; best_vthresh=3; % fourth full acq of comparator, 100 khz, improper load termination
-ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200309T150149_29D1-8_WP5_2-4-3_schmitt';  best_vbias = 1; best_vthresh=3; % fourth full acq of comparator, 100 khz, fixed load termination
-%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200311T161607_29D1-8_WP5_2-4-3_schmitt';  best_vbias = NaN; best_vthresh=NaN;  % count rate sweep at vbias(1) and vthresh(3)
-ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200312T170353_29D1-8_WP5_2-4-3_schmitt';  best_vbias = 1; best_vthresh=3;  % full acq with ramp 0-4.5V so hystersis curve looks more symmetrical
+%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200309T150149_29D1-8_WP5_2-4-3_schmitt';  best_vbias = 1; best_vthresh=3; % fourth full acq of comparator, 100 khz, fixed load termination
+
+ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200311T161607_29D1-8_WP5_2-4-3_schmitt';  best_vbias = NaN; best_vthresh=NaN;  % count rate sweep at vbias(1) and vthresh(3)
+%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200312T170353_29D1-8_WP5_2-4-3_schmitt';  best_vbias = 1; best_vthresh=3;  % full acq with ramp 0-4.5V so hystersis curve looks more symmetrical
 
 addpath('./helper_functions');
 % clean the oscope data to make it matlab-friendly
@@ -43,6 +44,7 @@ csvwrite(resfile,alldat);
 %}
 
 close all; generate_colormap(ana_folder);
+
 
 function [minout, maxout, deltaout, rising_thresh, falling_thresh, hysteresis, frequency] = analyze_comparator_oscope_data(measdir)
 
@@ -79,7 +81,7 @@ function [minout, maxout, deltaout, rising_thresh, falling_thresh, hysteresis, f
           hold off
       end
   
-      % noise in the signal can cause the high-low transistions to jitter, use a threshold to detect square waves
+      % noise in the signal can cause the high-low transistions to jitter, allow a very small amount of deviation in the 2 thresholds
       if (abs(sum(in_test1 - in_test2)) < 10)
           fprintf(1,'Square wave detected for in_raw, using ch1 as the trig_raw\n');
           input_type = 'square';
@@ -132,9 +134,19 @@ function [minout, maxout, deltaout, rising_thresh, falling_thresh, hysteresis, f
     % drop all NaN entries
     pos_trig_edges = pos_trig_edges(~isnan(pos_trig_edges));
     
+    % shift the pos_trig_edges to be in the middle of a pos and neg
+    % that way the waveform doesnt start immediately on a sharp transition edge
+    % makes it easier to visualize the waveform and possibly to analyze
+    %pos_trig_edges
+    %tmp = [pos_trig_edges(1:end-1) ; pos_trig_edges(2:end)];
+    %tmp = floor(mean(tmp,1))  % this is approximately all the neg edges
+    %tmp = [pos_trig_edges(1:end-1) ; tmp];
+    %pos_trig_edges = floor(mean(tmp,1))
+    
     % finally, pick out the edges to further process
     rampminL = pos_trig_edges(1);
     rampminR = pos_trig_edges(2);
+    rampmax = pos_trig_edges(1);  % square wave doesnt really have a rampmax...
   elseif (strcmp(input_type,'ramp'))
       % find the first rampmin
       [~, rampminL] = min(in_raw(neg_trig_edges(1):neg_trig_edges(2),2));
@@ -144,7 +156,10 @@ function [minout, maxout, deltaout, rising_thresh, falling_thresh, hysteresis, f
       rampminR = rampminR + neg_trig_edges(2);
       % find the rampmax between these two points
       [~, rampmax] = max(in_raw(rampminL:rampminR,2));
-      rampmax = rampmax + rampminL;
+      % note: rampmax does not need to be absolute idx, so i commented this out
+      % relative idx (relative to rampminL and rampminR) is good enough for hysteresis plotting later
+      % this makes rampmax inconsistent with rampminL and rampminR, which are in absolute idx
+      %rampmax = rampmax + rampminL;
   end
   % finally, segment out the data from one rampmin to the other
   time = out_raw(rampminL:rampminR,1);
@@ -305,7 +320,7 @@ function generate_colormap(ana_folder)
   save([ana_folder '/ana_results.mat'],vars_to_save{:},'-v7');
 
 
-  % plot_specific_meas depends on ana_result.m existing, so it has to go here
+  % plot_specific_meas depends on ana_result.mat existing, so it has to go here
   plot_specific_meas(ana_folder, [vbias(opt_r) vthresh(opt_c)]);
 
 end
@@ -315,6 +330,8 @@ function plot_countrate(ana_folder)
   global vbias;
   global vthresh;
   global fign;
+  global waveform_save;
+  global wss;
 
   % create folder to save analysis PNGs
   pngpath = [ana_folder '/analysis_pngs'];
@@ -345,9 +362,11 @@ function plot_countrate(ana_folder)
 
   % save the analysis data for make_paper_plots
   vars_to_save = {'vbias','vthresh','q','s', ...
+                  'waveform_save', 'wss', ...
                   'deltaout_mean','cr_max','cr_max_idx'};
   save([ana_folder '/ana_results.mat'],vars_to_save{:},'-v7');
 
+  plot_specific_meas(ana_folder, cr_max_idx);
 end
 
 function plot_specific_meas(ana_folder, input)
@@ -379,42 +398,48 @@ function plot_specific_meas(ana_folder, input)
       qout = load([measdir '/ch2.csv.clean']);
   end
   
-  % waveform plot
+  % full waveform plot
   fign = fign+1;
   figure(fign)
   plot(qin(:,1),qin(:,2))
   hold on
   plot(qout(:,1),qout(:,2),'r')
   hold off
+  title('full waveform plot')
   saveas(gcf,[ana_folder sprintf('/analysis_pngs/meas%04d.png',idx)]);
 
-  % hysteresis plot
+  % single waveform plot
   qmat = load([ana_folder '/ana_results.mat']);
-  qwaveform_save = qmat.waveform_save{idx};
-  qrampminL = qwaveform_save{qmat.wss.rampminL};
-  qrampminR = qwaveform_save{qmat.wss.rampminR};
-  qrampmax  = qwaveform_save{qmat.wss.rampmax};
-  fign = fign+1;
-  figure(fign)
-  plot(qin(qrampminL:qrampminR,1),qin(qrampminL:qrampminR,2))
-  hold on
-  plot(qout(qrampminL:qrampminR,1),qout(qrampminL:qrampminR,2),'r')
-  plot(qin(qrampmax,1),qin(qrampmax,2),'ko');
-  hold off
+  if isfield(qmat,'waveform_save')
+      qwaveform_save = qmat.waveform_save{idx};
+      qrampminL = qwaveform_save{qmat.wss.rampminL};
+      qrampminR = qwaveform_save{qmat.wss.rampminR};
+      qrampmax  = qwaveform_save{qmat.wss.rampmax};
+      fign = fign+1;
+      figure(fign)
+      plot(qin(qrampminL:qrampminR,1),qin(qrampminL:qrampminR,2))
+      hold on
+      plot(qout(qrampminL:qrampminR,1),qout(qrampminL:qrampminR,2),'r')
+      plot(qin(qrampmax,1),qin(qrampmax,2),'ko');
+      hold off
+      title('single waveform plot')
+      saveas(gcf,[ana_folder sprintf('/analysis_pngs/meas%04d_single.png',idx)]);
   
-  % segment out the rising ramp data from the falling ramp data
-  rise_dat_in  = qin(qrampminL:qrampmax,2);
-  rise_dat_out = qout(qrampminL:qrampmax,2);
-  fall_dat_in  = qin(qrampmax:qrampminR,2);
-  fall_dat_out = qout(qrampmax:qrampminR,2);
   
-  fign = fign+1;
-  figure(fign)
-  plot(rise_dat_in,rise_dat_out);
-  hold on
-  plot(fall_dat_in,fall_dat_out,'r');
-  hold off
-  
+      % hysteresis plot
+      rise_dat_in  = qin(qrampminL:qrampmax,2);
+      rise_dat_out = qout(qrampminL:qrampmax,2);
+      fall_dat_in  = qin(qrampmax:qrampminR,2);
+      fall_dat_out = qout(qrampmax:qrampminR,2);
+      fign = fign+1;
+      figure(fign)
+      plot(rise_dat_in,rise_dat_out);
+      hold on
+      plot(fall_dat_in,fall_dat_out,'r');
+      hold off
+      title('hysteresis plot')
+      saveas(gcf,[ana_folder sprintf('/analysis_pngs/meas%04d_hysteresis.png',idx)]);
+  end
   
   
 
