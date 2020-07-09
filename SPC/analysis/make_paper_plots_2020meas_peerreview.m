@@ -1,9 +1,12 @@
 
-function make_paper_plots_pmb2020_abstract()
+global paper_folder;
 
-%amp_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200217T170121_29D1-5_WP5_1-1-1_amp3st1bw/';
+paper_folder = '/Volumes/bongo/Albert/Publications/2020-PCAmeasurement/paper_figures';
+%amp_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200217T170121_29D1-5_WP5_1-1-1_amp3st1bw/'; % why is this one here?
 amp_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200219T104707_29D1-5_WP5_1-1-1_amp3st1bw/';
-comp_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200129T173850_29D1-8_WP5_2-4-3_schmitt';
+comp_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200312T170353_29D1-8_WP5_2-4-3_schmitt';  best_vbias = 1; best_vthresh=3;
+comp_cr_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200311T161607_29D1-8_WP5_2-4-3_schmitt';
+clockgen_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200319T210650_29D1-8_WP8_4-6-10_2SR3inv';
 
 global width height;
 iptsetpref('ImshowBorder','loose');
@@ -38,21 +41,20 @@ defsize = [0 0 width height];
 set(0, 'defaultFigurePaperPosition', defsize);
 
 plotFigure1(amp_folder)
-plotFigure2(comp_folder)
+plotFigure2(comp_folder, comp_cr_folder)
+plotFigure3(clockgen_folder)
 
-end % end-function-header
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % FIGURE 1 - Amplifier
 function plotFigure1(ana_folder)
 
+global paper_folder;
 global width height;
 cvec={'k-s','k-x','k-d','k-o'};
-png_folder = [ana_folder '/paper_figures'];
-if ~exist(png_folder)
-    mkdir(png_folder);
-end
+png_folder = paper_folder;  % legacy keyword was png_folder... update and remove this in the future
 
 % load the data
 if exist([ana_folder '/ana_results.mat'])
@@ -95,7 +97,7 @@ cv=caxis;
 % save the figures
 set(gcf,'PaperSize',[width height]);
 set(gcf, 'PaperPosition',[-0.4 -0.4 width+0.6 height+0.6]);
-fkey = 'figure1_amp_waveform';
+fkey = 'figure1a_amp_waveform';
 saveas(fh,[png_folder '/' sprintf('%s.pdf',fkey)]);
 fid = fopen([png_folder '/' sprintf('%s.txt',fkey)],'w');
 fprintf(fid,sprintf('axis = [%f %f %f %f]\n',v));
@@ -127,7 +129,7 @@ xval=outV(q.opt_r,q.opt_c);
 % save the figures
 set(gcf,'PaperSize',[width height]);
 set(gcf, 'PaperPosition',[-0.4 -0.4 width+0.6 height+0.6]);
-fkey = 'figure1_amp_outV';
+fkey = 'figure1b_amp_outV';
 saveas(fh,[png_folder '/' sprintf('%s.pdf',fkey)]);
 fid = fopen([png_folder '/' sprintf('%s.txt',fkey)],'w');
 fprintf(fid,sprintf('axis = [%f %f %f %f]\n',v));
@@ -161,7 +163,7 @@ xval=settling_time(q.opt_r,q.opt_c);
 % save the figures
 set(gcf,'PaperSize',[width height]);
 set(gcf, 'PaperPosition',[-0.4 -0.4 width+0.6 height+0.6]);
-fkey = 'figure1_amp_settling_time';
+fkey = 'figure1c_amp_settling_time';
 saveas(fh,[png_folder '/' sprintf('%s.pdf',fkey)]);
 fid = fopen([png_folder '/' sprintf('%s.txt',fkey)],'w');
 fprintf(fid,sprintf('axis = [%f %f %f %f]\n',v));
@@ -179,14 +181,12 @@ end % end-plotFigure1-function-header
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % FIGURE 2 - Comparator
-function plotFigure2(ana_folder)
+function plotFigure2(ana_folder, cr_ana_folder)
 
+global paper_folder;
 global width height;
 cvec={'k-s','k-x','k-d','k-o'};
-png_folder = [ana_folder '/paper_figures'];
-if ~exist(png_folder)
-    mkdir(png_folder);
-end
+png_folder = paper_folder;  % legacy folder was png_folder, update and remove in the future
 
 % load the data
 if exist([ana_folder '/ana_results.mat'])
@@ -201,17 +201,19 @@ invals = q.waveform_save{q.measID}{q.wss.invals};
 outvals = q.waveform_save{q.measID}{q.wss.outvals};
 deltaout_measID = q.waveform_save{q.measID}{q.wss.deltaout};
 hysteresis_measID = q.waveform_save{q.measID}{q.wss.hysteresis};
+% only need rampmax since rampminL is the 0 idx and rampminR is the last idx
+rampmax  = q.waveform_save{q.measID}{q.wss.rampmax};
 vbias = q.vbias;
 vthresh=  q.vthresh;
 
 % start everything from time 0
 time = time-time(1);
 
-
+% plot of measured waveform
 fh=figure(4);
-plot(time, invals,'r','LineWidth',2)
+plot(time, invals,'Color',[0.75 0.75 0.75])
 hold on
-plot(time, outvals,'b','LineWidth',2)
+plot(time, outvals,'k','LineWidth',3)
 hold off
 set(gca,'XColor','k')
 set(gca,'YColor','k')
@@ -222,7 +224,7 @@ v=axis;
 % save the figures
 set(gcf,'PaperSize',[width height]);
 set(gcf, 'PaperPosition',[-0.4 -0.4 width+0.6 height+0.6]);
-fkey = 'figure2_comp_waveform';
+fkey = 'figure2a_comp_waveform';
 saveas(fh,[png_folder '/' sprintf('%s.pdf',fkey)]);
 fid = fopen([png_folder '/' sprintf('%s.txt',fkey)],'w');
 fprintf(fid,sprintf('axis = [%f %f %f %f]\n',v));
@@ -234,9 +236,47 @@ fprintf(fid,sprintf('hysteresis = %f\n',hysteresis_measID));
 fclose(fid);
 csvwrite([png_folder '/' sprintf('%s.csv',fkey)],[time, invals, outvals]);
 
+% rearranged plot to look like hysteresis curve
+fh=figure(5);
+rise_dat_in  = invals(1:rampmax);
+rise_dat_out = outvals(1:rampmax);
+fall_dat_in  = invals(rampmax+1:end);
+fall_dat_out = outvals(rampmax+1:end);
+plot(rise_dat_in, rise_dat_out,'Color',[0.75 0.75 0.75])
+hold on
+plot(fall_dat_in, fall_dat_out,'k')
+hold off
+set(gca,'XColor','k')
+set(gca,'YColor','k')
+set(gca,'LineWidth',2)
+set(gca,'XMinorTick','off','YMinorTick','off')
+set(gca,'XTickLabel',[],'YTickLabel',[]);
+v=axis;
+% save the figures
+set(gcf,'PaperSize',[width height]);
+set(gcf, 'PaperPosition',[-0.4 -0.4 width+0.6 height+0.6]);
+fkey = 'figure2b_comp_hysteresis_curve';
+saveas(fh,[png_folder '/' sprintf('%s.pdf',fkey)]);
+fid = fopen([png_folder '/' sprintf('%s.txt',fkey)],'w');
+fprintf(fid,sprintf('axis = [%f %f %f %f]\n',v));
+fprintf(fid,sprintf('measID = %d\n',q.measID));
+fprintf(fid,sprintf('vbias = %f\n',vbias(q.opt_r)));
+fprintf(fid,sprintf('vthresh = %f\n',vthresh(q.opt_c)));
+fprintf(fid,sprintf('deltaout = %f\n',deltaout_measID));
+fprintf(fid,sprintf('hysteresis = %f\n',hysteresis_measID));
+fclose(fid);
+if (numel(rise_dat_in) > numel(fall_dat_in))
+    fall_dat_in(end+1:numel(rise_dat_in))=0;
+    fall_dat_out(end+1:numel(rise_dat_in))=0;
+else
+    rise_dat_in(end+1:numel(fall_dat_in))=0;
+    rise_dat_out(end+1:numel(fall_dat_in))=0;
+end
+csvwrite([png_folder '/' sprintf('%s.csv',fkey)],[rise_dat_in, rise_dat_out, fall_dat_in, fall_dat_out]);
+
 
 % plot colormap of deltaout
-fh=figure(5);
+fh=figure(6);
 deltaout = q.deltaout;
 imagesc(vthresh,vbias,deltaout); c=colorbar;
 set(gca,'YDir','normal');
@@ -256,7 +296,7 @@ xval=deltaout(q.opt_r,q.opt_c);
 % save the figures
 set(gcf,'PaperSize',[width height]);
 set(gcf, 'PaperPosition',[-0.4 -0.4 width+0.6 height+0.6]);
-fkey = 'figure2_comp_deltaout';
+fkey = 'figure2c_comp_deltaout_colormap';
 saveas(fh,[png_folder '/' sprintf('%s.pdf',fkey)]);
 fid = fopen([png_folder '/' sprintf('%s.txt',fkey)],'w');
 fprintf(fid,sprintf('axis = [%f %f %f %f]\n',v));
@@ -268,7 +308,7 @@ fclose(fid);
 csvwrite([png_folder '/' sprintf('%s.csv',fkey)],deltaout);
 
 % plot colormap of hysteresis
-fh=figure(6);
+fh=figure(7);
 hysteresis = q.hysteresis;
 imagesc(vthresh,vbias,hysteresis); c=colorbar;
 set(gca,'YDir','normal');
@@ -288,7 +328,7 @@ xval=hysteresis(q.opt_r,q.opt_c);
 % save the figures
 set(gcf,'PaperSize',[width height]);
 set(gcf, 'PaperPosition',[-0.4 -0.4 width+0.6 height+0.6]);
-fkey = 'figure2_comp_hysteresis';
+fkey = 'figure2d_comp_hysteresis_colormap';
 saveas(fh,[png_folder '/' sprintf('%s.pdf',fkey)]);
 fid = fopen([png_folder '/' sprintf('%s.txt',fkey)],'w');
 fprintf(fid,sprintf('axis = [%f %f %f %f]\n',v));
@@ -299,7 +339,208 @@ fprintf(fid,sprintf('vthresh = %f\n',vthresh(q.opt_c)));
 fclose(fid);
 csvwrite([png_folder '/' sprintf('%s.csv',fkey)],hysteresis);
 
+% plot the waveform of a square-wave count-rate curve
+fh=figure(8);
+q=load([cr_ana_folder '/ana_results.mat']);
+measID = q.cr_max_idx;
+time = q.waveform_save{measID}{q.wss.time};
+invals = q.waveform_save{measID}{q.wss.invals};
+outvals = q.waveform_save{measID}{q.wss.outvals};
+deltaout_measID = q.waveform_save{measID}{q.wss.deltaout};
+hysteresis_measID = q.waveform_save{measID}{q.wss.hysteresis};
+% start everything from time 0
+time = time-time(1);
+plot(time, invals,'Color',[0.75 0.75 0.75])
+hold on
+plot(time, outvals,'k')
+hold off
+set(gca,'XColor','k')
+set(gca,'YColor','k')
+set(gca,'LineWidth',2)
+set(gca,'XMinorTick','off','YMinorTick','off')
+set(gca,'XTickLabel',[],'YTickLabel',[]);
+v=axis;
+% give the left edge a little room
+v(1) = -1e-7;
+axis(v);
+% save the figures
+set(gcf,'PaperSize',[width height]);
+set(gcf, 'PaperPosition',[-0.4 -0.4 width+0.6 height+0.6]);
+fkey = 'figure2e_comp_cr_waveform';
+saveas(fh,[png_folder '/' sprintf('%s.pdf',fkey)]);
+fid = fopen([png_folder '/' sprintf('%s.txt',fkey)],'w');
+fprintf(fid,sprintf('axis = [%f %f %f %f]\n',v));
+fprintf(fid,sprintf('measID = %d\n',measID));
+fprintf(fid,sprintf('deltaout = %f\n',deltaout_measID));
+fprintf(fid,sprintf('hysteresis = %f\n',hysteresis_measID));
+fclose(fid);
+csvwrite([png_folder '/' sprintf('%s.csv',fkey)],[time, invals, outvals]);
+
+
+% plot count rate curve
+fh=figure(9);
+frequency = q.q(:,q.s.frequency);
+deltaout = q.q(:,q.s.deltaout);
+cr_max_idx = q.cr_max_idx;
+cr_max = q.cr_max;
+semilogx(frequency,deltaout, 'k','LineWidth',3)
+hold on
+v=axis;
+v(2)=10e6;
+v(4)=8;
+axis(v);
+plot([frequency(cr_max_idx) frequency(cr_max_idx)],[v(3) v(4)],'k--')
+hold off
+set(gca,'XColor','k')
+set(gca,'YColor','k')
+set(gca,'LineWidth',2)
+set(gca,'XMinorTick','off','YMinorTick','off')
+set(gca,'XTickLabel',[],'YTickLabel',[]);
+set(gca,'XTick',[1e2 1e3 1e4 1e5 1e6 1e7]);
+set(gca,'YTick',[0 2 4 6 8]);
+v=axis;
+% save the figures
+set(gcf,'PaperSize',[width height]);
+set(gcf, 'PaperPosition',[-0.4 -0.4 width+0.6 height+0.6]);
+fkey = 'figure2f_countrate';
+saveas(fh,[png_folder '/' sprintf('%s.pdf',fkey)]);
+fid = fopen([png_folder '/' sprintf('%s.txt',fkey)],'w');
+fprintf(fid,sprintf('axis = [%f %f %f %f]\n',v));
+fprintf(fid,sprintf('cr_max = %f\n',cr_max));
+fclose(fid);
+csvwrite([png_folder '/' sprintf('%s.csv',fkey)],[frequency, deltaout]);
 
 end % end-plotFigure2-function-header
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FIGURE 3 - Clock Generator
+function plotFigure3(ana_folder)
+
+global paper_folder;
+global width height;
+cvec={'k-s','k-x','k-d','k-o'};
+
+% load the data
+if exist([ana_folder '/ana_results.mat'])
+    q=load([ana_folder '/ana_results.mat']);
+else
+    error('ana_results.mat file not found in %s... did you run analyze_comparator_meas?',ana_folder);
+end
+
+% plot of standard waveform
+fh=figure(10);
+cr_max_idx = q.cr_max_idx;
+time = q.waveform_save{cr_max_idx}{q.wss.time};
+time = time-time(1);
+invals = q.waveform_save{cr_max_idx}{q.wss.invals};
+out1vals = q.waveform_save{cr_max_idx}{q.wss.out1vals};
+out2vals = q.waveform_save{cr_max_idx}{q.wss.out2vals};
+in_idx = q.waveform_save{cr_max_idx}{q.wss.in_idx};
+% if there are too many in_idx, then limit it so the plot is clearer
+if (in_idx > 8)
+  idx_range = in_idx(1):in_idx(8);
+else
+  idx_range = in_idx(1):in_idx(end);
+end
+plot(time(idx_range),out1vals(idx_range),'k');
+%plot(time(idx_range),invals(idx_range),'Color',[0.5 0.5 0.5]);
+hold on
+plot(time(idx_range),out2vals(idx_range),'Color',[0.5 0.5 0.5]);
+% plot the input pulses off-set and compressed from the output pulses
+plot(time(idx_range),(invals(idx_range)/4)+9,'Color',[0.75 0.75 0.75]);
+hold off
+set(gca,'XColor','k')
+set(gca,'YColor','k')
+set(gca,'LineWidth',2)
+set(gca,'XMinorTick','off','YMinorTick','off')
+set(gca,'XTickLabel',[],'YTickLabel',[]);
+set(gca,'XTick',[0 20e-6 40e-6 60e-6 80e-6 100e-6]);
+set(gca,'YTick',[0 2 4 6 8]);
+v=axis;
+% save the figures
+set(gcf,'PaperSize',[width height]);
+set(gcf, 'PaperPosition',[-0.4 -0.4 width+0.6 height+0.6]);
+fkey = 'figure3a_clockgen_waveform';
+saveas(fh,[paper_folder '/' sprintf('%s.pdf',fkey)]);
+fid = fopen([paper_folder '/' sprintf('%s.txt',fkey)],'w');
+fprintf(fid,sprintf('axis = [%f %f %f %f]\n',v));
+fclose(fid);
+csvwrite([paper_folder '/' sprintf('%s.csv',fkey)],[time(idx_range), invals(idx_range), out1vals(idx_range), out2vals(idx_range)]);
+
+% plot of error in waveform
+fh=figure(11);
+% step forward 2 in order to show missed pulses
+error_idx = cr_max_idx+2;
+time = q.waveform_save{error_idx}{q.wss.time};
+time = time-time(1);
+invals = q.waveform_save{error_idx}{q.wss.invals};
+out1vals = q.waveform_save{error_idx}{q.wss.out1vals};
+out2vals = q.waveform_save{error_idx}{q.wss.out2vals};
+in_idx = q.waveform_save{error_idx}{q.wss.in_idx};
+% if there are too many in_idx, then limit it so the plot is clearer
+if (in_idx > 8)
+  idx_range = in_idx(1):in_idx(8);
+else
+  idx_range = in_idx(1):in_idx(end);
+end
+plot(time(idx_range),out1vals(idx_range),'k');
+%plot(time(idx_range),invals(idx_range),'Color',[0.5 0.5 0.5]);
+hold on
+plot(time(idx_range),out2vals(idx_range),'Color',[0.5 0.5 0.5]);
+% plot the input pulses off-set and compressed from the output pulses
+plot(time(idx_range),(invals(idx_range)/4)+9,'Color',[0.75 0.75 0.75]);
+hold off
+set(gca,'XColor','k')
+set(gca,'YColor','k')
+set(gca,'LineWidth',2)
+set(gca,'XMinorTick','off','YMinorTick','off')
+set(gca,'XTickLabel',[],'YTickLabel',[]);
+set(gca,'XTick',[0 20e-6 40e-6 60e-6 80e-6 100e-6]);
+set(gca,'YTick',[0 2 4 6 8]);
+v=axis;
+% save the figures
+set(gcf,'PaperSize',[width height]);
+set(gcf, 'PaperPosition',[-0.4 -0.4 width+0.6 height+0.6]);
+fkey = 'figure3b_clockgen_waveform_errors';
+saveas(fh,[paper_folder '/' sprintf('%s.pdf',fkey)]);
+fid = fopen([paper_folder '/' sprintf('%s.txt',fkey)],'w');
+fprintf(fid,sprintf('axis = [%f %f %f %f]\n',v));
+fclose(fid);
+csvwrite([paper_folder '/' sprintf('%s.csv',fkey)],[time(idx_range), invals(idx_range), out1vals(idx_range), out2vals(idx_range)]);
+
+% plot of count rate
+fh=figure(12);
+in_freq = q.q(:,q.s.in_freq);
+phi1_ratio = q.q(:,q.s.phi1_ratio)*100;
+cr_max = q.cr_max;
+semilogx(in_freq,phi1_ratio,'k','LineWidth',3);
+hold on
+v=axis;
+v(4) = 105;
+axis(v);
+plot([cr_max cr_max],[v(3) v(4)],'--','Color',[0.75 0.75 0.75]);
+plot(in_freq(cr_max_idx),phi1_ratio(cr_max_idx),'ko','MarkerSize',16);
+plot(in_freq(error_idx),phi1_ratio(error_idx),'kx','MarkerSize',16);
+hold off 
+set(gca,'XColor','k')
+set(gca,'YColor','k')
+set(gca,'LineWidth',2)
+set(gca,'XMinorTick','off','YMinorTick','off')
+set(gca,'XTickLabel',[],'YTickLabel',[]);
+set(gca,'XTick',[1e4 1e5 1e6 1e7]);
+set(gca,'YTick',[0 20 40 60 80 100]);
+v=axis;
+% save the figures
+set(gcf,'PaperSize',[width height]);
+set(gcf, 'PaperPosition',[-0.4 -0.4 width+0.6 height+0.6]);
+fkey = 'figure3c_clockgen_countrate';
+saveas(fh,[paper_folder '/' sprintf('%s.pdf',fkey)]);
+fid = fopen([paper_folder '/' sprintf('%s.txt',fkey)],'w');
+fprintf(fid,sprintf('axis = [%f %f %f %f]\n',v));
+fprintf(fid,sprintf('cr_max = %d\n',cr_max));
+fclose(fid);
+csvwrite([paper_folder '/' sprintf('%s.csv',fkey)],[in_freq, phi1_ratio]);
+
+
+end % end-plotFigure3-function-header
