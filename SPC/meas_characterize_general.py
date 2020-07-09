@@ -14,18 +14,21 @@ import meas_characterize_countrate
 SPCsetup_path = "../SPCsetup1"
 scopeip = "192.168.66.85"
 unixdir = "/mnt/ArrayData/MasdaX/2018-01/measurements"
-chipID = "29D1-8_WP5_2-4-3_schmitt"
+chipID = "29D1-8_WP8_4-6-10_2SR3inv"
 
 #meas_type = "amp"
 #runcon = "custom step wave 200 Hz 130 mVpp with 1:10 voltage divider, effective 13 mVpp, horiz acq is 10k samples"
 #notes = "added 50ohm load to siggen input to probe card, running standard comp sweep at 100 kHz"
 
-meas_type = "comp"
-cirtype = "schmitt"
-runcon = "ramp 0-4.5V 100khz, 1.8MEG 12c probe with calibrated gain of 16 (24 dB)"
-notes = "re-running standard comp sweep with high ramp max so hysteresis curve looks more symmetrical"
+#meas_type = "comp"
+#cirtype = "schmitt"
+#runcon = "ramp 0-4.5V 100khz, 1.8MEG 12c probe with calibrated gain of 16 (24 dB)"
+#notes = "re-running standard comp sweep with high ramp max so hysteresis curve looks more symmetrical"
 
-#meas_type = "clockgen"
+meas_type = "clockgen"
+meas_type = "countrate"
+runcon = "square 0-5V, (2x) 1.8MEG 12c probe with calibrated gain of 16 (24 dB) and 19 (25.6 dB)"
+notes = "third count rate meas of a good circuit with wider oscope div window and higher freq"
 
 #meas_type = "counter"
 
@@ -110,7 +113,8 @@ elif meas_type == "counter":
     meas_characterize_counter.run(mi, measdir, smu_data)
 elif meas_type == "countrate":
     voltage_db = {
-        "29D1-8_WP5_2-4-3_schmitt": ["v1(8)", "v2(0)", "v3(8)", "v4(0)", "v5(1)", "v6(3)", "comp"]
+        "29D1-8_WP5_2-4-3_schmitt": ["v1(8)", "v2(0)", "v3(8)", "v4(0)", "v5(1)", "v6(3)", "comp"],
+        "29D1-8_WP8_4-6-10_2SR3inv": ["v1(8)", "v2(0)", "v3(0)", "v4(0)", "v5(0)", "v6(0)", "clockgen"],
     }
     if chipID not in voltage_db.keys():
         print("Error: no voltage data entry found for %s" % chipID)
