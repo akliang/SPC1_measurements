@@ -10,8 +10,8 @@ from helpers import oscope_functions
 
 def run():
 
-    chipID = "29D1-8_WP5_2-4-1_schmitt"
-    notes = "weird performance of schmitt circuit - triggering twice on rising edge and never on falling edge"
+    chipID = "29D1-8_WP8_4-6-10_2SR3inv"
+    notes = "manual count rate acq - 1 MHz"
 
     # create mi handle
     scopeip = "192.168.66.85"
@@ -31,8 +31,8 @@ def run():
     smu_data = re.sub("\$\(hostname\)_", hostname.decode('utf-8'), smu_data.decode('utf-8'))
     smu_data = smu_data.rstrip()  # take off newline
 
-    oscope_functions.run(mi, 400)
-    dod.run(mi, measdir, smu_data)
+    #oscope_functions.acq_delayer(mi, 400)
+    dod.run(mi, measdir, smu_data, "false")
 
     # write notes files to measdir
     idfh = open("%s/id.txt" % measdir, 'w')
