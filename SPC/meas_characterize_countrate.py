@@ -23,7 +23,7 @@ def run(mi, measdir, smu_data, acq_delay, voltages, CRmeas_type):
     elif CRmeas_type == "clockgen":
         vhi = 5
         vlo = 0
-        frequency = (4, 7, 50)
+        frequency = (4, 6, 50)
     query = [
         ["OUTPUT1:STATE OFF"],
         ["OUTPUT2:STATE OFF"],
@@ -37,7 +37,8 @@ def run(mi, measdir, smu_data, acq_delay, voltages, CRmeas_type):
 
     # run count rate loop
     dircnt = 1  # variable used to create separate folders for each meas point
-    for F in np.logspace(frequency[0], frequency[1], num=frequency[2], endpoint=True, base=10):
+    #for F in np.logspace(frequency[0], frequency[1], num=frequency[2], endpoint=True, base=10):
+    for F in np.linspace(95000, 105000, 40):
 
         # change the siggen frequency
         query = [
@@ -58,14 +59,16 @@ def run(mi, measdir, smu_data, acq_delay, voltages, CRmeas_type):
         F = F / 10 ** Fpower
         F = math.ceil(F)
         F = F * 10 ** Fpower
-        Fdiv = 1/F * 2.5
+        Fdiv = 1/F * 3
         # set the oscope to at least this division step
         mi.write("HORIZONTAL:MODE:SCALE %0.12f" % Fdiv)
         # give the scope enough time to set the new scale
         time.sleep(2)
 
-        # make sure the record length is 10k
-        oscope_functions.set_recordlength(mi, 10000)
+        # make sure the record length is 50k
+        # TODO: this seems to overlap with meas_characterize_general, but maybe autoset destroys the _general setting
+        # leaving this line here allows CR measurement to use different recordlength than _general
+        oscope_functions.set_recordlength(mi, 50000)
         # acquire the data
         if acq_delay == 0:
             time.sleep(2)  # wait a few seconds to let everything settle
