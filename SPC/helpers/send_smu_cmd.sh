@@ -22,28 +22,39 @@ INFILE="$2"
 source "$SETFILE"
 
 
-# the command sequence to send to SMUHOST
-CMD="
+# Disabled on 2020-07-08 since no longer need to penetrate into measdev
+# Instead, SMUHOST is most likely the local computer, so just write directly to SCPIFILE on the local file system
+
+## the command sequence to send to SMUHOST
+#CMD="
+#if [ -e $SCPIFILE ]; then
+#  echo 'Error: SCPI file ($SCPIFILE) already exists!  Exiting...'
+#  exit 126
+#fi
+#cat > $SCPIFILE.pre
+#mv $SCPIFILE.pre $SCPIFILE
+#echo 'Waiting for SMUs to consume the file...'
+#while [ -e $SCPIFILE ]; do
+#  read -t 0.1 N && break
+#done
+#"
+
+## send the command over to SMUHOST (make sure proxy port on eve is open!)
+#if [ -e "/usr/bin/nc" ]; then
+#  cat "$INFILE" | ssh -o ProxyCommand='/usr/bin/nc -x 127.0.0.1:9998 %h %p' $SMUHOST "$CMD"
+#else
+#  cat "$INFILE" | ssh -o ProxyCommand='/bin/nc -x 127.0.0.1:9998 %h %p' $SMUHOST "$CMD"
+#fi
+
+
 if [ -e $SCPIFILE ]; then
   echo 'Error: SCPI file ($SCPIFILE) already exists!  Exiting...'
   exit 126
 fi
-cat > $SCPIFILE.pre
+cat "$INFILE" > $SCPIFILE.pre
 mv $SCPIFILE.pre $SCPIFILE
 echo 'Waiting for SMUs to consume the file...'
 while [ -e $SCPIFILE ]; do
   read -t 0.1 N && break
 done
-"
-
-
-# send the command over to SMUHOST (make sure proxy port on eve is open!)
-# TODO: evesock isn't needed anymore
-if [ -e "/usr/bin/nc" ]; then
-  cat "$INFILE" | ssh -o ProxyCommand='/usr/bin/nc -x 127.0.0.1:9998 %h %p' $SMUHOST "$CMD"
-else
-  cat "$INFILE" | ssh -o ProxyCommand='/bin/nc -x 127.0.0.1:9998 %h %p' $SMUHOST "$CMD"
-fi
-
-
 
