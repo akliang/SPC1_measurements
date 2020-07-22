@@ -2,7 +2,7 @@ function clean_oscope_data(ana_folder)
 
     resfile = [ana_folder '/vbiases.txt' ];
     if (exist(resfile,'file'))
-        fprintf(1,'Found existing resfile (%s)... skipping clean_oscope_data\n',resfile);
+        fprintf(1,'Found existing vbias (%s)... skipping clean_oscope_data\n',resfile);
         return
     end
 
