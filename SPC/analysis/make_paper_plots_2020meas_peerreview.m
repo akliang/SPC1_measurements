@@ -13,7 +13,7 @@ amp_folder =      [pathpre 'ArrayData/MasdaX/2018-01/measurements/20200219T10470
 comp_folder =     [pathpre 'ArrayData/MasdaX/2018-01/measurements/20200312T170353_29D1-8_WP5_2-4-3_schmitt'];  best_vbias = 1; best_vthresh=3;
 comp_cr_folder =  [pathpre 'ArrayData/MasdaX/2018-01/measurements/20200311T161607_29D1-8_WP5_2-4-3_schmitt'];
 %clockgen_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200319T210650_29D1-8_WP8_4-6-10_2SR3inv';
-clockgen_folder = [pathpre 'ArrayData/MasdaX/2018-01/measurements/20200716T999999_CG_combined'];
+clockgen_folder = [pathpre 'ArrayData/MasdaX/2018-01/measurements/20200722T999999_29D1-5_WP6_3-3-1_2SR3inv_combined'];
 
 global width height;
 iptsetpref('ImshowBorder','loose');
@@ -436,6 +436,8 @@ global paper_folder;
 global width height;
 cvec={'k-s','k-x','k-d','k-o'};
 
+max_num_idx = 14;
+
 % load the data
 if exist([ana_folder '/ana_results.mat'])
     q=load([ana_folder '/ana_results.mat']);
@@ -445,47 +447,6 @@ end
 
 % plot of standard waveform
 fh=figure(10);
-cr_max_idx = floor(q.cr_max_idx/2);
-time = q.waveform_save{cr_max_idx}{q.wss.time};
-invals = q.waveform_save{cr_max_idx}{q.wss.invals};
-out1vals = q.waveform_save{cr_max_idx}{q.wss.out1vals};
-out2vals = q.waveform_save{cr_max_idx}{q.wss.out2vals};
-in_idx = q.waveform_save{cr_max_idx}{q.wss.in_idx};
-% if there are too many in_idx, then limit it so the plot is clearer
-if (in_idx > 8)
-  idx_range = in_idx(1):in_idx(8);
-else
-  idx_range = in_idx(1):in_idx(end);
-end
-timevals = time(idx_range);
-timevals = timevals - timevals(1);
-plot(timevals,out1vals(idx_range),'k');
-hold on
-plot(timevals,out2vals(idx_range),'Color',[0.5 0.5 0.5]);
-% plot the input pulses off-set and compressed from the output pulses
-plot(timevals,(invals(idx_range)/4)+9,'Color',[0.75 0.75 0.75]);
-hold off
-set(gca,'XColor','k')
-set(gca,'YColor','k')
-set(gca,'LineWidth',2)
-set(gca,'XMinorTick','off','YMinorTick','off')
-set(gca,'XTickLabel',[],'YTickLabel',[]);
-set(gca,'XTick',[0 20e-6 40e-6 60e-6 80e-6 100e-6]);
-set(gca,'YTick',[0 2 4 6 8]);
-v=axis;
-% save the figures
-set(gcf,'PaperSize',[width height]);
-set(gcf, 'PaperPosition',[-0.4 -0.4 width+0.6 height+0.6]);
-fkey = 'figure3a_clockgen_waveform_good';
-saveas(fh,[paper_folder '/' sprintf('%s.pdf',fkey)]);
-fid = fopen([paper_folder '/' sprintf('%s.txt',fkey)],'w');
-fprintf(fid,sprintf('ana_folder = %s\n',ana_folder));
-fprintf(fid,sprintf('axis = [%f %f %f %f]\n',v));
-fclose(fid);
-csvwrite([paper_folder '/' sprintf('%s.csv',fkey)],[time(idx_range), invals(idx_range), out1vals(idx_range), out2vals(idx_range)]);
-
-% plot of max_cr with barely-working waveform
-fh=figure(11);
 cr_max_idx = q.cr_max_idx;
 time = q.waveform_save{cr_max_idx}{q.wss.time};
 invals = q.waveform_save{cr_max_idx}{q.wss.invals};
@@ -493,10 +454,10 @@ out1vals = q.waveform_save{cr_max_idx}{q.wss.out1vals};
 out2vals = q.waveform_save{cr_max_idx}{q.wss.out2vals};
 in_idx = q.waveform_save{cr_max_idx}{q.wss.in_idx};
 % if there are too many in_idx, then limit it so the plot is clearer
-if (in_idx > 8)
-  idx_range = in_idx(1):in_idx(8);
+if (numel(in_idx) > max_num_idx)
+  idx_range = in_idx(1):in_idx(max_num_idx);
 else
-  idx_range = in_idx(1):in_idx(end);
+  idx_range = in_idx;
 end
 timevals = time(idx_range);
 timevals = timevals - timevals(1);
@@ -517,7 +478,7 @@ v=axis;
 % save the figures
 set(gcf,'PaperSize',[width height]);
 set(gcf, 'PaperPosition',[-0.4 -0.4 width+0.6 height+0.6]);
-fkey = 'figure3b_clockgen_waveform_crmax';
+fkey = 'figure3a_clockgen_waveform_crmax';
 saveas(fh,[paper_folder '/' sprintf('%s.pdf',fkey)]);
 fid = fopen([paper_folder '/' sprintf('%s.txt',fkey)],'w');
 fprintf(fid,sprintf('ana_folder = %s\n',ana_folder));
@@ -526,19 +487,19 @@ fclose(fid);
 csvwrite([paper_folder '/' sprintf('%s.csv',fkey)],[time(idx_range), invals(idx_range), out1vals(idx_range), out2vals(idx_range)]);
 
 % plot of error in waveform
-fh=figure(12);
+fh=figure(11);
 % step forward 2 in order to show missed pulses
-error_idx = cr_max_idx+2;
+error_idx = cr_max_idx+29;
 time = q.waveform_save{error_idx}{q.wss.time};
 invals = q.waveform_save{error_idx}{q.wss.invals};
 out1vals = q.waveform_save{error_idx}{q.wss.out1vals};
 out2vals = q.waveform_save{error_idx}{q.wss.out2vals};
 in_idx = q.waveform_save{error_idx}{q.wss.in_idx};
 % if there are too many in_idx, then limit it so the plot is clearer
-if (in_idx > 8)
-  idx_range = in_idx(1):in_idx(8);
+if (numel(in_idx) > max_num_idx)
+  idx_range = in_idx(1):in_idx(max_num_idx);
 else
-  idx_range = in_idx(1):in_idx(end);
+  idx_range = in_idx;
 end
 timevals = time(idx_range);
 timevals = timevals - timevals(1);
@@ -559,7 +520,7 @@ v=axis;
 % save the figures
 set(gcf,'PaperSize',[width height]);
 set(gcf, 'PaperPosition',[-0.4 -0.4 width+0.6 height+0.6]);
-fkey = 'figure3c_clockgen_waveform_errors';
+fkey = 'figure3b_clockgen_waveform_errors';
 saveas(fh,[paper_folder '/' sprintf('%s.pdf',fkey)]);
 fid = fopen([paper_folder '/' sprintf('%s.txt',fkey)],'w');
 fprintf(fid,sprintf('ana_folder = %s\n',ana_folder));
@@ -568,7 +529,7 @@ fclose(fid);
 csvwrite([paper_folder '/' sprintf('%s.csv',fkey)],[time(idx_range), invals(idx_range), out1vals(idx_range), out2vals(idx_range)]);
 
 % plot of count rate
-fh=figure(13);
+fh=figure(12);
 in_freq = q.q(:,q.s.in_freq);
 phi_ratio = q.q(:,q.s.phi_ratio)*100;
 cr_max = q.cr_max;
@@ -578,8 +539,8 @@ v=axis;
 v(4) = 105;
 axis(v);
 plot([cr_max cr_max],[v(3) v(4)],'--','Color',[0.75 0.75 0.75]);
-plot(in_freq(cr_max_idx),phi_ratio(cr_max_idx),'ko','MarkerSize',16);
-plot(in_freq(error_idx),phi_ratio(error_idx),'kx','MarkerSize',16);
+plot(in_freq(cr_max_idx),phi_ratio(cr_max_idx),'ks','MarkerSize',16);
+plot(in_freq(error_idx),phi_ratio(error_idx),'ko','MarkerSize',16);
 hold off 
 set(gca,'XColor','k')
 set(gca,'YColor','k')
@@ -592,7 +553,7 @@ v=axis;
 % save the figures
 set(gcf,'PaperSize',[width height]);
 set(gcf, 'PaperPosition',[-0.4 -0.4 width+0.6 height+0.6]);
-fkey = 'figure3d_clockgen_countrate';
+fkey = 'figure3c_clockgen_countrate';
 saveas(fh,[paper_folder '/' sprintf('%s.pdf',fkey)]);
 fid = fopen([paper_folder '/' sprintf('%s.txt',fkey)],'w');
 fprintf(fid,sprintf('ana_folder = %s\n',ana_folder));
