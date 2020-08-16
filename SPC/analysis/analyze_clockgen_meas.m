@@ -14,10 +14,23 @@ if exist('/Volumes/ArrayData/MasdaX','dir')
 else
     pathpre = '~/Desktop/ArrayData/MasdaX/2018-01/measurements/';
 end
-ana_folder = [pathpre '20200319T210650_29D1-8_WP8_4-6-10_2SR3inv']; % third acq with wider data frame (more pulses per frame) and higher freq sweep
-ana_folder = [pathpre '20200716T213229_29D1-5_WP6_3-2-16_2SR3inv']; % meas greater than 100 kHz
-ana_folder = [pathpre '20200716T221001_29D1-5_WP6_3-2-16_2SR3inv']; % super-fine sweep around max CR
-ana_folder = [pathpre '20200716T999999_CG_combined']; % combined 20200716T13229 and 20200716T221001
+
+% attic
+% only 85 kcps, but used for AAPM poster
+%ana_folder = [pathpre '20200319T210650_29D1-8_WP8_4-6-10_2SR3inv']; % third acq with wider data frame (more pulses per frame) and higher freq sweep
+% misbehaving circuit?  phi2 disappears instead of both phis being swallowed
+%ana_folder = [pathpre '20200716T213229_29D1-5_WP6_3-2-16_2SR3inv']; % meas greater than 100 kHz
+%ana_folder = [pathpre '20200716T221001_29D1-5_WP6_3-2-16_2SR3inv']; % super-fine sweep around max CR
+%ana_folder = [pathpre '20200716T999999_CG_combined']; % combined 20200716T13229 and 20200716T221001
+%ana_folder = [pathpre '20200721T230112_29D1-5_WP6_3-3-1_2SR3inv'];  % broad sweep with 400 acqs averaging (10k record length)
+%ana_folder = [pathpre '20200721T232309_29D1-5_WP6_3-3-1_2SR3inv'];  % broad sweep without math channels (10k RL)
+%ana_folder = [pathpre '20200721T234458_29D1-5_WP6_3-3-1_2SR3inv'];  % fine sweep without math channels (10k RL) - 98.6 kps
+
+% at the moment, the best case (but only around 98.3 kcps)
+ana_folder = [pathpre '20200721T235233_29D1-5_WP6_3-3-1_2SR3inv'];  % broad sweep with 50k RL
+ana_folder = [pathpre '20200722T000012_29D1-5_WP6_3-3-1_2SR3inv'];  % fine sweep with 50k RL - 98.3 kcps
+ana_folder = [pathpre '20200722T999999_29D1-5_WP6_3-3-1_2SR3inv_combined'];  % RL 50k combined
+
 
 addpath('./helper_functions');
 % clean the oscope data to make it matlab-friendly
@@ -49,11 +62,7 @@ csvwrite(resfile,alldat);
 
 close all;
 calc_and_plot_results(ana_folder);
-%plot_specific_meas(54)
-%plot_specific_meas(55)
-%plot_specific_meas(25)
-%plot_specific_meas(27)
-%plot_specific_meas(29)
+plot_specific_meas(30)
 
 
 
@@ -66,24 +75,9 @@ function [in_freq, phi1_deltaout, phi2_deltaout, phi_ratio] = analyze_clockgen_o
   debug=false;
   
   % load in and out files
-  if exist([measdir '/math2.csv.clean'],'file')
-      in_raw=load([measdir '/math1.csv.clean']);
-  else
-      fprintf('Math file not found for in_raw, using ch1\n');
-      in_raw=load([measdir '/ch1.csv.clean']);
-  end
-  if exist([measdir '/math2.csv.clean'],'file')
-      out1_raw=load([measdir '/math2.csv.clean']);
-  else
-      fprintf('Math file not found for out1_raw, using ch2\n');
-      out1_raw=load([measdir '/ch2.csv.clean']);
-  end
-  if exist([measdir '/math3.csv.clean'],'file')
-      out2_raw=load([measdir '/math3.csv.clean']);
-  else
-      fprintf('Math file not found for out2_raw, using ch3\n');
-      out2_raw=load([measdir '/ch3.csv.clean']);
-  end
+  in_raw=load([measdir '/ch1.csv.clean']);
+  out1_raw=load([measdir '/ch2.csv.clean']);
+  out2_raw=load([measdir '/ch3.csv.clean']);
   sigpulse=load([measdir '/ch4.csv.clean']);
   sigpulse = sigpulse(:,2);
   time = in_raw(:,1);
@@ -148,9 +142,7 @@ function [in_freq, phi1_deltaout, phi2_deltaout, phi_ratio] = analyze_clockgen_o
       if (neg_edges_idx(1) <= idx_delta); neg_edges_idx = neg_edges_idx(2:end); end
       if (pos_edges_idx(end)+idx_delta >= numel(indat)); pos_edges_idx = pos_edges_idx(1:end-1); end
       if (neg_edges_idx(end)+idx_delta >= numel(indat)); neg_edges_idx = neg_edges_idx(1:end-1); end
-      %}
       
-      %{
       % clean up the edges_idx values (at high frequencies, the edges jitter sometimes)
       % first, make sure the edges are actually a rising or falling edge
       % step through every pos_edges_idx and check that the left side is less than the right side
@@ -311,7 +303,7 @@ function calc_and_plot_results(ana_folder)
   s.phi_ratio=11;
   
   % calculate the maximum count rate
-  cr_thresh = 0.95;
+  cr_thresh = 1;
   %cr_max_idx = find(q(:,s.phi1_ratio) >= cr_thresh);
   %cr_phi1 = (q(:,s.phi1_ratio) >= cr_thresh);
   %cr_phi2 = (q(:,s.phi2_ratio) >= cr_thresh);
@@ -325,7 +317,7 @@ function calc_and_plot_results(ana_folder)
 
   fign = fign+1;
   figure(fign)
-  semilogx(q(:,s.in_freq),q(:,s.phi_ratio)*100, 'k');
+  semilogx(q(:,s.in_freq),q(:,s.phi_ratio)*100, 'ko-');
   hold on
   v=axis;
   v(4) = 125;
