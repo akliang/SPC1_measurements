@@ -20,25 +20,47 @@ def run(mi, measdir, smu_data, acq_delay, voltages, CRmeas_type):
         vlo = 0
         # note: beyond 4.9 MHz, trigger output from siggen is divided down (see AFG quick start manual)
         frequency = (2, 7, 60)
+        recordlength = 50000
     elif CRmeas_type == "clockgen":
         vhi = 5
         vlo = 0
         frequency = (4, 6, 50)
-    query = [
-        ["OUTPUT1:STATE OFF"],
-        ["OUTPUT2:STATE OFF"],
-        ["SOURCE1:VOLTAGE:UNIT VPP"],
-        ["SOURCE1:FUNCTION:SHAPE SQUARE"],
-        ["SOURCE1:VOLTAGE:LEVEL:IMMEDIATE:HIGH %fV" % vhi],
-        ["SOURCE1:VOLTAGE:LEVEL:IMMEDIATE:LOW  %fV" % vlo],
-        ["OUTPUT1:STATE ON"],
-    ]
+        recordlength = 50000
+    elif CRmeas_type == "counter":
+        # phi setting for 29D1-5_WP6_3-2-5_diffTFT
+        vhi = 0.5
+        vlo = -2
+        frequency = (4, 6.5, 50)
+        recordlength = 1000
+        mi.write("TRIGGER:A:EDGE:SOURCE CH1")
+        mi.write("ACQUIRE:STOPAFTER SEQUENCE")
+        mi.write("ACQUIRE:STATE 1")
+
+    if CRmeas_type is not "counter":
+        query = [
+            ["OUTPUT1:STATE OFF"],
+            ["OUTPUT2:STATE OFF"],
+            ["SOURCE1:VOLTAGE:UNIT VPP"],
+            ["SOURCE1:FUNCTION:SHAPE SQUARE"],
+            ["SOURCE1:VOLTAGE:LEVEL:IMMEDIATE:HIGH %fV" % vhi],
+            ["SOURCE1:VOLTAGE:LEVEL:IMMEDIATE:LOW  %fV" % vlo],
+            ["OUTPUT1:STATE ON"],
+        ]
+    else:
+        query = [
+            ["OUTPUT1:STATE OFF"],
+            ["OUTPUT2:STATE OFF"],
+            ["SOURCE1:VOLTAGE:UNIT VPP"],
+            ["SOURCE1:FUNCTION:SHAPE PULSE"],
+            ["SOURCE1:VOLTAGE:LEVEL:IMMEDIATE:HIGH %fV" % vhi],
+            ["SOURCE1:VOLTAGE:LEVEL:IMMEDIATE:LOW  %fV" % vlo],
+        ]
     siggen_functions.send_query(query)
 
     # run count rate loop
     dircnt = 1  # variable used to create separate folders for each meas point
-    #for F in np.logspace(frequency[0], frequency[1], num=frequency[2], endpoint=True, base=10):
-    for F in np.linspace(95000, 105000, 40):
+    for F in np.logspace(frequency[0], frequency[1], num=frequency[2], endpoint=True, base=10):
+    #for F in np.linspace(95000, 105000, 40):
 
         # change the siggen frequency
         query = [
@@ -65,10 +87,30 @@ def run(mi, measdir, smu_data, acq_delay, voltages, CRmeas_type):
         # give the scope enough time to set the new scale
         time.sleep(2)
 
+        if CRmeas_type == "counter":
+            # note, this assumes in is ch4 and inbar is ch5
+            smv.send_scpi("v4(0)")
+            smv.send_scpi("v5(6.5)")
+            siggen_functions.send_query([["OUTPUT1:STATE ON"]])
+            time.sleep(2)
+            siggen_functions.send_query([["OUTPUT1:STATE OFF"]])
+            time.sleep(2)
+            smv.send_scpi("v4(6.5)")
+            smv.send_scpi("v5(0)")
+            time.sleep(2)
+
+            # set the oscope into SINGLE mode
+            mi.write("ACQUIRE:STOPAFTER SEQUENCE")
+            mi.write("ACQUIRE:STATE 1")
+            time.sleep(2)
+            siggen_functions.send_query([["OUTPUT1:STATE ON"]])
+            time.sleep(2)
+            siggen_functions.send_query([["OUTPUT1:STATE OFF"]])
+
         # make sure the record length is 50k
         # TODO: this seems to overlap with meas_characterize_general, but maybe autoset destroys the _general setting
         # leaving this line here allows CR measurement to use different recordlength than _general
-        oscope_functions.set_recordlength(mi, 50000)
+        oscope_functions.set_recordlength(mi, recordlength)
         # acquire the data
         if acq_delay == 0:
             time.sleep(2)  # wait a few seconds to let everything settle

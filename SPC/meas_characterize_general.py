@@ -14,32 +14,33 @@ import meas_characterize_countrate
 SPCsetup_path = "../SPCsetup1"
 scopeip = "192.168.66.85"
 unixdir = "/mnt/ArrayData/MasdaX/2018-01/measurements"
-chipID = "29D1-5_WP6_3-3-1_2SR3inv"
+chipID = "29D1-5_WP6_3-2-4_7inv"
 
 #meas_type = "amp"
 #runcon = "custom step wave 200 Hz 130 mVpp with 1:10 voltage divider, effective 13 mVpp, horiz acq is 10k samples"
 #notes = "added 50ohm load to siggen input to probe card, running standard comp sweep at 100 kHz"
-acq_delay = 400
+#acq_delay = 400
 
 #meas_type = "comp"
 #cirtype = "schmitt"
 #runcon = "ramp 0-4.5V 100khz, 1.8MEG 12c probe with calibrated gain of 16 (24 dB)"
 #notes = "re-running standard comp sweep with high ramp max so hysteresis curve looks more symmetrical"
-acq_delay = 400
+#acq_delay = 400
+# note: to run countrate for comp, borrow the block below from clockgen
 
 # note: there is no meas_type clockgen, but this label is here for clarity
-meas_type = "clockgen"
+#meas_type = "clockgen"
 meas_type = "countrate"
 runcon = "square 0-5V, (2x) 1.8MEG 12c probe with calibrated gain of 16 (24 dB) and 18 (25.1 dB)"
-#notes = "third count rate meas of a good circuit with wider oscope div window and higher freq"
-notes = "properly working pretty much exactly 100 kcps"
-acq_delay = 50 # afraid to set this to 0, but technically it should be
+notes = "measurement of first working instance of 7inv CG design variant"
+acq_delay = 50   # afraid to set this to 0, but technically it should be
 
+# note: there is no meas_type counter, but this label is here for clarity
 #meas_type = "counter"
-
 #meas_type = "countrate"
-#runcon = "square 0-3V, freq from 10^2 to 10^7, 50ohm siggen load"
-#notes = "fourth trial of new script with improved oscope windowing"
+#runcon = "(2x) 1.8MEG 12c probe with calibrated gain of 16 (24 dB) and 18 (25.1 dB); in and inbar from SMU at 0 to 6.5V, 10-percent duty cycle for phi"
+#notes = "decently working diffTFT counter bit, out is full swing but outbar is slightly weak about 75-percent swing"
+#acq_delay = 0
 
 target_recordlength = 10000
 # oscilloscope math channel settings
@@ -113,16 +114,14 @@ if meas_type == "amp":
 elif meas_type == "comp":
     mi.write("MATH1:DEF \"Ch1\"")
     meas_characterize_comp.run(mi, measdir, smu_data, acq_delay, cirtype)
-#elif meas_type == "clockgen":
-#    meas_characterize_clockgen.run(mi, measdir, smu_data)
-elif meas_type == "counter":
-    meas_characterize_counter.run(mi, measdir, smu_data)
 elif meas_type == "countrate":
     voltage_db = {
         "29D1-8_WP5_2-4-3_schmitt": ["v1(8)", "v2(0)", "v3(8)", "v4(0)", "v5(1)", "v6(3)", "comp"],
         "29D1-8_WP8_4-6-10_2SR3inv": ["v1(8)", "v2(0)", "v3(0)", "v4(0)", "v5(0)", "v6(0)", "clockgen"],
         "29D1-5_WP6_3-2-16_2SR3inv": ["v1(8)", "v2(0)", "v3(0)", "v4(0)", "v5(0)", "v6(0)", "clockgen"],
         "29D1-5_WP6_3-3-1_2SR3inv": ["v1(8)", "v2(0)", "v3(0)", "v4(0)", "v5(0)", "v6(0)", "clockgen"],
+        "29D1-5_WP6_3-2-5_diffTFT": ["v1(8)", "v2(0)", "v3(-5)", "v4(0)", "v5(6.5)", "v6(0)", "counter"],
+        "29D1-5_WP6_3-2-4_7inv": ["v1(8)", "v2(0)", "v3(0)", "v4(0)", "v5(0)", "v6(0)", "clockgen"],
     }
     if chipID not in voltage_db.keys():
         print("Error: no voltage data entry found for %s" % chipID)
