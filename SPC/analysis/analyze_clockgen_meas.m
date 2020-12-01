@@ -38,7 +38,7 @@ clean_oscope_data(ana_folder);
 % load the vbias data
 vb_dat = load([ana_folder '/vbiases.txt']);
 
-%%{
+%{
 % walk through every meas and analyze
 global waveform_save;
 waveform_save={};
@@ -62,7 +62,7 @@ csvwrite(resfile,alldat);
 
 close all;
 calc_and_plot_results(ana_folder);
-plot_specific_meas(30)
+plot_specific_meas(37)
 
 
 

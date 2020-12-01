@@ -7,14 +7,20 @@ clear global input_type
 global fign
 fign = 0;
 
+if exist('/Volumes/ArrayData/MasdaX','dir')
+    pathpre = '/Volumes/ArrayData/MasdaX/2018-01/measurements/';
+else
+    pathpre = '~/Desktop/ArrayData/MasdaX/2018-01/measurements/';
+end
+
 %ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200122T164209_29D1-8_WP5_2-4-3_schmitt';  % first full acq of comparator
 %ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200127T171505_29D1-8_WP5_2-4-3_schmitt';  % second full acq of comparator
 %ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200129T173850_29D1-8_WP5_2-4-3_schmitt';  best_vbias = 0.5; best_vthresh=0; % third full acq of comparator
 %ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200309T123730_29D1-8_WP5_2-4-3_schmitt';  best_vbias = 1; best_vthresh=3; % fourth full acq of comparator, 100 khz, improper load termination
 %ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200309T150149_29D1-8_WP5_2-4-3_schmitt';  best_vbias = 1; best_vthresh=3; % fourth full acq of comparator, 100 khz, fixed load termination
 
-ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200311T161607_29D1-8_WP5_2-4-3_schmitt';  best_vbias = NaN; best_vthresh=NaN;  % count rate sweep at vbias(1) and vthresh(3)
-%ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200312T170353_29D1-8_WP5_2-4-3_schmitt';  best_vbias = 1; best_vthresh=3;  % full acq with ramp 0-4.5V so hystersis curve looks more symmetrical
+%ana_folder = [pathpre '20200311T161607_29D1-8_WP5_2-4-3_schmitt'];  best_vbias = NaN; best_vthresh=NaN;  % count rate sweep at vbias(1) and vthresh(3)
+ana_folder = [pathpre '20200312T170353_29D1-8_WP5_2-4-3_schmitt'];  best_vbias = 1; best_vthresh=3;  % full acq with ramp 0-4.5V so hystersis curve looks more symmetrical
 
 addpath('./helper_functions');
 % clean the oscope data to make it matlab-friendly
@@ -28,6 +34,7 @@ global waveform_save;
 waveform_save={};
 ana_res_all = zeros([size(vb_dat,1) 7]);
 for fidx=1:size(vb_dat,1)
+%for fidx=53
     if (mod(fidx,10)==0)
         fprintf(1,'Progress: Analyzing meas %d/%d\n',fidx,size(vb_dat,1));
     end
@@ -44,6 +51,7 @@ csvwrite(resfile,alldat);
 %}
 
 close all; generate_colormap(ana_folder);
+plot_specific_meas(ana_folder, 10);
 
 
 function [minout, maxout, deltaout, rising_thresh, falling_thresh, hysteresis, frequency] = analyze_comparator_oscope_data(measdir)
@@ -58,7 +66,7 @@ function [minout, maxout, deltaout, rising_thresh, falling_thresh, hysteresis, f
   % load in and out files
   in_raw=load([measdir '/ch1.csv.clean']);
   if exist([measdir '/math2.csv.clean'])
-      out_raw = load([measdir '/math2.csv.clean']);
+    out_raw = load([measdir '/math2.csv.clean']);
   else
     out_raw=load([measdir '/ch2.csv.clean']);
   end
@@ -156,10 +164,11 @@ function [minout, maxout, deltaout, rising_thresh, falling_thresh, hysteresis, f
       rampminR = rampminR + neg_trig_edges(2);
       % find the rampmax between these two points
       [~, rampmax] = max(in_raw(rampminL:rampminR,2));
-      % note: rampmax does not need to be absolute idx, so i commented this out
-      % relative idx (relative to rampminL and rampminR) is good enough for hysteresis plotting later
-      % this makes rampmax inconsistent with rampminL and rampminR, which are in absolute idx
-      %rampmax = rampmax + rampminL;
+      % more convenient for rampmax to be relative (for make_paper_plots)
+      % so, rampmax is different from rampminL and rampminR (both of which are absolute)
+      % to get the absolute rampmax idx, remember to add rampminL
+      % rampmax over-indexes by 1, so correct it here
+      rampmax = rampmax - 1;
   end
   % finally, segment out the data from one rampmin to the other
   time = out_raw(rampminL:rampminR,1);
@@ -414,18 +423,19 @@ function plot_specific_meas(ana_folder, input)
       qwaveform_save = qmat.waveform_save{idx};
       qrampminL = qwaveform_save{qmat.wss.rampminL};
       qrampminR = qwaveform_save{qmat.wss.rampminR};
-      qrampmax  = qwaveform_save{qmat.wss.rampmax};
+      qrampmax  = qwaveform_save{qmat.wss.rampmax} + qrampminL;
       fign = fign+1;
       figure(fign)
       plot(qin(qrampminL:qrampminR,1),qin(qrampminL:qrampminR,2))
       hold on
       plot(qout(qrampminL:qrampminR,1),qout(qrampminL:qrampminR,2),'r')
       plot(qin(qrampmax,1),qin(qrampmax,2),'ko');
+      plot(qin(qrampminL,1),qin(qrampminL,2),'go');
+      plot(qin(qrampminR,1),qin(qrampminR,2),'ro');
       hold off
       title('single waveform plot')
       saveas(gcf,[ana_folder sprintf('/analysis_pngs/meas%04d_single.png',idx)]);
-  
-  
+
       % hysteresis plot
       rise_dat_in  = qin(qrampminL:qrampmax,2);
       rise_dat_out = qout(qrampminL:qrampmax,2);

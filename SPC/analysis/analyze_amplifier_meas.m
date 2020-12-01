@@ -18,18 +18,24 @@ global gainfac;  % temporary patch for mis-atten data, delete after 20191119T101
 %ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/attic/20191120T135534'; gainfac=1;   % scope acq = 400; script acq = 400 (mistake!)
 %ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20191121T161359'; gainfac=1;
 
+if exist('/Volumes/ArrayData/MasdaX','dir')
+    pathpre = '/Volumes/ArrayData/MasdaX/2018-01/measurements/';
+else
+    pathpre = '~/Desktop/ArrayData/MasdaX/2018-01/measurements/';
+end
+
 % new data taken with improved acq script and on wafer5
 %ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200212T172727_29D1-5_WP5_1-1-1_amp3st1bw/'; gainfac=1;
 %ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200214T174201_29D1-5_WP5_1-1-1_amp3st1bw/'; gainfac=1;
-ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200217T170121_29D1-5_WP5_1-1-1_amp3st1bw/'; gainfac=1;
-ana_folder = '/Volumes/ArrayData/MasdaX/2018-01/measurements/20200219T104707_29D1-5_WP5_1-1-1_amp3st1bw/'; gainfac=1;
+%ana_folder = [pathpre '20200217T170121_29D1-5_WP5_1-1-1_amp3st1bw/']; gainfac=1;
+ana_folder = [pathpre '20200219T104707_29D1-5_WP5_1-1-1_amp3st1bw/']; gainfac=1;
 
 addpath('./helper_functions');
 % clean the oscope data to make it matlab-friendly
 clean_oscope_data(ana_folder);
 vb_dat = load([ana_folder '/vbiases.txt']);
 
-%%{
+%{
 % walk through every meas and analyze
 global waveform_save;
 waveform_save={};
@@ -70,8 +76,8 @@ function [amplifier_input,amplifier_output,settling_time]=analyze_oscope_amp(mea
   global waveform_save
   global wss
 
-  %settling_time_threshold = 0.05;
-  settling_time_percent = 0.01;
+  %settling_time_percent = 0.01;
+  settling_time_percent = 0.05;
   
   % assuming input and output csv files
   incsv=[measdir '/math1.csv.clean'];
@@ -143,6 +149,8 @@ function [amplifier_input,amplifier_output,settling_time]=analyze_oscope_amp(mea
       % 2020-02-18: if amp peak is too sharp, 1/20th wide is too broad, changed to 1/100th
       smooth_span = round(numel(outvals_single)/100);
       outvals_smooth = movmean(outvals_single,smooth_span);
+      % 2020-10-16: testing 5-percent baseline and NO smoothing
+      outvals_smooth = outvals_single;
       % define the threshold (absolute value)
       settling_time_threshold = abs(amplifier_output*settling_time_percent);
       % the find point where it crosses above/below the threshold
