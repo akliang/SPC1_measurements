@@ -10,8 +10,8 @@ from helpers import oscope_functions
 
 def run():
 
-    chipID = "29D1-8_WP8_4-6-10_2SR3inv"
-    notes = "manual count rate acq - 1 MHz"
+    chipID = "29D1-5_WP6_3-2-5_DiffTFT"
+    notes = "counter performance with in Vpp 6.5V at ___ kHz"
 
     # create mi handle
     scopeip = "192.168.66.85"

@@ -1,3 +1,7 @@
 analyze sort problem when outputting formatted result CSV data
 SMU missing data points problem
 
+set math channels
+tss read separate chipID runcon notes file
+tss set 10k points
+acq delayer isnt quite working, math avg isnt settling before acq

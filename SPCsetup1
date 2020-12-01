@@ -1,11 +1,11 @@
 
-SMUHOST="hoover3"
+SMUHOST="measdelli"
 MAINSMU="smu6"  # dont forget to update SMUs block down below
 NDEV="$MAINSMU.imager.umro"
 
 DDIR='../measurements/spc/'
 
-DFILEPREFIX="spc003_probe12c_29D1-8_WP5_$(hostname)_"
+DFILEPREFIX="spc004_probe12c_p3_29D1-5_WP6_$(hostname)_"
 
 PNTYPE=1
 
